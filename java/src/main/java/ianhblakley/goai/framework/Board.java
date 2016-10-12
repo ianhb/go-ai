@@ -1,5 +1,8 @@
 package ianhblakley.goai.framework;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,7 +11,9 @@ import java.util.Set;
  * <p>
  * Created by ian on 10/12/16.
  */
-class Board {
+public class Board {
+
+    private static final Logger logger = LogManager.getFormatterLogger(Board.class);
 
     private PositionState[][] board;
     private int boardSize;
@@ -18,8 +23,26 @@ class Board {
     Board(int boardSize) {
         this.boardSize = boardSize;
         board = new PositionState[boardSize][boardSize];
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                board[i][j] = PositionState.EMPTY;
+            }
+        }
         cells = new Cell[boardSize][boardSize];
         cellSet = new HashSet<>();
+    }
+
+    public Set<Position> getAvailableSpaces() {
+        Set<Position> available = new HashSet<>();
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                if (board[i][j].equals(PositionState.EMPTY)) {
+                    available.add(new Position(i, j));
+                }
+            }
+        }
+        logger.info("Found %s available spaces", available.size());
+        return available;
     }
 
     private void placePiece(PositionState color, Position position) {
@@ -92,7 +115,7 @@ class Board {
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
-        string.append(new String(new char[boardSize]).replace('\0', '_'));
+        string.append(new String(new char[boardSize * 3]).replace('\0', '_'));
         string.append('\n');
         for (PositionState[] row : board) {
             string.append("|");
@@ -111,9 +134,9 @@ class Board {
                 }
                 string.append(" ");
             }
-            string.append("|");
+            string.append("|\n");
         }
-        string.append(new String(new char[boardSize]).replace('\0', '_'));
+        string.append(new String(new char[boardSize * 3]).replace('\0', '_'));
         return string.toString();
     }
 

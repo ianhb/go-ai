@@ -5,7 +5,7 @@ package ianhblakley.goai.framework;
  * <p>
  * Created by ian on 10/12/16.
  */
-enum PositionState {
+public enum PositionState {
 
     EMPTY, BLACK, WHITE
 }

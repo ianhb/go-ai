@@ -14,3 +14,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
 }
+
+apply plugin: 'application'
+mainClassName = 'ianhblakley.goai.Main'
+applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml"]

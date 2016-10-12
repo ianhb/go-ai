@@ -5,7 +5,7 @@ package ianhblakley.goai.framework;
  * <p>
  * Created by ian on 10/12/16.
  */
-class Move {
+public class Move {
 
     private Position position;
     private PositionState color;

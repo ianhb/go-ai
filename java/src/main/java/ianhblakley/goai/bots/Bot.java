@@ -1,4 +1,7 @@
-package ianhblakley.goai.framework;
+package ianhblakley.goai.bots;
+
+import ianhblakley.goai.framework.Board;
+import ianhblakley.goai.framework.Move;
 
 /**
  * Interface to encompass a bot
@@ -6,7 +9,7 @@ package ianhblakley.goai.framework;
  * <p>
  * Created by ian on 10/12/16.
  */
-interface Bot {
+public interface Bot {
 
     Move getPlay(Board board, int turnNumber);
 

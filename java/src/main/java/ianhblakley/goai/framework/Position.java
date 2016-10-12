@@ -8,7 +8,7 @@ import java.util.Set;
  * <p>
  * Created by ian on 10/12/16.
  */
-class Position {
+public class Position {
     int row;
     int column;
 
