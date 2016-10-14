@@ -5,6 +5,7 @@ import ianhblakley.goai.framework.scoring.Scorer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * <p>
  * Created by ian on 10/12/16.
  */
-public class Game {
+public class Game implements Externalizable {
 
     private static final Logger logger = LogManager.getFormatterLogger(Game.class);
 
@@ -23,6 +24,8 @@ public class Game {
     private Bot white;
     private int turns;
     private List<Move> moves;
+
+    public Game() {}
 
     public Game(Bot black, Bot white, int boardSize) {
         this.black = black;
@@ -33,7 +36,10 @@ public class Game {
         logger.info("Initialized Game");
     }
 
-    public void play() {
+    public void play() throws Exception {
+        if (black == null || white == null) {
+            throw new Exception("Can't play games from log");
+        }
         Move blackMove;
         Move whiteMove;
         PositionState[][] oldBoard = null;
@@ -71,5 +77,21 @@ public class Game {
         logger.info("Final Board \n" + board.toString());
     }
 
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(board);
+        out.writeInt(turns);
+        out.writeObject(moves);
+        out.writeObject(white.getClass());
+        out.writeObject(black.getClass());
+    }
 
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        board = (Board) in.readObject();
+        turns = in.readInt();
+        moves = (List<Move>) in.readObject();
+        white = null;
+        black = null;
+    }
 }

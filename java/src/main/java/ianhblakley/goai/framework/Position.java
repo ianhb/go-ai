@@ -1,5 +1,6 @@
 package ianhblakley.goai.framework;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,7 +9,7 @@ import java.util.Set;
  * <p>
  * Created by ian on 10/12/16.
  */
-public class Position {
+public class Position implements Serializable {
     int row;
     int column;
 

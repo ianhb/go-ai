@@ -3,7 +3,10 @@ package ianhblakley.goai;
 import ianhblakley.goai.bots.Bot;
 import ianhblakley.goai.bots.RandomBot;
 import ianhblakley.goai.framework.Game;
+import ianhblakley.goai.framework.GameSerializer;
 import ianhblakley.goai.framework.PositionState;
+
+import java.util.List;
 
 /**
  * Main class that runs the program
@@ -14,7 +17,7 @@ public class Main {
 
     private static final int BOARDSIZE = 9;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Bot white = new RandomBot(PositionState.WHITE, BOARDSIZE);
         Bot black = new RandomBot(PositionState.BLACK, BOARDSIZE);
         Game game = new Game(black, white, BOARDSIZE);

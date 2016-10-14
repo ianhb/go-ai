@@ -3,6 +3,7 @@ package ianhblakley.goai.framework;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
  * <p>
  * Created by ian on 10/12/16.
  */
-public class Board {
+public class Board implements Serializable {
 
     private static final Logger logger = LogManager.getFormatterLogger(Board.class);
 
@@ -230,7 +231,7 @@ public class Board {
         int act(Position side, Position center);
     }
 
-    class Cell {
+    class Cell implements Serializable {
         Set<Position> pieces;
         private int libertyCount;
         private PositionState color;

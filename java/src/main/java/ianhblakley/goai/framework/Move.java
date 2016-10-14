@@ -1,11 +1,13 @@
 package ianhblakley.goai.framework;
 
+import java.io.Serializable;
+
 /**
  * Models a move by a player
  * <p>
  * Created by ian on 10/12/16.
  */
-public class Move {
+public class Move implements Serializable {
 
     private Position position;
     private PositionState color;
