@@ -3,10 +3,7 @@ package ianhblakley.goai;
 import ianhblakley.goai.bots.Bot;
 import ianhblakley.goai.bots.RandomBot;
 import ianhblakley.goai.framework.Game;
-import ianhblakley.goai.framework.GameSerializer;
 import ianhblakley.goai.framework.PositionState;
-
-import java.util.List;
 
 /**
  * Main class that runs the program
