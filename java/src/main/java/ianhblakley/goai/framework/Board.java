@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Represents a Go board
@@ -52,11 +53,11 @@ public class Board {
         mergeCells(position);
     }
 
-    private PositionState getPositionState(Position position) {
+    PositionState getPositionState(Position position) {
         return board[position.row][position.column];
     }
 
-    private Cell getCell(Position position) {
+    Cell getCell(Position position) {
         return cells[position.row][position.column];
     }
 
@@ -68,14 +69,14 @@ public class Board {
 
     void placeMove(Move move) {
         placePiece(move.getColor(), move.getPosition());
+        checkCapture(move.getColor());
     }
 
     private void mergeCells(Position position) {
         Cell cell = new Cell(position);
         cellSet.add(cell);
         FourSideOperation merge = (side, center) -> {
-            if (getPositionState(side) == getPositionState(center)) {
-                cellSet.remove(getCell(side));
+            if (getPositionState(side) == getPositionState(center) && !getCell(side).equals(getCell(center))) {
                 getCell(center).merge(getCell(side));
             }
             return 0;
@@ -93,7 +94,7 @@ public class Board {
             left = new Position(center.row, center.column - 1);
             sum += operation.act(left, center);
         }
-        if (center.column < boardSize - 2) {
+        if (center.column < boardSize - 1) {
             right = new Position(center.row, center.column + 1);
             sum += operation.act(right, center);
         }
@@ -101,24 +102,60 @@ public class Board {
             up = new Position(center.row - 1, center.column);
             sum += operation.act(up, center);
         }
-        if (center.row < boardSize - 2) {
+        if (center.row < boardSize - 1) {
             down = new Position(center.row + 1, center.column);
             sum += operation.act(down, center);
         }
         return sum;
     }
 
-    void checkCapture() {
-        cellSet.stream().filter(cell -> cell.getLibertyCount() == 0).forEach(Cell::delete);
+    private void checkCapture(PositionState playedColor) {
+        Set<Cell> deletedCells = new HashSet<>();
+        Set<Cell> noLibertyCells = cellSet.stream().filter(cell -> cell.getLibertyCount() == 0).collect(Collectors.toSet());
+        if (noLibertyCells.size() > 1) {
+            boolean seenBlack = false;
+            boolean seenWhite = false;
+            for (Cell cell : noLibertyCells) {
+                seenBlack = seenBlack || cell.getColor() == PositionState.BLACK;
+                seenWhite = seenWhite || cell.getColor() == PositionState.WHITE;
+            }
+            if (seenBlack && seenWhite) {
+                noLibertyCells.stream().filter(cell -> cell.getColor().equals(Utils.getOppositeColor(playedColor)));
+            }
+        }
+        noLibertyCells.forEach(cell -> {
+            cell.delete();
+            deletedCells.add(cell);
+        });
+
+        cellSet.removeAll(deletedCells);
+    }
+
+    PositionState[][] getBoard() {
+        return board;
+    }
+
+    Board deepCopy() {
+        Board board = new Board(boardSize);
+        board.board = Utils.deepCopyBoard(this.board);
+        board.cells = Utils.deepCopyCells(this.cells);
+        board.cellSet = new HashSet<>(this.cellSet);
+        return board;
     }
 
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
+        string.append("   ");
+        for (int i = 0; i < boardSize; i++) {
+            string.append(String.format("%1$2s ", i));
+        }
+        string.append("\n   ");
         string.append(new String(new char[boardSize * 3]).replace('\0', '_'));
         string.append('\n');
-        for (PositionState[] row : board) {
-            string.append("|");
+        for (int i = 0; i < boardSize; i++) {
+            PositionState[] row = board[i];
+            string.append(String.format("%1$2s", i)).append("|");
             for (PositionState state : row) {
                 string.append(" ");
                 switch (state) {
@@ -136,16 +173,37 @@ public class Board {
             }
             string.append("|\n");
         }
+        string.append("   ");
         string.append(new String(new char[boardSize * 3]).replace('\0', '_'));
         return string.toString();
+    }
+
+    int getBoardSize() {
+        return boardSize;
+    }
+
+    Set<Position> getLiberties(Position p) {
+        Set<Position> possibleEyes = new HashSet<>();
+        FourSideOperation liberties = ((side, center) -> {
+            if (getPositionState(side) == PositionState.EMPTY) {
+                possibleEyes.add(side);
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        applyToSide(p, liberties);
+        return possibleEyes;
     }
 
     interface FourSideOperation {
         int act(Position side, Position center);
     }
 
-    private class Cell {
+    class Cell {
         Set<Position> pieces;
+        private int libertyCount;
+        private PositionState color;
 
         Cell() {
             pieces = new HashSet<>();
@@ -154,11 +212,19 @@ public class Board {
         Cell(Position init) {
             this();
             pieces.add(init);
+            color = getPositionState(init);
             Board.this.cells[init.row][init.column] = this;
         }
 
+        PositionState getColor() {
+            return color;
+        }
+
         void merge(Cell cell1) {
+            assert color.equals(cell1.color);
+            cellSet.remove(cell1);
             for (Position p : cell1.pieces) {
+                assert getPositionState(p).equals(color);
                 pieces.add(p);
                 Board.this.cells[p.row][p.column] = this;
             }
@@ -169,17 +235,12 @@ public class Board {
         }
 
         int getLibertyCount() {
-            int libertyCount = 0;
+            Set<Position> possibleEyes = new HashSet<>();
             for (Position p : pieces) {
-                FourSideOperation liberties = ((side, center) -> {
-                    if (getPositionState(side) == PositionState.EMPTY) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                });
-                libertyCount += applyToSide(p, liberties);
+                possibleEyes.addAll(getLiberties(p));
             }
+            libertyCount = possibleEyes.size();
+
             return libertyCount;
         }
     }

@@ -35,38 +35,39 @@ public class Game {
     public void play() {
         Move blackMove;
         Move whiteMove;
+        PositionState[][] oldBoard = null;
         do {
             turns++;
-            do {
-                blackMove = black.getPlay(board, turns);
-            } while (checkSuicide(blackMove) || checkKO(blackMove));
-            board.placeMove(blackMove);
-            moves.add(blackMove);
-            board.checkCapture();
+            blackMove = black.getPlay(board, oldBoard, turns);
+            oldBoard = Utils.deepCopyBoard(board.getBoard());
+            if (!blackMove.isPass()) {
+                logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
+                board.placeMove(blackMove);
+                moves.add(blackMove);
+            } else {
+                logger.info("Black passed on turn %s", turns);
+            }
+
+            logger.info("Current Board: \n %s", board.toString());
             turns++;
-            logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
-            do {
-                whiteMove = white.getPlay(board, turns);
-            } while (checkSuicide(whiteMove) || checkKO(whiteMove));
-            board.placeMove(whiteMove);
-            moves.add(whiteMove);
-            board.checkCapture();
-            logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
+
+            whiteMove = white.getPlay(board, oldBoard, turns);
+            oldBoard = Utils.deepCopyBoard(board.getBoard());
+            if (!whiteMove.isPass()) {
+                logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
+                board.placeMove(whiteMove);
+                moves.add(whiteMove);
+            } else {
+                logger.info("White passed on turn %s", turns);
+            }
             logger.info("Current Board: \n %s", board.toString());
         } while (!(blackMove.isPass() && whiteMove.isPass()));
     }
 
     public void printStats() {
-        logger.info("Moves %i", turns);
-        logger.info(board.toString());
+        logger.info("Moves %s", turns);
+        logger.info("Final Board \n" + board.toString());
     }
 
-    private boolean checkSuicide(Move move) {
-        return false;
-    }
-
-    private boolean checkKO(Move move) {
-        return false;
-    }
 
 }

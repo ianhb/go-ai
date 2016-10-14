@@ -1,13 +1,12 @@
 package ianhblakley.goai.bots;
 
-import ianhblakley.goai.framework.Board;
-import ianhblakley.goai.framework.Move;
-import ianhblakley.goai.framework.Position;
-import ianhblakley.goai.framework.PositionState;
+import ianhblakley.goai.framework.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -20,30 +19,37 @@ public class RandomBot implements Bot {
     private final static Logger logger = LogManager.getFormatterLogger(RandomBot.class);
 
     private final PositionState color;
+    private int stones;
 
-    public RandomBot(PositionState color) {
+    public RandomBot(PositionState color, int boardSize) {
         assert color != null;
         assert !color.equals(PositionState.EMPTY);
         this.color = color;
+        stones = (int) (Math.floor(Math.pow(boardSize, 2)) / 2);
+        if (color.equals(PositionState.BLACK)) stones++;
     }
 
     @Override
-    public Move getPlay(Board board, int turnNumber) {
+    public Move getPlay(Board board, PositionState[][] oldBoard, int turnNumber) {
+        if (!checkCanPlay()) return new Move();
         Set<Position> positions = board.getAvailableSpaces();
         if (positions.size() == 0) {
             return new Move();
         }
-        int item = new Random().nextInt(positions.size());
-        int i = 0;
-        logger.info("Getting the %sth element", item);
-        for (Position p : positions) {
-            if (i == item) {
-                logger.info("Player %s played at %s on turn %s", color.toString(), p, turnNumber);
-                return new Move(p, color, turnNumber);
-            } else {
-                i++;
+        List<Position> randomPositions = new ArrayList<>(positions);
+        Collections.shuffle(randomPositions);
+        for (Position p : randomPositions) {
+            Move m = new Move(p, color, turnNumber);
+            if (!(StateChecker.checkBoard(m, board, oldBoard))) {
+                stones--;
+                return m;
             }
         }
-        return null;
+        return new Move();
+    }
+
+    @Override
+    public boolean checkCanPlay() {
+        return stones > 0;
     }
 }

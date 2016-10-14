@@ -2,6 +2,7 @@ package ianhblakley.goai.bots;
 
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Move;
+import ianhblakley.goai.framework.PositionState;
 
 /**
  * Interface to encompass a bot
@@ -11,6 +12,8 @@ import ianhblakley.goai.framework.Move;
  */
 public interface Bot {
 
-    Move getPlay(Board board, int turnNumber);
+    Move getPlay(Board board, PositionState[][] oldBoard, int turnNumber);
+
+    boolean checkCanPlay();
 
 }
