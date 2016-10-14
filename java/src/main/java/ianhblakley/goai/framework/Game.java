@@ -1,6 +1,7 @@
 package ianhblakley.goai.framework;
 
 import ianhblakley.goai.bots.Bot;
+import ianhblakley.goai.framework.scoring.Scorer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,7 +49,6 @@ public class Game {
                 logger.info("Black passed on turn %s", turns);
             }
 
-            logger.info("Current Board: \n %s", board.toString());
             turns++;
 
             whiteMove = white.getPlay(board, oldBoard, turns);
@@ -60,8 +60,10 @@ public class Game {
             } else {
                 logger.info("White passed on turn %s", turns);
             }
-            logger.info("Current Board: \n %s", board.toString());
         } while (!(blackMove.isPass() && whiteMove.isPass()));
+        Scorer scorer = Scorer.getDefaultScorer();
+        logger.info("Game won by %s with score %s - %s", scorer.winner(board),
+                scorer.getBlackScore(), scorer.getWhiteScore());
     }
 
     public void printStats() {

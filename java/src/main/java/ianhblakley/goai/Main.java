@@ -12,7 +12,7 @@ import ianhblakley.goai.framework.PositionState;
  */
 public class Main {
 
-    private static final int BOARDSIZE = 19;
+    private static final int BOARDSIZE = 9;
 
     public static void main(String[] args) {
         Bot white = new RandomBot(PositionState.WHITE, BOARDSIZE);

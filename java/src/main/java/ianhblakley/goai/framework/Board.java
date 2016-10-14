@@ -20,6 +20,10 @@ public class Board {
     private int boardSize;
     private Cell[][] cells;
     private Set<Cell> cellSet;
+    private int blacks;
+    private int whites;
+    private int blackCaptured;
+    private int whiteCaptured;
 
     Board(int boardSize) {
         this.boardSize = boardSize;
@@ -31,6 +35,10 @@ public class Board {
         }
         cells = new Cell[boardSize][boardSize];
         cellSet = new HashSet<>();
+        blacks = 0;
+        whites = 0;
+        blackCaptured = 0;
+        whiteCaptured = 0;
     }
 
     public Set<Position> getAvailableSpaces() {
@@ -50,11 +58,17 @@ public class Board {
         assert !color.equals(PositionState.EMPTY);
         assert getPositionState(position).equals(PositionState.EMPTY);
         board[position.row][position.column] = color;
+        if (color.equals(PositionState.BLACK)) blacks++;
+        else whites++;
         mergeCells(position);
     }
 
-    PositionState getPositionState(Position position) {
+    public PositionState getPositionState(Position position) {
         return board[position.row][position.column];
+    }
+
+    public PositionState getPositionState(int row, int column) {
+        return getPositionState(new Position(row, column));
     }
 
     Cell getCell(Position position) {
@@ -178,8 +192,24 @@ public class Board {
         return string.toString();
     }
 
-    int getBoardSize() {
+    public int getBoardSize() {
         return boardSize;
+    }
+
+    public int getBlackCaptured() {
+        return blackCaptured;
+    }
+
+    public int getWhiteCaptured() {
+        return whiteCaptured;
+    }
+
+    public int getBlacks() {
+        return blacks;
+    }
+
+    public int getWhites() {
+        return whites;
     }
 
     Set<Position> getLiberties(Position p) {
@@ -231,7 +261,16 @@ public class Board {
         }
 
         void delete() {
-            pieces.forEach(Board.this::removePosition);
+            pieces.forEach((position) -> {
+                Board.this.removePosition(position);
+                if (color.equals(PositionState.BLACK)) {
+                    blackCaptured++;
+                    blacks--;
+                } else {
+                    whiteCaptured++;
+                    whites--;
+                }
+            });
         }
 
         int getLibertyCount() {
