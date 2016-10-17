@@ -12,13 +12,15 @@ import ianhblakley.goai.framework.PositionState;
  */
 public class Main {
 
-    private static final int BOARDSIZE = 9;
+    private static final int BOARDSIZE = 19;
 
     public static void main(String[] args) throws Exception {
-        Bot white = new RandomBot(PositionState.WHITE, BOARDSIZE);
-        Bot black = new RandomBot(PositionState.BLACK, BOARDSIZE);
-        Game game = new Game(black, white, BOARDSIZE);
-        game.play();
-        game.printStats();
+        for (int i = 0; i < 10; i++) {
+            Bot white = new RandomBot(PositionState.WHITE, BOARDSIZE);
+            Bot black = new RandomBot(PositionState.BLACK, BOARDSIZE);
+            Game game = new Game(black, white, BOARDSIZE);
+            game.play();
+            game.printStats();
+        }
     }
 }
