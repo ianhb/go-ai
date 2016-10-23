@@ -1,5 +1,6 @@
 package ianhblakley.goai.bots;
 
+import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.*;
 
 import java.util.ArrayList;
@@ -16,8 +17,8 @@ public class RandomBot extends AbstractBot {
 
     private final PositionState color;
 
-    public RandomBot(PositionState color, int boardSize) {
-        super(color, boardSize);
+    public RandomBot(PositionState color) {
+        super(color);
         assert color != null;
         assert !color.equals(PositionState.EMPTY);
         this.color = color;

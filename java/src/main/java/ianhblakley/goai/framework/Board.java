@@ -1,10 +1,13 @@
 package ianhblakley.goai.framework;
 
+import ianhblakley.goai.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,9 +28,11 @@ public class Board implements Serializable {
     private int whites;
     private int blackCaptured;
     private int whiteCaptured;
+    private Board previousState;
+    private Move previousMove;
 
-    Board(int boardSize) {
-        this.boardSize = boardSize;
+    public Board() {
+        this.boardSize = Constants.BOARDSIZE;
         board = new PositionState[boardSize][boardSize];
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
@@ -40,6 +45,8 @@ public class Board implements Serializable {
         whites = 0;
         blackCaptured = 0;
         whiteCaptured = 0;
+        previousState = null;
+        previousMove = null;
     }
 
     public Set<Position> getAvailableSpaces() {
@@ -82,9 +89,11 @@ public class Board implements Serializable {
         cells[position.row][position.column] = null;
     }
 
-    void placeMove(Move move) {
+    public void placeMove(Move move) {
         placePiece(move.getColor(), move.getPosition());
         checkCapture(move.getColor());
+        previousState = deepCopy();
+        previousMove = move;
     }
 
     private void mergeCells(Position position) {
@@ -97,6 +106,30 @@ public class Board implements Serializable {
             return 0;
         };
         applyToSide(position, merge);
+    }
+
+    public Board getPreviousState() {
+        return previousState;
+    }
+
+    public Move getPreviousMove() {
+        return previousMove;
+    }
+
+    public boolean isEndGame() {
+        if (getTurnCount() == Math.pow(Constants.BOARDSIZE, 2)) {
+            return true;
+        }
+        Set<Position> availablePositions = getAvailableSpaces();
+        for (Position p : availablePositions) {
+            if (StateChecker.checkBoard(new Move(p, PositionState.BLACK, 0), this, previousState.getBoard())) {
+                return false;
+            }
+            if (StateChecker.checkBoard(new Move(p, PositionState.WHITE, 0), this, previousState.getBoard())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private int applyToSide(Position center, FourSideOperation operation) {
@@ -150,8 +183,16 @@ public class Board implements Serializable {
         return board;
     }
 
-    Board deepCopy() {
-        Board board = new Board(boardSize);
+    public PositionState[][] getBoardCopy() {
+        return Utils.deepCopyBoard(board);
+    }
+
+    int getTurnCount() {
+        return blackCaptured + blacks + whites + whiteCaptured;
+    }
+
+    public Board deepCopy() {
+        Board board = new Board();
         board.board = Utils.deepCopyBoard(this.board);
         board.cells = Utils.deepCopyCells(this.cells);
         board.cellSet = new HashSet<>(this.cellSet);
@@ -285,4 +326,30 @@ public class Board implements Serializable {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Board board1 = (Board) o;
+
+        if (boardSize != board1.boardSize) return false;
+        if (blacks != board1.blacks) return false;
+        if (whites != board1.whites) return false;
+        if (blackCaptured != board1.blackCaptured) return false;
+        if (whiteCaptured != board1.whiteCaptured) return false;
+        return Arrays.deepEquals(board, board1.board);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.deepHashCode(board);
+        result = 31 * result + boardSize;
+        result = 31 * result + blacks;
+        result = 31 * result + whites;
+        result = 31 * result + blackCaptured;
+        result = 31 * result + whiteCaptured;
+        return result;
+    }
 }

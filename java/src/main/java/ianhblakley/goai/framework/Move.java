@@ -30,7 +30,7 @@ public class Move implements Serializable {
         return position;
     }
 
-    PositionState getColor() {
+    public PositionState getColor() {
         return color;
     }
 

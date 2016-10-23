@@ -27,21 +27,32 @@ public class Game implements Externalizable {
     private Bot white;
     private int turns;
     private List<Move> moves;
+    private PositionState winner;
 
     public Game() {}
 
-    public Game(Bot black, Bot white, int boardSize) {
+    public Game(Bot black, Bot white) {
         this.black = black;
         this.white = white;
-        this.board = new Board(boardSize);
+        this.board = new Board();
         turns = 0;
         moves = new ArrayList<>();
         logger.info("Initialized Game");
+        winner = null;
     }
 
-    public void play() throws Exception {
+    public Game(Board b, Bot black, Bot white) {
+        this.black = black;
+        this.white = white;
+        this.board = b;
+        turns = b.getTurnCount();
+        winner = null;
+    }
+
+    public void play() {
         if (black == null || white == null) {
-            throw new Exception("Can't play games from log");
+            logger.error("Can't play games from logs");
+            return;
         }
         Move blackMove;
         Move whiteMove;
@@ -53,7 +64,9 @@ public class Game implements Externalizable {
             if (!blackMove.isPass()) {
                 logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
                 board.placeMove(blackMove);
-                moves.add(blackMove);
+                if (moves != null) {
+                    moves.add(blackMove);
+                }
             } else {
                 logger.info("Black passed on turn %s", turns);
             }
@@ -65,14 +78,22 @@ public class Game implements Externalizable {
             if (!whiteMove.isPass()) {
                 logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
                 board.placeMove(whiteMove);
-                moves.add(whiteMove);
+                if (moves != null) {
+                    moves.add(whiteMove);
+                }
             } else {
                 logger.info("White passed on turn %s", turns);
             }
         } while (!(blackMove.isPass() && whiteMove.isPass()));
         Scorer scorer = Scorer.getDefaultScorer();
-        logger.info("Game won by %s with score %s - %s", scorer.winner(board),
+        this.winner = scorer.winner(board);
+        logger.info("Game won by %s with score %s - %s", winner,
                 scorer.getBlackScore(), scorer.getWhiteScore());
+
+    }
+
+    public PositionState getWinner() {
+        return winner;
     }
 
     public void printStats() {

@@ -1,5 +1,6 @@
 package ianhblakley.goai.bots;
 
+import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Move;
 import ianhblakley.goai.framework.PositionState;
@@ -20,8 +21,8 @@ abstract class AbstractBot implements Bot {
     AbstractBot() {
     }
 
-    AbstractBot(PositionState color, int boardSize) {
-        stones = (int) (Math.floor(Math.pow(boardSize, 2)) / 2);
+    AbstractBot(PositionState color) {
+        stones = (int) (Math.floor(Math.pow(Constants.BOARDSIZE, 2)) / 2);
         if (color.equals(PositionState.BLACK)) stones++;
     }
 
