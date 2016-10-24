@@ -12,7 +12,7 @@ import ianhblakley.goai.framework.PositionState;
 class TerritoryScorer extends Scorer {
 
     @Override
-    void score(Board board) {
+    void score(Board board, boolean verbose) {
         blackScore = board.getWhiteCaptured();
         whiteScore = board.getBlackCaptured();
     }

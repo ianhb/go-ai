@@ -14,7 +14,7 @@ public class RandomSimulator implements Simulator {
     public PositionState simulate(MonteCarloTree tree, State state) {
         Game randomGame = new Game(state.getBoard(), new RandomBot(PositionState.BLACK),
                 new RandomBot(PositionState.WHITE));
-        randomGame.play();
+        randomGame.play(false);
         return randomGame.getWinner();
     }
 }

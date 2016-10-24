@@ -1,6 +1,8 @@
 package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.framework.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,9 +10,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Randomly selects a node to expand
+ *
  * Created by ian on 10/17/16.
  */
 public class RandomExpander implements Expander {
+
+    private static final Logger logger = LogManager.getFormatterLogger(RandomExpander.class);
 
     @Override
     public State expand(MonteCarloTree tree, State selectedState) {
@@ -33,6 +39,7 @@ public class RandomExpander implements Expander {
                 return s;
             }
         }
+        logger.error("Not Expanding Tree");
         return null;
     }
 }

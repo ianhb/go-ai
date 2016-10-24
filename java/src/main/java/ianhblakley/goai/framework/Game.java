@@ -49,7 +49,7 @@ public class Game implements Externalizable {
         winner = null;
     }
 
-    public void play() {
+    public void play(boolean verbose) {
         if (black == null || white == null) {
             logger.error("Can't play games from logs");
             return;
@@ -62,13 +62,17 @@ public class Game implements Externalizable {
             blackMove = black.getPlay(board, oldBoard, turns);
             oldBoard = Utils.deepCopyBoard(board.getBoard());
             if (!blackMove.isPass()) {
-                logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
+                if (verbose) {
+                    logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
+                }
                 board.placeMove(blackMove);
                 if (moves != null) {
                     moves.add(blackMove);
                 }
             } else {
-                logger.info("Black passed on turn %s", turns);
+                if (verbose) {
+                    logger.info("Black passed on turn %s", turns);
+                }
             }
 
             turns++;
@@ -76,18 +80,20 @@ public class Game implements Externalizable {
             whiteMove = white.getPlay(board, oldBoard, turns);
             oldBoard = Utils.deepCopyBoard(board.getBoard());
             if (!whiteMove.isPass()) {
-                logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
+                if (verbose) {
+                    logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
+                }
                 board.placeMove(whiteMove);
                 if (moves != null) {
                     moves.add(whiteMove);
                 }
             } else {
-                logger.info("White passed on turn %s", turns);
+                if (verbose) logger.info("White passed on turn %s", turns);
             }
         } while (!(blackMove.isPass() && whiteMove.isPass()));
         Scorer scorer = Scorer.getDefaultScorer();
-        this.winner = scorer.winner(board);
-        logger.info("Game won by %s with score %s - %s", winner,
+        this.winner = scorer.winner(board, verbose);
+        if (verbose) logger.info("Game won by %s with score %s - %s", winner,
                 scorer.getBlackScore(), scorer.getWhiteScore());
 
     }
@@ -98,7 +104,7 @@ public class Game implements Externalizable {
 
     public void printStats() {
         logger.info("Moves %s", turns);
-        logger.info("Final Board \n" + board.toString());
+        logger.info("Final Board" + board.toString());
     }
 
     @Override

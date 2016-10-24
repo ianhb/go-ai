@@ -3,13 +3,20 @@ package ianhblakley.goai.mcts;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Move;
 import ianhblakley.goai.framework.PositionState;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 /**
+ * Framework to run MCTS
+ * Uses a {@link Selector}, {@link Expander} and {@link Simulator}
+ *
  * Created by ian on 10/17/16.
  */
 public class MCTS {
 
     private static final int ITERATOR = 10;
+    private static final Logger logger = LogManager.getFormatterLogger(MCTS.class);
 
     private Selector selector;
     private Expander expander;
@@ -23,11 +30,12 @@ public class MCTS {
         tree = new MonteCarloTree();
     }
 
-    Move getMove(Board board, PositionState color, int turnNumber) {
+    public Move getMove(Board board, PositionState color, int turnNumber) {
         assert tree.checkRootIsBoard(board);
         for (int i=0;i<ITERATOR;i++) {
             runSimulation(board.deepCopy(), color);
         }
+        logger.debug(tree.toString());
         return selectMove(color, turnNumber);
     }
 
@@ -47,6 +55,10 @@ public class MCTS {
     }
 
     private Move selectMove(PositionState color, int turnNumber) {
-        return null;
+        State bestMove = tree.selectBestChild();
+        if (bestMove == null) {
+            return new Move();
+        }
+        return new Move(bestMove.getBoard().getPreviousMove().getPosition(), color, turnNumber);
     }
 }

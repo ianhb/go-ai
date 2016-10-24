@@ -1,5 +1,7 @@
 package ianhblakley.goai.framework;
 
+import ianhblakley.goai.Constants;
+
 /**
  * Used to validate whether or not a move is a valid move
  * Includes checks for suicide moves and Ko moves
@@ -24,8 +26,8 @@ public class StateChecker {
         }
         Board updatedState = state.deepCopy();
         updatedState.placeMove(move);
-        for (int i = 0; i < updatedState.getBoardSize(); i++) {
-            for (int j = 0; j < updatedState.getBoardSize(); j++) {
+        for (int i = 0; i < Constants.BOARDSIZE; i++) {
+            for (int j = 0; j < Constants.BOARDSIZE; j++) {
                 if (updatedState.getBoard()[i][j] != oldState[i][j]) {
                     return false;
                 }

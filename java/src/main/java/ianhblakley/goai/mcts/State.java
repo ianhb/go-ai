@@ -5,13 +5,16 @@ import ianhblakley.goai.framework.Board;
 import java.util.ArrayList;
 
 /**
+ * Holds the state of a game in the MCT
+ * Represents a node in a tree
+ *
  * Created by ian on 10/17/16.
  */
 class State {
 
+    private final Board board;
     private State parent;
     private ArrayList<State> children;
-    private final Board board;
     private int wins;
     private int plays;
     private boolean terminalState;
@@ -65,6 +68,15 @@ class State {
 
     void addChild(State s) {
         children.add(s);
+    }
+
+    double getWinProbability() {
+        return (double) wins / (double) plays;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(getWinProbability());
     }
 }
 

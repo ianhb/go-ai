@@ -11,6 +11,10 @@ import ianhblakley.goai.framework.PositionState;
  */
 public class UctBot extends AbstractBot {
 
+    public UctBot(PositionState color) {
+        super(color);
+    }
+
     @Override
     public Move getPlay(Board board, PositionState[][] oldBoard, int turnNumber) {
         return null;

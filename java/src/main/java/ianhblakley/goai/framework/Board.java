@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,6 @@ public class Board implements Serializable {
     private static final Logger logger = LogManager.getFormatterLogger(Board.class);
 
     private PositionState[][] board;
-    private int boardSize;
     private Cell[][] cells;
     private Set<Cell> cellSet;
     private int blacks;
@@ -32,14 +30,13 @@ public class Board implements Serializable {
     private Move previousMove;
 
     public Board() {
-        this.boardSize = Constants.BOARDSIZE;
-        board = new PositionState[boardSize][boardSize];
-        for (int i = 0; i < boardSize; i++) {
-            for (int j = 0; j < boardSize; j++) {
+        board = new PositionState[Constants.BOARDSIZE][Constants.BOARDSIZE];
+        for (int i = 0; i < Constants.BOARDSIZE; i++) {
+            for (int j = 0; j < Constants.BOARDSIZE; j++) {
                 board[i][j] = PositionState.EMPTY;
             }
         }
-        cells = new Cell[boardSize][boardSize];
+        cells = new Cell[Constants.BOARDSIZE][Constants.BOARDSIZE];
         cellSet = new HashSet<>();
         blacks = 0;
         whites = 0;
@@ -51,14 +48,13 @@ public class Board implements Serializable {
 
     public Set<Position> getAvailableSpaces() {
         Set<Position> available = new HashSet<>();
-        for (int i = 0; i < boardSize; i++) {
-            for (int j = 0; j < boardSize; j++) {
+        for (int i = 0; i < Constants.BOARDSIZE; i++) {
+            for (int j = 0; j < Constants.BOARDSIZE; j++) {
                 if (board[i][j].equals(PositionState.EMPTY)) {
                     available.add(new Position(i, j));
                 }
             }
         }
-        logger.info("Found %s available spaces", available.size());
         return available;
     }
 
@@ -122,6 +118,9 @@ public class Board implements Serializable {
         }
         Set<Position> availablePositions = getAvailableSpaces();
         for (Position p : availablePositions) {
+            if (previousState == null) {
+                return true;
+            }
             if (StateChecker.checkBoard(new Move(p, PositionState.BLACK, 0), this, previousState.getBoard())) {
                 return false;
             }
@@ -142,7 +141,7 @@ public class Board implements Serializable {
             left = new Position(center.row, center.column - 1);
             sum += operation.act(left, center);
         }
-        if (center.column < boardSize - 1) {
+        if (center.column < Constants.BOARDSIZE - 1) {
             right = new Position(center.row, center.column + 1);
             sum += operation.act(right, center);
         }
@@ -150,7 +149,7 @@ public class Board implements Serializable {
             up = new Position(center.row - 1, center.column);
             sum += operation.act(up, center);
         }
-        if (center.row < boardSize - 1) {
+        if (center.row < Constants.BOARDSIZE - 1) {
             down = new Position(center.row + 1, center.column);
             sum += operation.act(down, center);
         }
@@ -202,14 +201,15 @@ public class Board implements Serializable {
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
+        string.append("\n");
         string.append("   ");
-        for (int i = 0; i < boardSize; i++) {
+        for (int i = 0; i < Constants.BOARDSIZE; i++) {
             string.append(String.format("%1$2s ", i));
         }
         string.append("\n   ");
-        string.append(new String(new char[boardSize * 3]).replace('\0', '_'));
+        string.append(new String(new char[Constants.BOARDSIZE * 3]).replace('\0', '_'));
         string.append('\n');
-        for (int i = 0; i < boardSize; i++) {
+        for (int i = 0; i < Constants.BOARDSIZE; i++) {
             PositionState[] row = board[i];
             string.append(String.format("%1$2s", i)).append("|");
             for (PositionState state : row) {
@@ -230,12 +230,8 @@ public class Board implements Serializable {
             string.append("|\n");
         }
         string.append("   ");
-        string.append(new String(new char[boardSize * 3]).replace('\0', '_'));
+        string.append(new String(new char[Constants.BOARDSIZE * 3]).replace('\0', '_'));
         return string.toString();
-    }
-
-    public int getBoardSize() {
-        return boardSize;
     }
 
     public int getBlackCaptured() {
@@ -266,6 +262,21 @@ public class Board implements Serializable {
         });
         applyToSide(p, liberties);
         return possibleEyes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Board board1 = (Board) o;
+        return Arrays.deepEquals(board, board1.board);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
     }
 
     interface FourSideOperation {
@@ -324,32 +335,5 @@ public class Board implements Serializable {
 
             return libertyCount;
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Board board1 = (Board) o;
-
-        if (boardSize != board1.boardSize) return false;
-        if (blacks != board1.blacks) return false;
-        if (whites != board1.whites) return false;
-        if (blackCaptured != board1.blackCaptured) return false;
-        if (whiteCaptured != board1.whiteCaptured) return false;
-        return Arrays.deepEquals(board, board1.board);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Arrays.deepHashCode(board);
-        result = 31 * result + boardSize;
-        result = 31 * result + blacks;
-        result = 31 * result + whites;
-        result = 31 * result + blackCaptured;
-        result = 31 * result + whiteCaptured;
-        return result;
     }
 }

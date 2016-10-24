@@ -1,5 +1,6 @@
 package ianhblakley.goai.framework.scoring;
 
+import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
@@ -22,20 +23,26 @@ class AreaScorer extends Scorer {
 
     private boolean seenBlack;
     private boolean seenWhite;
+    private Board board;
+    private ScoringState[][] states;
 
     @Override
-    void score(Board board) {
+    void score(Board board, boolean verbose) {
         getArea(board);
-        logger.debug("Black Area: %s White Area %s", blackScore, whiteScore);
-        logger.debug("Black Stones: %s White Stones: %s", board.getBlacks(), board.getWhites());
         whiteScore += board.getWhites();
         blackScore += board.getBlacks();
+        if (verbose) {
+            logger.debug(toString());
+            logger.debug("Black Area: %s White Area %s", blackScore, whiteScore);
+            logger.debug("Black Stones: %s White Stones: %s", board.getBlacks(), board.getWhites());
+        }
     }
 
     private int getArea(Board board) {
-        ScoringState[][] states = createEmptyState(board.getBoardSize());
-        for (int i=0;i<board.getBoardSize();i++) {
-            for (int j=0;j<board.getBoardSize();j++) {
+        this.board = board;
+        states = createEmptyState(Constants.BOARDSIZE);
+        for (int i = 0; i < Constants.BOARDSIZE; i++) {
+            for (int j = 0; j < Constants.BOARDSIZE; j++) {
                 if (states[i][j] == ScoringState.UNCHECKED) {
                     switch (board.getPositionState(i, j)) {
                         case BLACK:
@@ -61,16 +68,20 @@ class AreaScorer extends Scorer {
                 }
             }
         }
+        return 0;
+    }
 
+    @Override
+    public String toString() {
         StringBuilder string = new StringBuilder();
         string.append("\n   ");
-        for (int i = 0; i < board.getBoardSize(); i++) {
+        for (int i = 0; i < Constants.BOARDSIZE; i++) {
             string.append(String.format("%1$2s ", i));
         }
         string.append("\n   ");
-        string.append(new String(new char[board.getBoardSize() * 3]).replace('\0', '_'));
+        string.append(new String(new char[Constants.BOARDSIZE * 3]).replace('\0', '_'));
         string.append('\n');
-        for (int i = 0; i < board.getBoardSize(); i++) {
+        for (int i = 0; i < Constants.BOARDSIZE; i++) {
             ScoringState[] row = states[i];
             string.append(String.format("%1$2s", i)).append("|");
             for (ScoringState state : row) {
@@ -100,104 +111,9 @@ class AreaScorer extends Scorer {
             string.append("|\n");
         }
         string.append("   ");
-        string.append(new String(new char[board.getBoardSize() * 3]).replace('\0', '_'));
-        logger.info(string.toString());
-
-        return 0;
+        string.append(new String(new char[Constants.BOARDSIZE * 3]).replace('\0', '_'));
+        return string.toString();
     }
-
-    /*
-    private int floodFill(Board board, ScoringState[][] states, int row, int column) throws Exception {
-        assert board.getPositionState(row, column) == PositionState.EMPTY;
-        seenWhite = false;
-        seenBlack = false;
-        Queue<Position> floodQueue = new ArrayDeque<>();
-        Set<Position> areaSet = new HashSet<>();
-        floodQueue.add(new Position(row, column));
-        while (floodQueue.size() > 0) {
-            Position n = floodQueue.poll();
-            if (states[n.getRow()][n.getColumn()] == ScoringState.PROCESSING) continue;
-            areaSet.add(n);
-            Position e = new Position(n);
-            Position w = new Position(n);
-            while (e.getEast() != null && board.getPositionState(e.getEast()) == PositionState.EMPTY) {
-                e = e.getEast();
-                setState(ScoringState.PROCESSING, states, e);
-                areaSet.add(e);
-            }
-            while (w.getWest(board.getBoardSize()) != null && board.getPositionState(w.getWest(board.getBoardSize()))
-                    == PositionState.EMPTY) {
-                w = w.getWest(board.getBoardSize());
-                setState(ScoringState.PROCESSING, states, w);
-                areaSet.add(w);
-            }
-            if (e.getEast() != null) {
-                Position east = e.getEast();
-                switch (board.getPositionState(east)) {
-                    case BLACK:
-                        seenBlack = true;
-                        setState(ScoringState.BLACK, states, east);
-                        break;
-                    case WHITE:
-                        setState(ScoringState.WHITE, states, east);
-                        seenWhite = true;
-                }
-            }
-
-            if (w.getWest(board.getBoardSize()) != null) {
-                Position west = w.getWest(board.getBoardSize());
-                switch (board.getPositionState(west)) {
-                    case BLACK:
-                        setState(ScoringState.BLACK, states, west);
-                        seenBlack = true;
-                        break;
-                    case WHITE:
-                        setState(ScoringState.WHITE, states, west);
-                        seenWhite = true;
-                }
-            }
-
-            n = new Position(e);
-
-            while (n.getColumn() <= w.getColumn()) {
-                if (n.getNorth() != null) {
-                    Position north = n.getNorth();
-                    if (board.getPositionState(north) == PositionState.EMPTY &&
-                            states[north.getRow()][north.getColumn()] == ScoringState.UNCHECKED) {
-                        floodQueue.add(north);
-                    }
-                }
-
-                if (n.getSouth(board.getBoardSize()) != null) {
-                    Position south = n.getSouth(board.getBoardSize());
-                    if (board.getPositionState(south) == PositionState.EMPTY && states[south.getRow()]
-                            [south.getColumn()] == ScoringState.UNCHECKED) {
-                        floodQueue.add(south);
-                    }
-                }
-                n = n.getWest(board.getBoardSize());
-            }
-        }
-        if (seenBlack && seenWhite) {
-            for (Position p : areaSet) {
-                setState(ScoringState.DAME, states, p);
-            }
-            return 0;
-        } else if (seenBlack) {
-            for (Position p : areaSet) {
-                setState(ScoringState.BLACKTERRITORY, states, p);
-            }
-            return areaSet.size();
-        } else if (seenWhite) {
-            for (Position p : areaSet) {
-                setState(ScoringState.WHITETERRITORY, states, p);
-            }
-            return areaSet.size();
-        } else {
-            throw new Exception("No stones seen");
-        }
-    }
-    */
 
     private int floodFill2(Board board, ScoringState[][] states, int row, int column) throws Exception {
         assert board.getPositionState(row, column) == PositionState.EMPTY;
@@ -212,11 +128,11 @@ class AreaScorer extends Scorer {
             areaSet.add(n);
             Position north = n.getNorth();
             queueUp(floodQueue, states, north, board);
-            Position south = n.getSouth(board.getBoardSize());
+            Position south = n.getSouth(Constants.BOARDSIZE);
             queueUp(floodQueue, states, south, board);
             Position east = n.getEast();
             queueUp(floodQueue, states, east, board);
-            Position west = n.getWest(board.getBoardSize());
+            Position west = n.getWest(Constants.BOARDSIZE);
             queueUp(floodQueue, states, west, board);
         }
 

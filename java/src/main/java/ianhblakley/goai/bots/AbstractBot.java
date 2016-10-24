@@ -15,13 +15,13 @@ import org.apache.logging.log4j.Logger;
 abstract class AbstractBot implements Bot {
 
     private final static Logger logger = LogManager.getFormatterLogger(RandomBot.class);
-
+    protected final PositionState color;
     private int stones;
 
-    AbstractBot() {
-    }
-
     AbstractBot(PositionState color) {
+        assert color != null;
+        assert color != PositionState.EMPTY;
+        this.color = color;
         stones = (int) (Math.floor(Math.pow(Constants.BOARDSIZE, 2)) / 2);
         if (color.equals(PositionState.BLACK)) stones++;
     }
@@ -43,6 +43,11 @@ abstract class AbstractBot implements Bot {
         stones--;
     }
 
+    /**
+     * Returns if the bot has enough stones to play a move
+     *
+     * @return whether this has enought stones to play
+     */
     @Override
     public boolean checkCanPlay() {
         return stones > 0;

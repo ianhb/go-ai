@@ -26,7 +26,7 @@ public class Move implements Serializable {
         pass = true;
     }
 
-    Position getPosition() {
+    public Position getPosition() {
         return position;
     }
 
