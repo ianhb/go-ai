@@ -9,6 +9,7 @@ import java.util.List;
  *
  * Created by ian on 10/14/16.
  */
+@SuppressWarnings("ALL")
 class GameSerializer {
 
     public void serialize(Game game, String filename) throws IOException {

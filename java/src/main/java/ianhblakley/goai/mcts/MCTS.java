@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 public class MCTS {
 
     private static final Logger logger = LogManager.getFormatterLogger(MCTS.class);
+    private static final int COMPUTE_THRESHOLD = 3;
 
     private final TreePolicy treePolicy;
     private final DefaultPolicy defaultPolicy;
@@ -38,13 +39,14 @@ public class MCTS {
     public Position getMove(Board board) {
         MonteCarloTree tree = new MonteCarloTree(board, color);
         long startTime = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - startTime) < 1000) {
-            Node select = treePolicy.select(tree);
+        while ((System.currentTimeMillis() - startTime) < COMPUTE_THRESHOLD * 1000) {
+            Node select = treePolicy.select(tree.getRoot());
             PositionState winner = defaultPolicy.simulate(select);
             tree.backTrace(select, winner == color);
         }
         logger.debug("Tree Size: %s", tree.getTreeSize());
-        return treePolicy.getBestMove(tree.getRoot(), 0);
+        Node bestMove = treePolicy.getBestMove(tree.getRoot(), 0);
+        return bestMove.getMove();
     }
 
 }

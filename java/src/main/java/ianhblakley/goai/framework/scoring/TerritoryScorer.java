@@ -9,6 +9,7 @@ import ianhblakley.goai.framework.PositionState;
  * //TODO: Implement
  * Created by ian on 10/14/16.
  */
+@SuppressWarnings("ALL")
 class TerritoryScorer extends Scorer {
 
     @Override

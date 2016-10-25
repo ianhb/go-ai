@@ -1,13 +1,10 @@
 package ianhblakley.goai.mcts;
 
-import ianhblakley.goai.framework.Position;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Random;
-import java.util.Set;
 
 /**
  * Tree Policy used by the MCTS when randomly selecting children to expand
@@ -18,23 +15,15 @@ class RandomTreePolicy implements TreePolicy {
 
     private static final Logger logger = LogManager.getFormatterLogger(RandomTreePolicy.class);
 
-    private final Random random;
-
-    RandomTreePolicy() {
-        random = new Random(System.currentTimeMillis());
-    }
-
     @Override
-    public Node select(MonteCarloTree tree) {
+    public Node select(Node root) {
         Queue<Node> searchQueue = new LinkedList<>();
-        searchQueue.add(tree.getRoot());
+        searchQueue.add(root);
         Node deque = null;
         while (searchQueue.size() > 0) {
             deque = searchQueue.poll();
-            if (!deque.isTerminalState() && !deque.isExpanded()) {
-                Set<Position> possibleMoves = deque.getPossibleChildren();
-                Position randomMove = randomSelect(possibleMoves);
-                return deque.addChild(randomMove);
+            if (deque.isNotTerminalState() && deque.isNotFullyExpanded()) {
+                return deque.selectNewRandomChild();
             }
             searchQueue.addAll(deque.getChildren());
         }
@@ -42,28 +31,15 @@ class RandomTreePolicy implements TreePolicy {
         return deque;
     }
 
-    private Position randomSelect(Set<Position> moves) {
-        int size = moves.size();
-        int randomInt = random.nextInt(size);
-        int i = 0;
-        for (Position p : moves) {
-            if (i == randomInt) {
-                return p;
-            }
-            i++;
-        }
-        logger.debug("Random returning null Node");
-        return null;
-    }
 
     @Override
-    public Position getBestMove(Node n, double cP) {
-        double bestProb = 0;
-        Position bestMove = null;
+    public Node getBestMove(Node n, double cP) {
+        double bestProb = -1;
+        Node bestMove = null;
         for (Node child : n.getChildren()) {
             if (child.getWinProbability() >= bestProb) {
                 bestProb = child.getWinProbability();
-                bestMove = child.getMove();
+                bestMove = child;
             }
         }
         return bestMove;

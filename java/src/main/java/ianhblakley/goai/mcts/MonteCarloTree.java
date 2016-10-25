@@ -23,6 +23,7 @@ class MonteCarloTree {
             if (won) { expansionNode.logWin(); }
             else { expansionNode.logLoss(); }
             expansionNode = expansionNode.getParent();
+            won = !won;
         }
     }
 

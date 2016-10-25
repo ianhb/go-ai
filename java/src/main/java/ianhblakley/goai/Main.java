@@ -1,8 +1,8 @@
 package ianhblakley.goai;
 
 import ianhblakley.goai.bots.Bot;
-import ianhblakley.goai.bots.MCTSBot;
-import ianhblakley.goai.bots.RandomBot;
+import ianhblakley.goai.bots.RandomMCTSBot;
+import ianhblakley.goai.bots.UctBot;
 import ianhblakley.goai.framework.Game;
 import ianhblakley.goai.framework.PositionState;
 
@@ -14,8 +14,8 @@ import ianhblakley.goai.framework.PositionState;
 class Main {
 
     public static void main(String[] args) throws Exception {
-        Bot white = new RandomBot(PositionState.WHITE);
-        Bot black = new MCTSBot(PositionState.BLACK);
+        Bot white = new UctBot(PositionState.WHITE);
+        Bot black = new RandomMCTSBot(PositionState.BLACK);
         Game game = new Game(black, white);
         game.play(true);
         game.printStats();

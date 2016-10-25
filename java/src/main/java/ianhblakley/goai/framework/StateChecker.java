@@ -15,7 +15,7 @@ public class StateChecker {
             return false;
         }
         Board updatedState = state.deepCopy();
-        updatedState.placeMove(move);
+        updatedState.placeMoveLight(move);
         return (updatedState.getPositionState(move.getPosition()).equals(PositionState.EMPTY) ||
                 updatedState.getCell(move.getPosition()).getLibertyCount() == 0);
     }
@@ -25,7 +25,7 @@ public class StateChecker {
             return false;
         }
         Board updatedState = state.deepCopy();
-        updatedState.placeMove(move);
+        updatedState.placeMoveLight(move);
         for (int i = 0; i < Constants.BOARD_SIZE; i++) {
             for (int j = 0; j < Constants.BOARD_SIZE; j++) {
                 if (updatedState.getBoard()[i][j] != oldState[i][j]) {

@@ -3,6 +3,7 @@ package ianhblakley.goai.mcts;
 import ianhblakley.goai.framework.*;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -13,10 +14,12 @@ import java.util.Set;
  */
 class Node {
 
+    private static final Random random = new Random(System.currentTimeMillis());
+
     private final Node parent;
     private final Set<Node> children;
     private final Set<Position> possibleChildren;
-    private Position move;
+    private final Position move;
     private final PositionState color;
     private final Board state;
     private final boolean terminalState;
@@ -24,23 +27,18 @@ class Node {
     private int plays;
 
     Node(Node parent, Board b, Position move, PositionState color) {
-        this(parent, b, color);
-        this.move = move;
-        children.add(new Node(this, b.deepCopy(), Utils.getOppositeColor(color)));
-    }
-
-    private Node(Node parent, Board b, PositionState color) {
         this.parent = parent;
         this.children = new HashSet<>();
-        this.possibleChildren = b.legalMoves(color);
+        this.possibleChildren = b.getLegalMoves(color);
         this.color = color;
         this.state = b.deepCopy();
         this.terminalState = b.isEndGame();
         wins = 0;
         plays = 0;
+        this.move = move;
     }
 
-    public Position getMove() {
+    Position getMove() {
         return move;
     }
 
@@ -54,14 +52,33 @@ class Node {
     }
 
     void logLoss() {
+        wins--;
         plays++;
+    }
+
+    Node selectNewRandomChild() {
+        Position randomMove = randomSelect(getPossibleChildren());
+        return addChild(randomMove);
+    }
+
+    private Position randomSelect(Set<Position> moves) {
+        int size = moves.size();
+        int randomInt = random.nextInt(size);
+        int i = 0;
+        for (Position p : moves) {
+            if (i == randomInt) {
+                return p;
+            }
+            i++;
+        }
+        return null;
     }
 
     Node getParent() {
         return parent;
     }
 
-    Set<Position> getPossibleChildren() {
+    private Set<Position> getPossibleChildren() {
         return possibleChildren;
     }
 
@@ -69,15 +86,15 @@ class Node {
         return state.deepCopy();
     }
 
-    boolean isExpanded() {
-        return possibleChildren.size() == 0;
+    boolean isNotFullyExpanded() {
+        return possibleChildren.size() != 0;
     }
 
-    boolean isTerminalState() {
-        return terminalState;
+    boolean isNotTerminalState() {
+        return !terminalState;
     }
 
-    Node addChild(Position position) {
+    private Node addChild(Position position) {
         assert possibleChildren.size() > 0;
         assert possibleChildren.contains(position);
         possibleChildren.remove(position);
@@ -93,6 +110,10 @@ class Node {
             return 0;
         }
         return (double) wins / (double) plays;
+    }
+
+    int getPlays() {
+        return plays;
     }
 
     @Override

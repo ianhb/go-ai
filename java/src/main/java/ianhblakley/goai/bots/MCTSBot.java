@@ -13,11 +13,11 @@ import ianhblakley.goai.mcts.MCTS;
  * <p>
  * Created by ian on 10/17/16.
  */
-public abstract class MCTSBot extends AbstractBot {
+abstract class MCTSBot extends AbstractBot {
 
     MCTS mcts;
 
-    public MCTSBot(PositionState color) {
+    MCTSBot(PositionState color) {
         super(color);
     }
 

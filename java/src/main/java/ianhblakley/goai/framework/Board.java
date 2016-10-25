@@ -23,6 +23,8 @@ public class Board implements Serializable {
     private int whites;
     private int blackCaptured;
     private int whiteCaptured;
+    private Set<Position> blackMoves;
+    private Set<Position> whiteMoves;
     private Board previousState;
 
     public Board() {
@@ -39,6 +41,7 @@ public class Board implements Serializable {
         blackCaptured = 0;
         whiteCaptured = 0;
         previousState = null;
+        calcLegalMoves();
     }
 
     public Set<Position> getAvailableSpaces() {
@@ -85,6 +88,11 @@ public class Board implements Serializable {
         checkCapture(move.getColor());
         previousState = deepCopy();
         previousState.previousState = null;
+    }
+
+    void placeMoveLight(Move move) {
+        placePiece(move.getColor(), move.getPosition());
+        checkCapture(move.getColor());
     }
 
     private void mergeCells(Position position) {
@@ -232,7 +240,12 @@ public class Board implements Serializable {
         return possibleEyes;
     }
 
-    public Set<Position> legalMoves(PositionState color) {
+    private void calcLegalMoves() {
+        whiteMoves = legalMoves(PositionState.WHITE);
+        blackMoves = legalMoves(PositionState.BLACK);
+    }
+
+    private Set<Position> legalMoves(PositionState color) {
         Set<Position> positions = getAvailableSpaces();
         if (positions.size() == 0) {
             return Collections.emptySet();
@@ -253,6 +266,18 @@ public class Board implements Serializable {
         }
         return previousState.getBoardCopy();
     }
+
+    public Set<Position> getLegalMoves(PositionState color) {
+        switch (color) {
+            case WHITE:
+                return whiteMoves;
+            case BLACK:
+                return blackMoves;
+            default:
+                return null;
+        }
+    }
+
 
     @Override
     public boolean equals(Object o) {
