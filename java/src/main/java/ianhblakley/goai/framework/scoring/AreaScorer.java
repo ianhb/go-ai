@@ -23,7 +23,6 @@ class AreaScorer extends Scorer {
 
     private boolean seenBlack;
     private boolean seenWhite;
-    private Board board;
     private ScoringState[][] states;
 
     @Override
@@ -38,11 +37,10 @@ class AreaScorer extends Scorer {
         }
     }
 
-    private int getArea(Board board) {
-        this.board = board;
-        states = createEmptyState(Constants.BOARDSIZE);
-        for (int i = 0; i < Constants.BOARDSIZE; i++) {
-            for (int j = 0; j < Constants.BOARDSIZE; j++) {
+    private void getArea(Board board) {
+        states = createEmptyState();
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++) {
                 if (states[i][j] == ScoringState.UNCHECKED) {
                     switch (board.getPositionState(i, j)) {
                         case BLACK:
@@ -54,9 +52,9 @@ class AreaScorer extends Scorer {
                         default:
                             try {
                                 int score = floodFill2(board, states, i, j);
-                                if (states[i][j] == ScoringState.WHITETERRITORY) {
+                                if (states[i][j] == ScoringState.WHITE_TERRITORY) {
                                     whiteScore += score;
-                                } else if (states[i][j] == ScoringState.BLACKTERRITORY) {
+                                } else if (states[i][j] == ScoringState.BLACK_TERRITORY) {
                                     blackScore += score;
                                 } else {
                                     assert states[i][j] == ScoringState.DAME;
@@ -68,20 +66,19 @@ class AreaScorer extends Scorer {
                 }
             }
         }
-        return 0;
     }
 
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
         string.append("\n   ");
-        for (int i = 0; i < Constants.BOARDSIZE; i++) {
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
             string.append(String.format("%1$2s ", i));
         }
         string.append("\n   ");
-        string.append(new String(new char[Constants.BOARDSIZE * 3]).replace('\0', '_'));
+        string.append(new String(new char[Constants.BOARD_SIZE * 3]).replace('\0', '_'));
         string.append('\n');
-        for (int i = 0; i < Constants.BOARDSIZE; i++) {
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
             ScoringState[] row = states[i];
             string.append(String.format("%1$2s", i)).append("|");
             for (ScoringState state : row) {
@@ -90,10 +87,10 @@ class AreaScorer extends Scorer {
                     case DAME:
                         string.append("*");
                         break;
-                    case BLACKTERRITORY:
+                    case BLACK_TERRITORY:
                         string.append("o");
                         break;
-                    case WHITETERRITORY:
+                    case WHITE_TERRITORY:
                         string.append("x");
                         break;
                     case BLACK:
@@ -111,7 +108,7 @@ class AreaScorer extends Scorer {
             string.append("|\n");
         }
         string.append("   ");
-        string.append(new String(new char[Constants.BOARDSIZE * 3]).replace('\0', '_'));
+        string.append(new String(new char[Constants.BOARD_SIZE * 3]).replace('\0', '_'));
         return string.toString();
     }
 
@@ -128,11 +125,11 @@ class AreaScorer extends Scorer {
             areaSet.add(n);
             Position north = n.getNorth();
             queueUp(floodQueue, states, north, board);
-            Position south = n.getSouth(Constants.BOARDSIZE);
+            Position south = n.getSouth();
             queueUp(floodQueue, states, south, board);
             Position east = n.getEast();
             queueUp(floodQueue, states, east, board);
-            Position west = n.getWest(Constants.BOARDSIZE);
+            Position west = n.getWest();
             queueUp(floodQueue, states, west, board);
         }
 
@@ -143,12 +140,12 @@ class AreaScorer extends Scorer {
             return 0;
         } else if (seenBlack) {
             for (Position p : areaSet) {
-                setState(ScoringState.BLACKTERRITORY, states, p);
+                setState(ScoringState.BLACK_TERRITORY, states, p);
             }
             return areaSet.size();
         } else if (seenWhite) {
             for (Position p : areaSet) {
-                setState(ScoringState.WHITETERRITORY, states, p);
+                setState(ScoringState.WHITE_TERRITORY, states, p);
             }
             return areaSet.size();
         } else {
@@ -177,10 +174,10 @@ class AreaScorer extends Scorer {
         }
     }
 
-    private ScoringState[][] createEmptyState(int size) {
-        ScoringState[][] states = new ScoringState[size][size];
+    private ScoringState[][] createEmptyState() {
+        ScoringState[][] states = new ScoringState[Constants.BOARD_SIZE][Constants.BOARD_SIZE];
         for (ScoringState[] row : states) {
-            for (int i=0;i<size;i++) {
+            for (int i = 0; i < Constants.BOARD_SIZE; i++) {
                 row[i] = ScoringState.UNCHECKED;
             }
         }

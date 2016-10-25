@@ -15,21 +15,21 @@ import org.apache.logging.log4j.Logger;
 abstract class AbstractBot implements Bot {
 
     private final static Logger logger = LogManager.getFormatterLogger(RandomBot.class);
-    protected final PositionState color;
+    final PositionState color;
     private int stones;
 
     AbstractBot(PositionState color) {
         assert color != null;
         assert color != PositionState.EMPTY;
         this.color = color;
-        stones = (int) (Math.floor(Math.pow(Constants.BOARDSIZE, 2)) / 2);
+        stones = (int) (Math.floor(Math.pow(Constants.BOARD_SIZE, 2)) / 2);
         if (color.equals(PositionState.BLACK)) stones++;
     }
 
     /**
      * Returns the move the bot deems is best given the current board
      * Must call {@link #playStone()} if returns a non-null move and can't call {@link #playStone()} if returns null
-     * Must check {@link #checkCanPlay()} before returning a non-null Move
+     * Must check {@link #checkCannotPlay()} before returning a non-null Move
      *
      * @param board      the current board
      * @param turnNumber the turn number
@@ -45,10 +45,9 @@ abstract class AbstractBot implements Bot {
     /**
      * Returns if the bot has enough stones to play a move
      *
-     * @return whether this has enought stones to play
+     * @return whether this has enough stones to play
      */
-    @Override
-    public boolean checkCanPlay() {
-        return stones > 0;
+    boolean checkCannotPlay() {
+        return stones <= 0;
     }
 }

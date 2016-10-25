@@ -9,7 +9,7 @@ import java.util.List;
  *
  * Created by ian on 10/14/16.
  */
-public class GameSerializer {
+class GameSerializer {
 
     public void serialize(Game game, String filename) throws IOException {
         FileOutputStream fos = new FileOutputStream(filename);

@@ -3,8 +3,6 @@ package ianhblakley.goai.mcts;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -15,14 +13,10 @@ import java.util.*;
  */
 class MonteCarloTree {
 
-    private static final Logger logger = LogManager.getFormatterLogger(MonteCarloTree.class);
-
     private final Node root;
-    private final PositionState color;
 
     MonteCarloTree(Board board, PositionState color) {
         root = new Node(null, board.deepCopy(), null, color);
-        this.color = color;
     }
 
     void backTrace(Node expansionNode, boolean won) {

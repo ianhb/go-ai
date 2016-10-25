@@ -12,18 +12,20 @@ import ianhblakley.goai.mcts.MCTS;
  * <p>
  * Created by ian on 10/17/16.
  */
-public class MctsBot extends AbstractBot {
+public class MCTSBot extends AbstractBot {
 
     private final MCTS mcts;
 
-    public MctsBot(PositionState color) {
+    public MCTSBot(PositionState color) {
         super(color);
         mcts = MCTS.randomMCTS(color);
     }
 
     @Override
     public Move getPlay(Board board, int turnNumber) {
-        if (!checkCanPlay()) { return new Move(); }
+        if (checkCannotPlay()) {
+            return new Move();
+        }
         Position m = mcts.getMove(board);
         if (m == null) {
             return new Move();

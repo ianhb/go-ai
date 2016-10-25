@@ -1,7 +1,5 @@
 package ianhblakley.goai.mcts;
 
-import ianhblakley.goai.framework.Board;
-
 /**
  * Interface to select nodes for MCTS
  *

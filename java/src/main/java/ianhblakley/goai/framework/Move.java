@@ -11,14 +11,12 @@ public class Move implements Serializable {
 
     private Position position;
     private PositionState color;
-    private int turn;
     private boolean pass;
 
     public Move(Position position, PositionState color, int turn) {
         assert !color.equals(PositionState.EMPTY);
         this.position = position;
         this.color = color;
-        this.turn = turn;
         pass = false;
     }
 
@@ -38,7 +36,7 @@ public class Move implements Serializable {
         return color;
     }
 
-    boolean isPass() {
-        return pass;
+    boolean isNotPass() {
+        return !pass;
     }
 }

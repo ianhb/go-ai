@@ -1,8 +1,6 @@
 package ianhblakley.goai.framework;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Corresponds to a position on the board
@@ -10,27 +8,12 @@ import java.util.Set;
  * Created by ian on 10/12/16.
  */
 public class Position implements Serializable {
-    int row;
-    int column;
+    final int row;
+    final int column;
 
     public Position(int row, int column) {
         this.row = row;
         this.column = column;
-    }
-
-    public Position(Position position) {
-        row = position.getRow();
-        column = position.getColumn();
-    }
-
-    static Set<Position> getAllPositions(int boardSize) {
-        Set<Position> positions = new HashSet<>();
-        for (int i = 0; i < boardSize; i++) {
-            for (int j = 0; j < boardSize; j++) {
-                positions.add(new Position(i, j));
-            }
-        }
-        return positions;
     }
 
     public Position getEast() {
@@ -40,8 +23,8 @@ public class Position implements Serializable {
         return null;
     }
 
-    public Position getWest(int cap) {
-        if (column < cap - 1) {
+    public Position getWest() {
+        if (column < ianhblakley.goai.Constants.BOARD_SIZE - 1) {
             return new Position(row, column+1);
         }
         return null;
@@ -54,8 +37,8 @@ public class Position implements Serializable {
         return null;
     }
 
-    public Position getSouth(int cap) {
-        if (row < cap - 1) {
+    public Position getSouth() {
+        if (row < ianhblakley.goai.Constants.BOARD_SIZE - 1) {
             return new Position(row+1, column);
         }
         return null;

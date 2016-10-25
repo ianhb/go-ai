@@ -29,8 +29,6 @@ public class Game implements Externalizable {
     private List<Move> moves;
     private PositionState winner;
 
-    public Game() {}
-
     public Game(Bot black, Bot white) {
         this.black = black;
         this.white = white;
@@ -59,7 +57,7 @@ public class Game implements Externalizable {
         do {
             turns++;
             blackMove = black.getPlay(board, turns);
-            if (!blackMove.isPass()) {
+            if (blackMove.isNotPass()) {
                 if (verbose) {
                     logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
                 }
@@ -76,7 +74,7 @@ public class Game implements Externalizable {
             turns++;
 
             whiteMove = white.getPlay(board, turns);
-            if (!whiteMove.isPass()) {
+            if (whiteMove.isNotPass()) {
                 if (verbose) {
                     logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
                 }
@@ -87,7 +85,7 @@ public class Game implements Externalizable {
             } else {
                 if (verbose) logger.info("White passed on turn %s", turns);
             }
-        } while (!(blackMove.isPass() && whiteMove.isPass()));
+        } while (!(!blackMove.isNotPass() && !whiteMove.isNotPass()));
         Scorer scorer = Scorer.getDefaultScorer();
         this.winner = scorer.winner(board, verbose);
         if (verbose) logger.info("Game won by %s with score %s - %s", winner,
@@ -113,6 +111,7 @@ public class Game implements Externalizable {
         out.writeObject(black.getClass());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         board = (Board) in.readObject();

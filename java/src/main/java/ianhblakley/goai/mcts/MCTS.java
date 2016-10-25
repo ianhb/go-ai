@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
  */
 public class MCTS {
 
-    private static final int ITERATOR = 10;
     private static final Logger logger = LogManager.getFormatterLogger(MCTS.class);
 
     private final TreePolicy treePolicy;

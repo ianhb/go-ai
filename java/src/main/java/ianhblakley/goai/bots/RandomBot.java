@@ -21,7 +21,7 @@ public class RandomBot extends AbstractBot {
 
     @Override
     public Move getPlay(Board board, int turnNumber) {
-        if (!checkCanPlay()) return new Move();
+        if (checkCannotPlay()) return new Move();
         Set<Position> positions = board.getAvailableSpaces();
         if (positions.size() == 0) {
             return new Move();
@@ -30,7 +30,7 @@ public class RandomBot extends AbstractBot {
         Collections.shuffle(randomPositions);
         for (Position p : randomPositions) {
             Move m = new Move(p, color, turnNumber);
-            if (!(StateChecker.checkBoard(m, board, board.getLastBoard()))) {
+            if (!(!StateChecker.isLegalMove(m, board, board.getLastBoard()))) {
                 playStone();
                 return m;
             }

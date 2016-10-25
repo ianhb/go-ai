@@ -18,7 +18,7 @@ class RandomTreePolicy implements TreePolicy {
 
     private static final Logger logger = LogManager.getFormatterLogger(RandomTreePolicy.class);
 
-    private Random random;
+    private final Random random;
 
     RandomTreePolicy() {
         random = new Random(System.currentTimeMillis());

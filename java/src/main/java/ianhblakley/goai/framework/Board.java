@@ -1,8 +1,6 @@
 package ianhblakley.goai.framework;
 
 import ianhblakley.goai.Constants;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -18,8 +16,6 @@ import java.util.stream.Collectors;
  */
 public class Board implements Serializable {
 
-    private static final Logger logger = LogManager.getFormatterLogger(Board.class);
-
     private PositionState[][] board;
     private Cell[][] cells;
     private Set<Cell> cellSet;
@@ -30,13 +26,13 @@ public class Board implements Serializable {
     private Board previousState;
 
     public Board() {
-        board = new PositionState[Constants.BOARDSIZE][Constants.BOARDSIZE];
-        for (int i = 0; i < Constants.BOARDSIZE; i++) {
-            for (int j = 0; j < Constants.BOARDSIZE; j++) {
+        board = new PositionState[Constants.BOARD_SIZE][Constants.BOARD_SIZE];
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++) {
                 board[i][j] = PositionState.EMPTY;
             }
         }
-        cells = new Cell[Constants.BOARDSIZE][Constants.BOARDSIZE];
+        cells = new Cell[Constants.BOARD_SIZE][Constants.BOARD_SIZE];
         cellSet = new HashSet<>();
         blacks = 0;
         whites = 0;
@@ -47,8 +43,8 @@ public class Board implements Serializable {
 
     public Set<Position> getAvailableSpaces() {
         Set<Position> available = new HashSet<>();
-        for (int i = 0; i < Constants.BOARDSIZE; i++) {
-            for (int j = 0; j < Constants.BOARDSIZE; j++) {
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++) {
                 if (board[i][j].equals(PositionState.EMPTY)) {
                     available.add(new Position(i, j));
                 }
@@ -98,50 +94,37 @@ public class Board implements Serializable {
             if (getPositionState(side) == getPositionState(center) && !getCell(side).equals(getCell(center))) {
                 getCell(center).merge(getCell(side));
             }
-            return 0;
         };
         applyToSide(position, merge);
     }
 
     public boolean isEndGame() {
-        if (previousState == null) {
-            return false;
-        }
-        if (getTurnCount() == Math.pow(Constants.BOARDSIZE, 2)) {
-            return true;
-        }
-        if (legalMoves(PositionState.BLACK).size() > 0) {
-            return false;
-        }
-        if (legalMoves(PositionState.WHITE).size() > 0) {
-            return false;
-        }
-        return true;
+        return previousState != null &&
+                (getTurnCount() == Math.pow(Constants.BOARD_SIZE, 2) ||
+                        legalMoves(PositionState.BLACK).size() <= 0 && legalMoves(PositionState.WHITE).size() <= 0);
     }
 
-    private int applyToSide(Position center, FourSideOperation operation) {
-        int sum = 0;
+    private void applyToSide(Position center, FourSideOperation operation) {
         Position left;
         Position right;
         Position up;
         Position down;
         if (center.column > 0) {
             left = new Position(center.row, center.column - 1);
-            sum += operation.act(left, center);
+            operation.act(left, center);
         }
-        if (center.column < Constants.BOARDSIZE - 1) {
+        if (center.column < Constants.BOARD_SIZE - 1) {
             right = new Position(center.row, center.column + 1);
-            sum += operation.act(right, center);
+            operation.act(right, center);
         }
         if (center.row > 0) {
             up = new Position(center.row - 1, center.column);
-            sum += operation.act(up, center);
+            operation.act(up, center);
         }
-        if (center.row < Constants.BOARDSIZE - 1) {
+        if (center.row < Constants.BOARD_SIZE - 1) {
             down = new Position(center.row + 1, center.column);
-            sum += operation.act(down, center);
+            operation.act(down, center);
         }
-        return sum;
     }
 
     private void checkCapture(PositionState playedColor) {
@@ -191,13 +174,13 @@ public class Board implements Serializable {
         StringBuilder string = new StringBuilder();
         string.append("\n");
         string.append("   ");
-        for (int i = 0; i < Constants.BOARDSIZE; i++) {
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
             string.append(String.format("%1$2s ", i));
         }
         string.append("\n   ");
-        string.append(new String(new char[Constants.BOARDSIZE * 3]).replace('\0', '_'));
+        string.append(new String(new char[Constants.BOARD_SIZE * 3]).replace('\0', '_'));
         string.append('\n');
-        for (int i = 0; i < Constants.BOARDSIZE; i++) {
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
             PositionState[] row = board[i];
             string.append(String.format("%1$2s", i)).append("|");
             for (PositionState state : row) {
@@ -218,7 +201,7 @@ public class Board implements Serializable {
             string.append("|\n");
         }
         string.append("   ");
-        string.append(new String(new char[Constants.BOARDSIZE * 3]).replace('\0', '_'));
+        string.append(new String(new char[Constants.BOARD_SIZE * 3]).replace('\0', '_'));
         return string.toString();
     }
 
@@ -243,9 +226,6 @@ public class Board implements Serializable {
         FourSideOperation liberties = ((side, center) -> {
             if (getPositionState(side) == PositionState.EMPTY) {
                 possibleEyes.add(side);
-                return 1;
-            } else {
-                return 0;
             }
         });
         applyToSide(p, liberties);
@@ -260,7 +240,7 @@ public class Board implements Serializable {
         Set<Position> legalPositions = new HashSet<>();
         for (Position p : positions) {
             Move m = new Move(p, color);
-            if (previousState == null || !StateChecker.checkBoard(m, this, previousState.getBoard())) {
+            if (previousState == null || StateChecker.isLegalMove(m, this, previousState.getBoard())) {
                 legalPositions.add(p);
             }
         }
@@ -290,11 +270,11 @@ public class Board implements Serializable {
     }
 
     interface FourSideOperation {
-        int act(Position side, Position center);
+        void act(Position side, Position center);
     }
 
     class Cell implements Serializable {
-        Set<Position> pieces;
+        final Set<Position> pieces;
         private int libertyCount;
         private PositionState color;
 

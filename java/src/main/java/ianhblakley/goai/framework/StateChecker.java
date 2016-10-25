@@ -26,8 +26,8 @@ public class StateChecker {
         }
         Board updatedState = state.deepCopy();
         updatedState.placeMove(move);
-        for (int i = 0; i < Constants.BOARDSIZE; i++) {
-            for (int j = 0; j < Constants.BOARDSIZE; j++) {
+        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++) {
                 if (updatedState.getBoard()[i][j] != oldState[i][j]) {
                     return false;
                 }
@@ -36,7 +36,7 @@ public class StateChecker {
         return true;
     }
 
-    public static boolean checkBoard(Move move, Board state, PositionState[][] oldState) {
-        return checkKO(move, state, oldState) || checkSuicide(move, state);
+    public static boolean isLegalMove(Move move, Board state, PositionState[][] oldState) {
+        return !checkKO(move, state, oldState) && !checkSuicide(move, state);
     }
 }
