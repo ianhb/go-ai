@@ -7,22 +7,23 @@ import ianhblakley.goai.framework.PositionState;
 import ianhblakley.goai.mcts.MCTS;
 
 /**
- * Bot that uses a pure MCTS to decide the moves to play
- * <p>
+ * Abstract bot that uses MCTS to select a move
+ * Subclasses must use one of the static methods in {@link MCTS} to
+ * instantiate {@link #mcts}
  * <p>
  * Created by ian on 10/17/16.
  */
-public class MCTSBot extends AbstractBot {
+public abstract class MCTSBot extends AbstractBot {
 
-    private final MCTS mcts;
+    MCTS mcts;
 
     public MCTSBot(PositionState color) {
         super(color);
-        mcts = MCTS.randomMCTS(color);
     }
 
     @Override
     public Move getPlay(Board board, int turnNumber) {
+        assert mcts != null;
         if (checkCannotPlay()) {
             return new Move();
         }

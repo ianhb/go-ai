@@ -20,7 +20,6 @@ public class MCTS {
     private final TreePolicy treePolicy;
     private final DefaultPolicy defaultPolicy;
     private final PositionState color;
-    private MonteCarloTree tree;
 
     private MCTS(TreePolicy treePolicy, DefaultPolicy defaultPolicy, PositionState color) {
         this.treePolicy = treePolicy;
@@ -32,8 +31,12 @@ public class MCTS {
         return new MCTS(new RandomTreePolicy(), new RandomDefaultPolicy(), color);
     }
 
+    public static MCTS uctMCTS(PositionState color) {
+        return new MCTS(new UCTTreePolicy(), new RandomDefaultPolicy(), color);
+    }
+
     public Position getMove(Board board) {
-        tree = new MonteCarloTree(board, color);
+        MonteCarloTree tree = new MonteCarloTree(board, color);
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < 1000) {
             Node select = treePolicy.select(tree);
@@ -41,14 +44,7 @@ public class MCTS {
             tree.backTrace(select, winner == color);
         }
         logger.debug("Tree Size: %s", tree.getTreeSize());
-        return getBestMove();
+        return treePolicy.getBestMove(tree.getRoot(), 0);
     }
-
-    private Position getBestMove() {
-        return tree.getBestMove();
-    }
-
-
-
 
 }

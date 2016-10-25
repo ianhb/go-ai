@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Selects a node at random
+ * Tree Policy used by the MCTS when randomly selecting children to expand
  *
  * Created by ian on 10/17/16.
  */
@@ -54,5 +54,18 @@ class RandomTreePolicy implements TreePolicy {
         }
         logger.debug("Random returning null Node");
         return null;
+    }
+
+    @Override
+    public Position getBestMove(Node n, double cP) {
+        double bestProb = 0;
+        Position bestMove = null;
+        for (Node child : n.getChildren()) {
+            if (child.getWinProbability() >= bestProb) {
+                bestProb = child.getWinProbability();
+                bestMove = child.getMove();
+            }
+        }
+        return bestMove;
     }
 }

@@ -1,7 +1,6 @@
 package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.framework.Board;
-import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
 
 import java.util.*;
@@ -25,18 +24,6 @@ class MonteCarloTree {
             else { expansionNode.logLoss(); }
             expansionNode = expansionNode.getParent();
         }
-    }
-
-    Position getBestMove() {
-        double bestProb = 0;
-        Position bestMove = null;
-        for (Node n : root.getChildren()) {
-            if (n.getWinProbability() >= bestProb) {
-                bestProb = n.getWinProbability();
-                bestMove = n.getMove();
-            }
-        }
-        return bestMove;
     }
 
     Node getRoot() {

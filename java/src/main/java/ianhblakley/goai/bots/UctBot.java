@@ -1,23 +1,18 @@
 package ianhblakley.goai.bots;
 
-import ianhblakley.goai.framework.Board;
-import ianhblakley.goai.framework.Move;
 import ianhblakley.goai.framework.PositionState;
+import ianhblakley.goai.mcts.MCTS;
 
 /**
  * Bot that uses UCT MCTS instead of pure MCTS
  * <p>
  * Created by ian on 10/17/16.
  */
-public class UctBot extends AbstractBot {
+public class UctBot extends MCTSBot {
 
     public UctBot(PositionState color) {
         super(color);
-    }
-
-    @Override
-    public Move getPlay(Board board, int turnNumber) {
-        return null;
+        mcts = MCTS.uctMCTS(color);
     }
 
 }

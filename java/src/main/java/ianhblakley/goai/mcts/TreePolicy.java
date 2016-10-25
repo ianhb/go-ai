@@ -1,5 +1,7 @@
 package ianhblakley.goai.mcts;
 
+import ianhblakley.goai.framework.Position;
+
 /**
  * Interface to select nodes for MCTS
  *
@@ -13,4 +15,6 @@ interface TreePolicy {
      * @return best state available
      */
     Node select(MonteCarloTree tree);
+
+    Position getBestMove(Node n, double cP);
 }
