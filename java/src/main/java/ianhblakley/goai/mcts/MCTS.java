@@ -1,7 +1,7 @@
 package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.framework.Board;
-import ianhblakley.goai.framework.Move;
+import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Framework to run MCTS
- * Uses a {@link Selector}, {@link Expander} and {@link Simulator}
+ * Uses a {@link TreePolicy} and {@link DefaultPolicy}
  *
  * Created by ian on 10/17/16.
  */
@@ -18,47 +18,38 @@ public class MCTS {
     private static final int ITERATOR = 10;
     private static final Logger logger = LogManager.getFormatterLogger(MCTS.class);
 
-    private Selector selector;
-    private Expander expander;
-    private Simulator simulator;
+    private final TreePolicy treePolicy;
+    private final DefaultPolicy defaultPolicy;
+    private final PositionState color;
     private MonteCarloTree tree;
 
-    public MCTS(Selector selector, Expander expander, Simulator simulator) {
-        this.selector = selector;
-        this.expander = expander;
-        this.simulator = simulator;
-        tree = new MonteCarloTree();
+    private MCTS(TreePolicy treePolicy, DefaultPolicy defaultPolicy, PositionState color) {
+        this.treePolicy = treePolicy;
+        this.defaultPolicy = defaultPolicy;
+        this.color = color;
     }
 
-    public Move getMove(Board board, PositionState color, int turnNumber) {
-        assert tree.checkRootIsBoard(board);
-        for (int i=0;i<ITERATOR;i++) {
-            runSimulation(board.deepCopy(), color);
+    public static MCTS randomMCTS(PositionState color) {
+        return new MCTS(new RandomTreePolicy(), new RandomDefaultPolicy(), color);
+    }
+
+    public Position getMove(Board board) {
+        tree = new MonteCarloTree(board, color);
+        long startTime = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - startTime) < 1000) {
+            Node select = treePolicy.select(tree);
+            PositionState winner = defaultPolicy.simulate(select);
+            tree.backTrace(select, winner == color);
         }
-        logger.debug(tree.toString());
-        return selectMove(color, turnNumber);
+        logger.debug("Tree Size: %s", tree.getTreeSize());
+        return getBestMove();
     }
 
-    private void runSimulation(Board board, PositionState color) {
-        State selectedState = selector.select(tree, board);
-        State expandedState = expander.expand(tree, selectedState);
-        PositionState winner = simulator.simulate(tree, expandedState);
-        backTrace(expandedState, (winner.equals(color)));
+    private Position getBestMove() {
+        return tree.getBestMove();
     }
 
-    private void backTrace(State expansionState, boolean won) {
-        while (expansionState != null) {
-            if (won) { expansionState.logWin(); }
-            else { expansionState.logLoss(); }
-            expansionState = expansionState.getParent();
-        }
-    }
 
-    private Move selectMove(PositionState color, int turnNumber) {
-        State bestMove = tree.selectBestChild();
-        if (bestMove == null) {
-            return new Move();
-        }
-        return new Move(bestMove.getBoard().getPreviousMove().getPosition(), color, turnNumber);
-    }
+
+
 }

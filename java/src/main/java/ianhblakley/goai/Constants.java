@@ -7,5 +7,5 @@ package ianhblakley.goai;
  */
 public class Constants {
 
-    public static final int BOARDSIZE = 3;
+    public static final int BOARDSIZE = 9;
 }

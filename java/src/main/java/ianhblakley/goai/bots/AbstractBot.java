@@ -32,12 +32,11 @@ abstract class AbstractBot implements Bot {
      * Must check {@link #checkCanPlay()} before returning a non-null Move
      *
      * @param board      the current board
-     * @param oldBoard   the board one play ago
      * @param turnNumber the turn number
      * @return the next move to play or null if can't/shouldn't play a move
      */
     @Override
-    public abstract Move getPlay(Board board, PositionState[][] oldBoard, int turnNumber);
+    public abstract Move getPlay(Board board, int turnNumber);
 
     void playStone() {
         stones--;

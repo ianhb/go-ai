@@ -3,9 +3,11 @@ package ianhblakley.goai.mcts;
 import ianhblakley.goai.framework.PositionState;
 
 /**
+ * Simulates a game from state down
+ *
  * Created by ian on 10/17/16.
  */
-public interface Simulator {
+interface DefaultPolicy {
 
-    PositionState simulate(MonteCarloTree tree, State state);
+    PositionState simulate(Node node);
 }

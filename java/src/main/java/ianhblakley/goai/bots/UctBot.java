@@ -16,7 +16,7 @@ public class UctBot extends AbstractBot {
     }
 
     @Override
-    public Move getPlay(Board board, PositionState[][] oldBoard, int turnNumber) {
+    public Move getPlay(Board board, int turnNumber) {
         return null;
     }
 

@@ -1,6 +1,8 @@
 package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.framework.Board;
+import ianhblakley.goai.framework.Position;
+import ianhblakley.goai.framework.PositionState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,78 +17,75 @@ class MonteCarloTree {
 
     private static final Logger logger = LogManager.getFormatterLogger(MonteCarloTree.class);
 
-    private State root;
+    private final Node root;
+    private final PositionState color;
 
-    MonteCarloTree() {
-        root = new State(null, new Board());
+    MonteCarloTree(Board board, PositionState color) {
+        root = new Node(null, board.deepCopy(), null, color);
+        this.color = color;
     }
 
-    /**
-     * Checks if the root of the tree represents the last move played by the bot
-     * @param b current board
-     * @return if the board of the root equals the previous board
-     */
-    boolean checkRootIsBoard(Board b) {
-        return root.represents(b.getPreviousState());
+    void backTrace(Node expansionNode, boolean won) {
+        while (expansionNode != null) {
+            if (won) { expansionNode.logWin(); }
+            else { expansionNode.logLoss(); }
+            expansionNode = expansionNode.getParent();
+        }
     }
 
-    State selectPlayedState(Board b) {
-        logger.debug("Current State: %s", b.toString());
-        for (State child : root.getChildren()) {
-            logger.debug("Child State: %s", child.getBoard().toString());
-            if (child.represents(b)) {
-                root = child;
-                child.setRoot();
-                return child;
+    Position getBestMove() {
+        double bestProb = 0;
+        Position bestMove = null;
+        for (Node n : root.getChildren()) {
+            if (n.getWinProbability() >= bestProb) {
+                bestProb = n.getWinProbability();
+                bestMove = n.getMove();
             }
         }
-        root = new State(null, b.deepCopy());
-        logger.debug("Opponent Move Not Found");
+        return bestMove;
+    }
+
+    Node getRoot() {
         return root;
-    }
-
-    State selectBestChild() {
-        logger.debug("Children: %s", root.getChildren().size());
-        double winProb = 0;
-        State state = null;
-        for (State child : root.getChildren()) {
-            if (child.getWinProbability() > winProb) {
-                winProb = child.getWinProbability();
-                state = child;
-            }
-        }
-        return state;
     }
 
     @Override
     public String toString() {
-        List<List<State>> levels = traverseLevels();
+        List<List<Node>> levels = traverseLevels();
         StringBuilder builder = new StringBuilder();
-        for (List<State> level : levels) {
-            for (State state : level) {
-                builder.append(state.toString()).append(" ");
+        for (List<Node> level : levels) {
+            for (Node node : level) {
+                builder.append(node.toString()).append(" ");
             }
             builder.append('\n');
         }
         return "MonteCarloTree{" + "\n" + builder.toString() + "}";
     }
 
-    private List<List<State>> traverseLevels() {
+    private List<List<Node>> traverseLevels() {
         if (root == null) {
             return Collections.emptyList();
         }
-        List<List<State>> levels = new LinkedList<>();
-        Queue<State> states = new LinkedList<>();
-        states.add(root);
-        while (!states.isEmpty()) {
-            List<State> level = new ArrayList<>(states.size());
+        List<List<Node>> levels = new LinkedList<>();
+        Queue<Node> nodes = new LinkedList<>();
+        nodes.add(root);
+        while (!nodes.isEmpty()) {
+            List<Node> level = new ArrayList<>(nodes.size());
             levels.add(level);
-            for (State s : new ArrayList<>(states)) {
+            for (Node s : new ArrayList<>(nodes)) {
                 level.add(s);
-                states.addAll(s.getChildren());
-                states.poll();
+                nodes.addAll(s.getChildren());
+                nodes.poll();
             }
         }
         return levels;
+    }
+
+    int getTreeSize() {
+        int i = 0;
+        for (List<Node> level : traverseLevels()) {
+            i += level.size();
+        }
+        return i;
     }
 }

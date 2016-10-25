@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,7 +28,6 @@ public class Board implements Serializable {
     private int blackCaptured;
     private int whiteCaptured;
     private Board previousState;
-    private Move previousMove;
 
     public Board() {
         board = new PositionState[Constants.BOARDSIZE][Constants.BOARDSIZE];
@@ -43,7 +43,6 @@ public class Board implements Serializable {
         blackCaptured = 0;
         whiteCaptured = 0;
         previousState = null;
-        previousMove = null;
     }
 
     public Set<Position> getAvailableSpaces() {
@@ -89,7 +88,7 @@ public class Board implements Serializable {
         placePiece(move.getColor(), move.getPosition());
         checkCapture(move.getColor());
         previousState = deepCopy();
-        previousMove = move;
+        previousState.previousState = null;
     }
 
     private void mergeCells(Position position) {
@@ -104,29 +103,18 @@ public class Board implements Serializable {
         applyToSide(position, merge);
     }
 
-    public Board getPreviousState() {
-        return previousState;
-    }
-
-    public Move getPreviousMove() {
-        return previousMove;
-    }
-
     public boolean isEndGame() {
+        if (previousState == null) {
+            return false;
+        }
         if (getTurnCount() == Math.pow(Constants.BOARDSIZE, 2)) {
             return true;
         }
-        Set<Position> availablePositions = getAvailableSpaces();
-        for (Position p : availablePositions) {
-            if (previousState == null) {
-                return true;
-            }
-            if (StateChecker.checkBoard(new Move(p, PositionState.BLACK, 0), this, previousState.getBoard())) {
-                return false;
-            }
-            if (StateChecker.checkBoard(new Move(p, PositionState.WHITE, 0), this, previousState.getBoard())) {
-                return false;
-            }
+        if (legalMoves(PositionState.BLACK).size() > 0) {
+            return false;
+        }
+        if (legalMoves(PositionState.WHITE).size() > 0) {
+            return false;
         }
         return true;
     }
@@ -182,7 +170,7 @@ public class Board implements Serializable {
         return board;
     }
 
-    public PositionState[][] getBoardCopy() {
+    private PositionState[][] getBoardCopy() {
         return Utils.deepCopyBoard(board);
     }
 
@@ -262,6 +250,28 @@ public class Board implements Serializable {
         });
         applyToSide(p, liberties);
         return possibleEyes;
+    }
+
+    public Set<Position> legalMoves(PositionState color) {
+        Set<Position> positions = getAvailableSpaces();
+        if (positions.size() == 0) {
+            return Collections.emptySet();
+        }
+        Set<Position> legalPositions = new HashSet<>();
+        for (Position p : positions) {
+            Move m = new Move(p, color);
+            if (previousState == null || !StateChecker.checkBoard(m, this, previousState.getBoard())) {
+                legalPositions.add(p);
+            }
+        }
+        return legalPositions;
+    }
+
+    public PositionState[][] getLastBoard() {
+        if (previousState == null) {
+            return null;
+        }
+        return previousState.getBoardCopy();
     }
 
     @Override

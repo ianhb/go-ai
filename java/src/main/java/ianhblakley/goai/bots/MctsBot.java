@@ -2,11 +2,9 @@ package ianhblakley.goai.bots;
 
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Move;
+import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
 import ianhblakley.goai.mcts.MCTS;
-import ianhblakley.goai.mcts.RandomExpander;
-import ianhblakley.goai.mcts.RandomSelector;
-import ianhblakley.goai.mcts.RandomSimulator;
 
 /**
  * Bot that uses a pure MCTS to decide the moves to play
@@ -20,11 +18,17 @@ public class MctsBot extends AbstractBot {
 
     public MctsBot(PositionState color) {
         super(color);
-        mcts = new MCTS(new RandomSelector(), new RandomExpander(), new RandomSimulator());
+        mcts = MCTS.randomMCTS(color);
     }
 
     @Override
-    public Move getPlay(Board board, PositionState[][] oldBoard, int turnNumber) {
-        return mcts.getMove(board, color, turnNumber);
+    public Move getPlay(Board board, int turnNumber) {
+        if (!checkCanPlay()) { return new Move(); }
+        Position m = mcts.getMove(board);
+        if (m == null) {
+            return new Move();
+        }
+        playStone();
+        return new Move(m, color, turnNumber);
     }
 }

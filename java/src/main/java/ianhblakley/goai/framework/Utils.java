@@ -7,7 +7,7 @@ import java.util.Arrays;
  * <p>
  * Created by ian on 10/12/16.
  */
-class Utils {
+public class Utils {
     static PositionState[][] deepCopyBoard(PositionState[][] original) {
         if (original == null) {
             return null;
@@ -36,7 +36,7 @@ class Utils {
         return result;
     }
 
-    static PositionState getOppositeColor(PositionState color) {
+    public static PositionState getOppositeColor(PositionState color) {
         assert !color.equals(PositionState.EMPTY);
         if (color.equals(PositionState.BLACK)) {
             return PositionState.WHITE;

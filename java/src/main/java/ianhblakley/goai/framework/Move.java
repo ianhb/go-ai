@@ -22,6 +22,10 @@ public class Move implements Serializable {
         pass = false;
     }
 
+    public Move(Position position, PositionState color) {
+        this(position, color, 0);
+    }
+
     public Move() {
         pass = true;
     }

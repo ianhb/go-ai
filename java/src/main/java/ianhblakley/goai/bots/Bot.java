@@ -12,7 +12,7 @@ import ianhblakley.goai.framework.PositionState;
  */
 public interface Bot {
 
-    Move getPlay(Board board, PositionState[][] oldBoard, int turnNumber);
+    Move getPlay(Board board, int turnNumber);
 
     boolean checkCanPlay();
 

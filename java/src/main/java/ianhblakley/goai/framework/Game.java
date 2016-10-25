@@ -56,11 +56,9 @@ public class Game implements Externalizable {
         }
         Move blackMove;
         Move whiteMove;
-        PositionState[][] oldBoard = null;
         do {
             turns++;
-            blackMove = black.getPlay(board, oldBoard, turns);
-            oldBoard = Utils.deepCopyBoard(board.getBoard());
+            blackMove = black.getPlay(board, turns);
             if (!blackMove.isPass()) {
                 if (verbose) {
                     logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
@@ -77,8 +75,7 @@ public class Game implements Externalizable {
 
             turns++;
 
-            whiteMove = white.getPlay(board, oldBoard, turns);
-            oldBoard = Utils.deepCopyBoard(board.getBoard());
+            whiteMove = white.getPlay(board, turns);
             if (!whiteMove.isPass()) {
                 if (verbose) {
                     logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
