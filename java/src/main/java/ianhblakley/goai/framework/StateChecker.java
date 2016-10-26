@@ -52,6 +52,16 @@ public class StateChecker {
     }
 
     /**
+     * Returns if the move is being played to an empty space
+     * @param move potential move
+     * @param state current state of game
+     * @return if the space is occupied
+     */
+    private static boolean checkNotEmpty(Move move, Board state) {
+        return state.getPositionState(move.getPosition()) != PositionState.EMPTY;
+    }
+
+    /**
      * Checks if the move is a legal move
      * Currently checks for suicide and KO
      * @param move potential move
@@ -60,6 +70,7 @@ public class StateChecker {
      * @return if the move is legal
      */
     public static boolean isLegalMove(Move move, Board state, PositionState[][] oldState) {
-        return !checkKO(move, state, oldState) && !checkSuicide(move, state);
+        return !checkKO(move, state, oldState) && !checkSuicide(move, state) && !checkSuicide(move, state) &&
+                !checkNotEmpty(move, state);
     }
 }
