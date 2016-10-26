@@ -112,6 +112,18 @@ class AreaScorer extends Scorer {
         return string.toString();
     }
 
+    /**
+     * Uses the flood fill algorithm to return the area of open space surrounding the Position (row, column)
+     * Greedily stores found states in states matrix
+     * The {@link ScoringState} of the area can be found by querying states after function call
+     *
+     * @param board  board to score
+     * @param states previously found {@link ScoringState}
+     * @param row    row of position to check
+     * @param column column of position to check
+     * @return area of controlled territory
+     * @throws Exception throws an exception if it never finds a stone on the board
+     */
     private int floodFill2(Board board, ScoringState[][] states, int row, int column) throws Exception {
         assert board.getPositionState(row, column) == PositionState.EMPTY;
         seenWhite = false;
@@ -153,10 +165,26 @@ class AreaScorer extends Scorer {
         }
     }
 
+    /**
+     * Sets the state of position p in states to state
+     * @param state state to set cell to
+     * @param states scoring state matrix
+     * @param p position to set
+     */
     private void setState(ScoringState state, ScoringState[][] states, Position p) {
                 states[p.getRow()][p.getColumn()] = state;
     }
 
+    /**
+     * Checks a {@link Position} p on {@link Board} b for the {@link PositionState}
+     * Update the {@link ScoringState[][]} matrix if a stone is found
+     * Queues the cell to check if it empty
+     * Areas are based on the types of stones found
+     * @param queue queue of positions to check
+     * @param states previously found states
+     * @param p position to check
+     * @param b final board
+     */
     private void queueUp(Queue<Position> queue, ScoringState[][] states, Position p, Board b) {
         if (p == null) return;
         switch (b.getPositionState(p)) {
@@ -174,6 +202,9 @@ class AreaScorer extends Scorer {
         }
     }
 
+    /**
+     * Creates a {@link ScoringState[][]} filled with UNCHECKED
+     */
     private ScoringState[][] createEmptyState() {
         ScoringState[][] states = new ScoringState[Constants.BOARD_SIZE][Constants.BOARD_SIZE];
         for (ScoringState[] row : states) {
