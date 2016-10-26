@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 public class MCTS {
 
     private static final Logger logger = LogManager.getFormatterLogger(MCTS.class);
-    private static final int COMPUTE_THRESHOLD = 3;
+    private static final int COMPUTE_THRESHOLD = 30;
 
     private final TreePolicy treePolicy;
     private final DefaultPolicy defaultPolicy;
