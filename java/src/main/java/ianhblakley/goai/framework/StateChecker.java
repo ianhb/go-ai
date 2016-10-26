@@ -10,6 +10,13 @@ import ianhblakley.goai.Constants;
  */
 public class StateChecker {
 
+    /**
+     * Checks if making move results in the piece commiting suicide
+     *
+     * @param move  potential move
+     * @param state current board state
+     * @return if the move results in suicide
+     */
     private static boolean checkSuicide(Move move, Board state) {
         if (state.getLiberties(move.getPosition()).size() > 0) {
             return false;
@@ -20,6 +27,14 @@ public class StateChecker {
                 updatedState.getCell(move.getPosition()).getLibertyCount() == 0);
     }
 
+    /**
+     * Checks if making the move will result in KO, or return to a previous gamestate
+     * Only checks last move to avoid immediate return to previous state
+     * @param move potential move
+     * @param state current board state
+     * @param oldState board state before last move was made
+     * @return if the move results in KO
+     */
     private static boolean checkKO(Move move, Board state, PositionState[][] oldState) {
         if (oldState == null) {
             return false;
@@ -36,6 +51,14 @@ public class StateChecker {
         return true;
     }
 
+    /**
+     * Checks if the move is a legal move
+     * Currently checks for suicide and KO
+     * @param move potential move
+     * @param state current board state
+     * @param oldState board state before the last move was made
+     * @return if the move is legal
+     */
     public static boolean isLegalMove(Move move, Board state, PositionState[][] oldState) {
         return !checkKO(move, state, oldState) && !checkSuicide(move, state);
     }

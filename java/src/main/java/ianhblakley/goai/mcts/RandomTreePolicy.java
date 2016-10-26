@@ -15,6 +15,13 @@ class RandomTreePolicy implements TreePolicy {
 
     private static final Logger logger = LogManager.getFormatterLogger(RandomTreePolicy.class);
 
+    /**
+     * Returns a random, unvisited child of the first node seen without being expanded.
+     * Nodes are visited level by level and nodes within a level are visited at random
+     *
+     * @param root root node to select from
+     * @return a randomly found unvisited node
+     */
     @Override
     public Node select(Node root) {
         Queue<Node> searchQueue = new LinkedList<>();
@@ -31,7 +38,12 @@ class RandomTreePolicy implements TreePolicy {
         return deque;
     }
 
-
+    /**
+     * Returns the immediate child node with the highest winning percentage
+     * @param n parent node
+     * @param cP expansion factor for UCT (unused in implementation)
+     * @return best child node
+     */
     @Override
     public Node getBestMove(Node n, double cP) {
         double bestProb = -1;

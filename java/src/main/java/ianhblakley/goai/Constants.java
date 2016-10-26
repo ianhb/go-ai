@@ -7,5 +7,8 @@ package ianhblakley.goai;
  */
 public class Constants {
 
+    /**
+     * Size of each side of the board
+     */
     public static final int BOARD_SIZE = 9;
 }

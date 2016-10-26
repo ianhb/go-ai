@@ -15,6 +15,7 @@ import java.util.List;
 /**
  * Holds and plays a game
  * Keeps track of the moves played and the ending board
+ * Implements {@link Externalizable} so bots don't have to be serializable
  * <p>
  * Created by ian on 10/12/16.
  */
@@ -22,13 +23,23 @@ public class Game implements Externalizable {
 
     private static final Logger logger = LogManager.getFormatterLogger(Game.class);
 
+    // Current board
     private Board board;
     private Bot black;
     private Bot white;
+    // Number of elapsed turns
     private int turns;
+    // All moves made thus far
     private List<Move> moves;
+    // Winner of the game, initially null
     private PositionState winner;
 
+    /**
+     * Creates a new game with the black and white bots
+     *
+     * @param black black bot
+     * @param white white bot
+     */
     public Game(Bot black, Bot white) {
         this.black = black;
         this.white = white;
@@ -39,6 +50,12 @@ public class Game implements Externalizable {
         winner = null;
     }
 
+    /**
+     * Creates a game from a given board state b and white and black bots
+     * @param b board state to resume from
+     * @param black black bot
+     * @param white white bot
+     */
     public Game(Board b, Bot black, Bot white) {
         this.black = black;
         this.white = white;
@@ -47,7 +64,12 @@ public class Game implements Externalizable {
         winner = null;
     }
 
+    /**
+     * Plays the game, querying bots for moves and continuing until both players pass
+     * @param verbose whether or not to write log messages
+     */
     public void play(boolean verbose) {
+        // Used because deserialized games won't have bots
         if (black == null || white == null) {
             logger.error("Can't play games from logs");
             return;
@@ -55,6 +77,7 @@ public class Game implements Externalizable {
         Move blackMove;
         Move whiteMove;
         do {
+            // Blacks Move
             turns++;
             blackMove = black.getPlay(board, turns);
             if (blackMove.isNotPass()) {
@@ -71,8 +94,8 @@ public class Game implements Externalizable {
                 }
             }
 
+            // Whites Move
             turns++;
-
             whiteMove = white.getPlay(board, turns);
             if (whiteMove.isNotPass()) {
                 if (verbose) {
@@ -85,8 +108,10 @@ public class Game implements Externalizable {
             } else {
                 if (verbose) logger.info("White passed on turn %s", turns);
             }
+            // Continue until both players pass
         } while (!(!blackMove.isNotPass() && !whiteMove.isNotPass()));
         Scorer scorer = Scorer.getDefaultScorer();
+        // Scores the game
         this.winner = scorer.winner(board, verbose);
         if (verbose) logger.info("Game won by %s with score %s - %s", winner,
                 scorer.getBlackScore(), scorer.getWhiteScore());
@@ -102,6 +127,11 @@ public class Game implements Externalizable {
         logger.info("Final Board" + board.toString());
     }
 
+    /**
+     * Writes the game to out stream without having to save the bot objects, only their class names
+     * @param out stream to write to
+     * @throws IOException thrown if unable to write to out
+     */
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(board);
@@ -111,6 +141,13 @@ public class Game implements Externalizable {
         out.writeObject(black.getClass());
     }
 
+    /**
+     * Reads a game from the input stream
+     * Read games never have bot objects and can't be played
+     * @param in input stream to read from
+     * @throws IOException thrown if unable to read from in
+     * @throws ClassNotFoundException thrown if unable to instantiate {@link Game}
+     */
     @SuppressWarnings("unchecked")
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {

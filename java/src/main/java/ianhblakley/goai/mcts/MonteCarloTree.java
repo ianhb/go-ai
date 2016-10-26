@@ -18,12 +18,18 @@ class MonteCarloTree {
         root = new Node(null, board.deepCopy(), null, color);
     }
 
+    /**
+     * Updates the tree by recording a win or loss for the bot owning the tree
+     * Moves up the tree from expansionNode to root
+     *
+     * @param expansionNode leaf node MCTS
+     * @param won           whether the bot won or lost the simulation
+     */
     void backTrace(Node expansionNode, boolean won) {
         while (expansionNode != null) {
             if (won) { expansionNode.logWin(); }
             else { expansionNode.logLoss(); }
             expansionNode = expansionNode.getParent();
-            won = !won;
         }
     }
 
@@ -44,6 +50,11 @@ class MonteCarloTree {
         return "MonteCarloTree{" + "\n" + builder.toString() + "}";
     }
 
+    /**
+     * Creates a list of levels of the tree
+     * Each sublist represents a layer of nodes in the tree
+     * @return list of layers of nodes
+     */
     private List<List<Node>> traverseLevels() {
         if (root == null) {
             return Collections.emptyList();
@@ -63,6 +74,10 @@ class MonteCarloTree {
         return levels;
     }
 
+    /**
+     * Returns the total number of nodes in the tree
+     * @return # of nodes in tree
+     */
     int getTreeSize() {
         int i = 0;
         for (List<Node> level : traverseLevels()) {

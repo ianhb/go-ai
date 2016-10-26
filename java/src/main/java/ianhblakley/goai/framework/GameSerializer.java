@@ -12,6 +12,13 @@ import java.util.List;
 @SuppressWarnings("ALL")
 class GameSerializer {
 
+    /**
+     * Writes the game to a file
+     *
+     * @param game     game to write
+     * @param filename name of file to write to
+     * @throws IOException thrown when unable to write
+     */
     public void serialize(Game game, String filename) throws IOException {
         FileOutputStream fos = new FileOutputStream(filename);
         BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -23,6 +30,12 @@ class GameSerializer {
         fos.close();
     }
 
+    /**
+     * Writes all of the games in games to a single file
+     * @param games games to write
+     * @param filename name of file to write to
+     * @throws IOException thrown when unable to write
+     */
     public void serialize(List<Game> games, String filename) throws IOException {
         FileOutputStream fos = new FileOutputStream(filename);
         BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -36,6 +49,13 @@ class GameSerializer {
         fos.close();
     }
 
+    /**
+     * Reads all of the games from filename and returns a list of the games read
+     * @param filename name of file to read from
+     * @return list of games in filename
+     * @throws IOException thrown when unable to read
+     * @throws ClassNotFoundException thrown when read contents aren't {@link Game}
+     */
     public List<Game> deserialize(String filename) throws IOException, ClassNotFoundException {
         FileInputStream fis = new FileInputStream(filename);
         BufferedInputStream bis = new BufferedInputStream(fis);
@@ -54,5 +74,8 @@ class GameSerializer {
         return games;
     }
 
+    /**
+     * Written to end of each file to allow readback
+     */
     private static class EndOfFile implements Serializable {}
 }

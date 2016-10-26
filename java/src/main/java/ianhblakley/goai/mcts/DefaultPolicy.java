@@ -9,5 +9,12 @@ import ianhblakley.goai.framework.PositionState;
  */
 interface DefaultPolicy {
 
+    /**
+     * Simulates a game based on provided node and returns the winner of the simulation.
+     * The game is stated at the state of node
+     *
+     * @param node start node
+     * @return winning color
+     */
     PositionState simulate(Node node);
 }
