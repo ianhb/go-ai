@@ -23,6 +23,7 @@ public class Game implements Externalizable {
 
     private static final Logger logger = LogManager.getFormatterLogger(Game.class);
 
+    private final Scorer scorer;
     // Current board
     private Board board;
     private Bot black;
@@ -48,6 +49,7 @@ public class Game implements Externalizable {
         moves = new ArrayList<>();
         logger.info("Initialized Game");
         winner = null;
+        scorer = Scorer.getDefaultScorer();
     }
 
     /**
@@ -62,6 +64,7 @@ public class Game implements Externalizable {
         this.board = b;
         turns = b.getTurnCount();
         winner = null;
+        scorer = Scorer.getDefaultScorer();
     }
 
     /**
@@ -76,31 +79,27 @@ public class Game implements Externalizable {
         }
         Move blackMove;
         Move whiteMove;
+        int blackCaptured = 0;
+        int whiteCaptured = 0;
         do {
             // Blacks Move
             turns++;
             blackMove = black.getPlay(board, turns);
             if (blackMove.isNotPass()) {
-                if (verbose) {
-                    logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
-                }
+                if (verbose) logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
                 board.placeMove(blackMove);
                 if (moves != null) {
                     moves.add(blackMove);
                 }
             } else {
-                if (verbose) {
-                    logger.info("Black passed on turn %s", turns);
-                }
+                if (verbose) logger.info("Black passed on turn %s", turns);
             }
 
             // Whites Move
             turns++;
             whiteMove = white.getPlay(board, turns);
             if (whiteMove.isNotPass()) {
-                if (verbose) {
-                    logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
-                }
+                if (verbose) logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
                 board.placeMove(whiteMove);
                 if (moves != null) {
                     moves.add(whiteMove);
@@ -108,14 +107,20 @@ public class Game implements Externalizable {
             } else {
                 if (verbose) logger.info("White passed on turn %s", turns);
             }
+            if (verbose) {
+                logger.trace("Game Board:\n %s", board);
+                if (board.getBlackCaptured() > blackCaptured) {
+                    logger.trace("Blacks Captured: %s", board.getBlackCaptured() - blackCaptured);
+                    blackCaptured = board.getBlackCaptured();
+                }
+                if (board.getWhiteCaptured() > whiteCaptured) {
+                    logger.trace("Whites Captured: %s", board.getWhiteCaptured() - whiteCaptured);
+                    whiteCaptured = board.getWhiteCaptured();
+                }
+            }
             // Continue until both players pass
-        } while (!(!blackMove.isNotPass() && !whiteMove.isNotPass()));
-        Scorer scorer = Scorer.getDefaultScorer();
-        // Scores the game
+        } while (blackMove.isNotPass() || whiteMove.isNotPass());
         this.winner = scorer.winner(board, verbose);
-        if (verbose) logger.info("Game won by %s with score %s - %s", winner,
-                scorer.getBlackScore(), scorer.getWhiteScore());
-
     }
 
     public PositionState getWinner() {
@@ -124,6 +129,8 @@ public class Game implements Externalizable {
 
     public void printStats() {
         logger.info("Moves %s", turns);
+        logger.info("Game won by %s with score %s - %s", winner,
+                scorer.getBlackScore(), scorer.getWhiteScore());
         logger.info("Final Board" + board.toString());
     }
 

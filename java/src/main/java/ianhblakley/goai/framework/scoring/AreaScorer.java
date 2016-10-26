@@ -37,6 +37,11 @@ class AreaScorer extends Scorer {
         }
     }
 
+    /**
+     * Finds the total area controlled by each player on the board and stores them under blackScore and whiteScore
+     *
+     * @param board the board state to score
+     */
     private void getArea(Board board) {
         states = createEmptyState();
         for (int i = 0; i < Constants.BOARD_SIZE; i++) {

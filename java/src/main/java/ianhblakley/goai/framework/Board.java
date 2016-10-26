@@ -296,6 +296,7 @@ public class Board implements Serializable {
         }
         string.append("   ");
         string.append(new String(new char[Constants.BOARD_SIZE * 3]).replace('\0', '_'));
+        string.append('\n');
         return string.toString();
     }
 
