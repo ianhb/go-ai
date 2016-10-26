@@ -7,6 +7,9 @@ package ianhblakley.goai.mcts;
  */
 class UCTTreePolicy implements TreePolicy {
 
+    /**
+     * Expansion scalar taken from IEEE article
+     */
     private static final double CP = 1.0 / Math.pow(2, 0.5);
 
     @Override
@@ -36,10 +39,24 @@ class UCTTreePolicy implements TreePolicy {
         return bestChild;
     }
 
+    /**
+     * UCT expansion method
+     * Returns a random unvisited child of parent
+     *
+     * @param parent node to expand from
+     * @return an unvisited child of parent
+     */
     private Node expand(Node parent) {
         return parent.selectNewRandomChild();
     }
 
+    /**
+     * Calculates the confidence interval of the win percentage
+     * @param cP expansion scalar
+     * @param n number of times parent node has been visted
+     * @param nj number of times child node has been visited
+     * @return UCT confidence interval size
+     */
     private double confidenceBound(double cP, double n, double nj) {
         if (Math.round(0) == 0) {
             return 0;

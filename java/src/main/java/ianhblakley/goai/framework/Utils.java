@@ -8,6 +8,13 @@ import java.util.Arrays;
  * Created by ian on 10/12/16.
  */
 public class Utils {
+
+    /**
+     * Returns a deep copy of the gameboard matrix
+     *
+     * @param original original version of the board
+     * @return new copy of the board
+     */
     static PositionState[][] deepCopyBoard(PositionState[][] original) {
         if (original == null) {
             return null;
@@ -22,6 +29,11 @@ public class Utils {
         return result;
     }
 
+    /**
+     * Returns a deep copy of the cell matrix
+     * @param original original cell matrix
+     * @return new copy of the cells
+     */
     static Board.Cell[][] deepCopyCells(Board.Cell[][] original) {
         if (original == null) {
             return null;
@@ -36,6 +48,12 @@ public class Utils {
         return result;
     }
 
+    /**
+     * Returns the opposite color of color
+     * Throws {@link AssertionError} if color is {@link PositionState#EMPTY}
+     * @param color color to invert
+     * @return opposite of color
+     */
     public static PositionState getOppositeColor(PositionState color) {
         assert !color.equals(PositionState.EMPTY);
         if (color.equals(PositionState.BLACK)) {

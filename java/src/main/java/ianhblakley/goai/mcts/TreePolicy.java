@@ -8,12 +8,20 @@ package ianhblakley.goai.mcts;
 interface TreePolicy {
 
     /**
-     * Selects a Node from a given tree, board state and player color
+     * Selects a Node from a given node for MCTS
+     * Returned node is a newly expanded node based on the expansion and selection implementation
      *
      * @param root root node to select from
-     * @return best state available
+     * @return new node to simulate from
      */
     Node select(Node root);
 
+    /**
+     * Gets the best immediate child of node n
+     *
+     * @param n  parent node
+     * @param cP expansion factor for UCT
+     * @return best child node of n
+     */
     Node getBestMove(Node n, double cP);
 }

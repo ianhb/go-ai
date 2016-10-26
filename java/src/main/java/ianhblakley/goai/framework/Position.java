@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /**
  * Corresponds to a position on the board
+ * Contains a row and column, which correspond to the
+ * first and second indices of the {@link Board#board} or {@link Board#cells}
  * <p>
  * Created by ian on 10/12/16.
  */
@@ -16,6 +18,12 @@ public class Position implements Serializable {
         this.column = column;
     }
 
+    /**
+     * Returns the east neighbor of this position if it exists
+     * Returns null if the node is on the east edge
+     *
+     * @return east neighbor if it exists
+     */
     public Position getEast() {
         if (column > 0) {
             return new Position(row, column-1);
@@ -23,6 +31,11 @@ public class Position implements Serializable {
         return null;
     }
 
+    /**
+     * Returns the west neighbor of this position if it exists
+     * Returns null if the node is on the west edge
+     * @return west neighbor if it exists
+     */
     public Position getWest() {
         if (column < ianhblakley.goai.Constants.BOARD_SIZE - 1) {
             return new Position(row, column+1);
@@ -30,6 +43,11 @@ public class Position implements Serializable {
         return null;
     }
 
+    /**
+     * Returns the north neighbor of this position if it exists
+     * Returns null if the node is on the north edge
+     * @return north neighbor if it exists
+     */
     public Position getNorth() {
         if (row > 0) {
             return new Position(row-1, column);
@@ -37,6 +55,11 @@ public class Position implements Serializable {
         return null;
     }
 
+    /**
+     * Returns the south neighbor of this position if it exists
+     * Returns null if the node is on the south edge
+     * @return south neighbor if it exists
+     */
     public Position getSouth() {
         if (row < ianhblakley.goai.Constants.BOARD_SIZE - 1) {
             return new Position(row+1, column);
@@ -57,6 +80,9 @@ public class Position implements Serializable {
         return "(" + row + ", " + column + ")";
     }
 
+    /**
+     * Equality of nodes is equal to the equality of the row and column values
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

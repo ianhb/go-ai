@@ -16,15 +16,26 @@ import java.util.stream.Collectors;
  */
 public class Board implements Serializable {
 
+    // Current state of each position of the board
     private PositionState[][] board;
+    // Cell that each position is associated with
+    // Can either be a Cell or null if position is empty
     private Cell[][] cells;
+    // Set of all current cells on the board
     private Set<Cell> cellSet;
+    // Number of black pieces on board
     private int blacks;
+    // Number of white pieces on board
     private int whites;
+    // Number of black pieces captured by white
     private int blackCaptured;
+    // Number of white pieces caputred by black
     private int whiteCaptured;
+    // Set of all legal moves makable by black
     private Set<Position> blackMoves;
+    // Set of all legal moves makable by white
     private Set<Position> whiteMoves;
+    // Copy of the previous board state
     private Board previousState;
 
     public Board() {
@@ -44,6 +55,11 @@ public class Board implements Serializable {
         calcLegalMoves();
     }
 
+    /**
+     * Set of all open positions on the board
+     *
+     * @return current open positions
+     */
     public Set<Position> getAvailableSpaces() {
         Set<Position> available = new HashSet<>();
         for (int i = 0; i < Constants.BOARD_SIZE; i++) {
@@ -56,6 +72,11 @@ public class Board implements Serializable {
         return available;
     }
 
+    /**
+     * Places a piece of color color at position position
+     * @param color color of piece
+     * @param position position of piece
+     */
     private void placePiece(PositionState color, Position position) {
         assert !color.equals(PositionState.EMPTY);
         assert getPositionState(position).equals(PositionState.EMPTY);
@@ -65,14 +86,31 @@ public class Board implements Serializable {
         mergeCells(position);
     }
 
+    /**
+     * Returns the current state of the board at position position
+     * @param position query position
+     * @return state of board at position
+     */
     public PositionState getPositionState(Position position) {
         return board[position.row][position.column];
     }
 
+    /**
+     * Returns the current state of the board at position (row, column)
+     * @param row row of position
+     * @param column column of position
+     * @return state of baord at position
+     */
     public PositionState getPositionState(int row, int column) {
         return getPositionState(new Position(row, column));
     }
 
+    /**
+     * Gets the {@link Cell} object at position position
+     * Returns null if no cell is at the position
+     * @param position query position
+     * @return cell object at position or null
+     */
     Cell getCell(Position position) {
         return cells[position.row][position.column];
     }
@@ -84,10 +122,10 @@ public class Board implements Serializable {
     }
 
     public void placeMove(Move move) {
-        placePiece(move.getColor(), move.getPosition());
-        checkCapture(move.getColor());
         previousState = deepCopy();
         previousState.previousState = null;
+        placePiece(move.getColor(), move.getPosition());
+        checkCapture(move.getColor());
     }
 
     void placeMoveLight(Move move) {

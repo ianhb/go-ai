@@ -24,11 +24,14 @@ public class Move implements Serializable {
         this(position, color, 0);
     }
 
+    /**
+     * Move representing a pass
+     */
     public Move() {
         pass = true;
     }
 
-    public Position getPosition() {
+    Position getPosition() {
         return position;
     }
 

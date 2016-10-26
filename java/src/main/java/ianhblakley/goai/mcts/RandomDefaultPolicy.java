@@ -12,16 +12,17 @@ import ianhblakley.goai.framework.PositionState;
  */
 class RandomDefaultPolicy implements DefaultPolicy {
 
-    private final RandomBot black;
-    private final RandomBot white;
-
-    RandomDefaultPolicy() {
-        black = new RandomBot(PositionState.BLACK);
-        white = new RandomBot(PositionState.WHITE);
-    }
-
+    /**
+     * Simulates a game using two {@link RandomBot} instances and returns the winning color
+     * Simulation is started at the board state of node
+     *
+     * @param node start node
+     * @return winning color
+     */
     @Override
     public PositionState simulate(Node node) {
+        RandomBot black = new RandomBot(PositionState.BLACK);
+        RandomBot white = new RandomBot(PositionState.WHITE);
         Board currentBoard = node.getState();
         Game simulation = new Game(currentBoard, black, white);
         simulation.play(false);

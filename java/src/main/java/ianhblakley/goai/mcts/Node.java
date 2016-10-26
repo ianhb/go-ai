@@ -46,21 +46,38 @@ class Node {
         return children;
     }
 
+    /**
+     * Records a win found by simulation of this or child node
+     */
     void logWin() {
         wins++;
         plays++;
     }
 
+    /**
+     * Records a loss found by simulation of this or child node
+     */
     void logLoss() {
         wins--;
         plays++;
     }
 
+    /**
+     * Returns a node that represents a random, unvisited child.
+     * Found by randomly selecting from the {@link #getPossibleChildren()}
+     *
+     * @return a random, unvisited node
+     */
     Node selectNewRandomChild() {
         Position randomMove = randomSelect(getPossibleChildren());
         return addChild(randomMove);
     }
 
+    /**
+     * Randomly selects a move from moves
+     * @param moves set of possible moves
+     * @return random move
+     */
     private Position randomSelect(Set<Position> moves) {
         int size = moves.size();
         int randomInt = random.nextInt(size);
@@ -78,10 +95,19 @@ class Node {
         return parent;
     }
 
+    /**
+     * Returns set of all possible moves that haven't been visited yet
+     * Once a child node is created, it is removed from this
+     * @return set of all possible, unmade moves
+     */
     private Set<Position> getPossibleChildren() {
         return possibleChildren;
     }
 
+    /**
+     * Returns a copy of the gameboard
+     * @return copy of gameboard
+     */
     Board getState() {
         return state.deepCopy();
     }
@@ -94,6 +120,13 @@ class Node {
         return !terminalState;
     }
 
+    /**
+     * Creates a child node that represents the move made by position.
+     * position is removed from {@link #getPossibleChildren()} and the child is added
+     * to {@link #getChildren()}
+     * @param position move to create node for
+     * @return node representing position made from current state
+     */
     private Node addChild(Position position) {
         assert possibleChildren.size() > 0;
         assert possibleChildren.contains(position);
