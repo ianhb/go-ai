@@ -38,6 +38,10 @@ abstract class AbstractBot implements Bot {
     @Override
     public abstract Move getPlay(Board board, int turnNumber);
 
+    /**
+     * Logs that a stone has been played by the player
+     * Each player only has enough stones to cover half the board
+     */
     void playStone() {
         stones--;
     }

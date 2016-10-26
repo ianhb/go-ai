@@ -115,12 +115,22 @@ public class Board implements Serializable {
         return cells[position.row][position.column];
     }
 
+    /**
+     * Removes the piece at Position position
+     * Throws {@link AssertionError} if the position is {@link PositionState#EMPTY}
+     *
+     * @param position position to remove piece from
+     */
     private void removePosition(Position position) {
         assert !getPositionState(position).equals(PositionState.EMPTY);
         board[position.row][position.column] = PositionState.EMPTY;
         cells[position.row][position.column] = null;
     }
 
+    /**
+     * Places move {@link Move} on the board
+     * @param move move to play
+     */
     public void placeMove(Move move) {
         previousState = deepCopy();
         previousState.previousState = null;
@@ -128,11 +138,21 @@ public class Board implements Serializable {
         checkCapture(move.getColor());
     }
 
+    /**
+     * Places a move but doesn't record the previous state
+     * Used by {@link StateChecker} to check prospective moves
+     * @param move potential move
+     */
     void placeMoveLight(Move move) {
         placePiece(move.getColor(), move.getPosition());
         checkCapture(move.getColor());
     }
 
+    /**
+     * Merges any cells that are adjacent to Position position and are the same color
+     * Checks all four sides and merges any cells, updating {@link #cells} and merging {@link #cellSet}
+     * @param position position of newly played piece
+     */
     private void mergeCells(Position position) {
         Cell cell = new Cell(position);
         cellSet.add(cell);
@@ -144,12 +164,21 @@ public class Board implements Serializable {
         applyToSide(position, merge);
     }
 
+    /**
+     * Returns whether the current board cannot have news played on it
+     * @return if the game can't go on
+     */
     public boolean isEndGame() {
         return previousState != null &&
                 (getTurnCount() == Math.pow(Constants.BOARD_SIZE, 2) ||
                         legalMoves(PositionState.BLACK).size() <= 0 && legalMoves(PositionState.WHITE).size() <= 0);
     }
 
+    /**
+     * Applies {@link FourSideOperation#act(Position, Position)} to each of the neighbors of center
+     * @param center center position
+     * @param operation operation to apply
+     */
     private void applyToSide(Position center, FourSideOperation operation) {
         Position left;
         Position right;
@@ -173,6 +202,12 @@ public class Board implements Serializable {
         }
     }
 
+    /**
+     * Checks if any cells are captured after a move is played
+     * Removes any captured pieces and updates counters
+     * Deletes cells that have been captured
+     * @param playedColor color of last played piece
+     */
     private void checkCapture(PositionState playedColor) {
         Set<Cell> deletedCells = new HashSet<>();
         Set<Cell> noLibertyCells = cellSet.stream().filter(cell -> cell.getLibertyCount() == 0).collect(Collectors.toSet());
@@ -199,14 +234,27 @@ public class Board implements Serializable {
         return board;
     }
 
+    /**
+     * Returns a deep copy of the board matrix
+     * @return deep copy of the board matrix
+     */
     private PositionState[][] getBoardCopy() {
         return Utils.deepCopyBoard(board);
     }
 
+    /**
+     * Returns the total number of turns played
+     * @return turns played
+     */
     int getTurnCount() {
         return blackCaptured + blacks + whites + whiteCaptured;
     }
 
+    /**
+     * Returns a deep copy of the board
+     * {@link #board}, {@link #cells} and {@link #cellSet} are deep copied
+     * @return deep copy of this
+     */
     public Board deepCopy() {
         Board board = new Board();
         board.board = Utils.deepCopyBoard(this.board);
@@ -267,6 +315,14 @@ public class Board implements Serializable {
         return whites;
     }
 
+    /**
+     * Returns the number of liberties around the the cell containing the Position p
+     * Liberties are defined as the open spaces around a cell
+     * Cells share liberties
+     * Precondition: Position p has a piece played on it
+     * @param p position get get liberties for
+     * @return number of liberties surrounding the cell
+     */
     Set<Position> getLiberties(Position p) {
         Set<Position> possibleEyes = new HashSet<>();
         FourSideOperation liberties = ((side, center) -> {
@@ -278,11 +334,19 @@ public class Board implements Serializable {
         return possibleEyes;
     }
 
+    /**
+     * Calculates and updates all legal moves
+     */
     private void calcLegalMoves() {
         whiteMoves = legalMoves(PositionState.WHITE);
         blackMoves = legalMoves(PositionState.BLACK);
     }
 
+    /**
+     * Returns the let of positions that could be legally played to by PositionState color
+     * @param color color of potential move
+     * @return all legal moves for color
+     */
     private Set<Position> legalMoves(PositionState color) {
         Set<Position> positions = getAvailableSpaces();
         if (positions.size() == 0) {
@@ -298,6 +362,11 @@ public class Board implements Serializable {
         return legalPositions;
     }
 
+    /**
+     * Returns a copy of the board matrix from before the last move was played
+     * Retusn null if it is the first play of the game
+     * @return copy of previous board matrix or null
+     */
     public PositionState[][] getLastBoard() {
         if (previousState == null) {
             return null;
@@ -305,6 +374,11 @@ public class Board implements Serializable {
         return previousState.getBoardCopy();
     }
 
+    /**
+     * Returns the last calculated {@link #legalMoves(PositionState)} for the given color
+     * @param color color of moves
+     * @return legal moves for color
+     */
     public Set<Position> getLegalMoves(PositionState color) {
         switch (color) {
             case WHITE:
@@ -316,7 +390,9 @@ public class Board implements Serializable {
         }
     }
 
-
+    /**
+     * Equality is based on same type and by equality of game board matrix
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -332,19 +408,33 @@ public class Board implements Serializable {
         return Arrays.deepHashCode(board);
     }
 
+    /**
+     * Interface used to abstract a function on two {@link Position}
+     */
     interface FourSideOperation {
         void act(Position side, Position center);
     }
 
+    /**
+     * Represents a cell on the game board
+     * Holds the positions of its pieces, the number of liberties it has and the color of the cell
+     */
     class Cell implements Serializable {
         final Set<Position> pieces;
         private int libertyCount;
         private PositionState color;
 
+        /**
+         * Creates an empty cell
+         */
         Cell() {
             pieces = new HashSet<>();
         }
 
+        /**
+         * Creates a new cell containing the piece at init
+         * @param init initializing position of the cell
+         */
         Cell(Position init) {
             this();
             pieces.add(init);
@@ -356,6 +446,10 @@ public class Board implements Serializable {
             return color;
         }
 
+        /**
+         * Merges the contents of cell1 with this and deletes cell1
+         * @param cell1 cell to merge and delete
+         */
         void merge(Cell cell1) {
             assert color.equals(cell1.color);
             cellSet.remove(cell1);
@@ -366,6 +460,9 @@ public class Board implements Serializable {
             }
         }
 
+        /**
+         * Deletes a cell from the {@link Board}
+         */
         void delete() {
             pieces.forEach((position) -> {
                 Board.this.removePosition(position);
@@ -379,6 +476,10 @@ public class Board implements Serializable {
             });
         }
 
+        /**
+         * Calculates the liberties of the cell
+         * @return number of liberties
+         */
         int getLibertyCount() {
             Set<Position> possibleEyes = new HashSet<>();
             for (Position p : pieces) {

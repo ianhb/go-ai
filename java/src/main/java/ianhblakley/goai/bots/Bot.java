@@ -11,6 +11,13 @@ import ianhblakley.goai.framework.Move;
  */
 public interface Bot {
 
+    /**
+     * Returns the move the bot deams is best
+     *
+     * @param board      current board
+     * @param turnNumber current turnNumber
+     * @return best move
+     */
     Move getPlay(Board board, int turnNumber);
 
 }
