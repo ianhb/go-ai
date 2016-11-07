@@ -56,7 +56,7 @@ class Game:
 
     def init_board(self):
         board = numpy.zeros(pow(self.board_size, 2), dtype=numpy.int)
-        if 'HA' not in self.game_content:
+        if 'HA[' not in self.game_content:
             return board
         handicap_amount = int(self.game_content[self.game_content.find('HA[') + 3])
         advantage_start_index = self.game_content.find('AB[')
