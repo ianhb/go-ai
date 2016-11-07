@@ -1,5 +1,7 @@
 package ianhblakley.goai.framework;
 
+import ianhblakley.goai.Constants;
+
 import java.util.Arrays;
 
 /**
@@ -34,12 +36,12 @@ public class Utils {
      * @param original original cell matrix
      * @return new copy of the cells
      */
-    static Board.Cell[][] deepCopyCells(Board.Cell[][] original) {
+    static Cell[][] deepCopyCells(Cell[][] original) {
         if (original == null) {
             return null;
         }
 
-        final Board.Cell[][] result = new Board.Cell[original.length][];
+        final Cell[][] result = new Cell[original.length][];
         for (int i = 0; i < original.length; i++) {
             result[i] = Arrays.copyOf(original[i], original[i].length);
             // For Java versions prior to Java 6 use the next:
@@ -61,5 +63,70 @@ public class Utils {
         } else {
             return PositionState.BLACK;
         }
+    }
+
+    /**
+     * Applies {@link FourSideOperation#act(Board, Position, Position)} to each of the neighbors of center
+     *
+     * @param center    center position
+     * @param operation operation to apply
+     */
+    static void applyToSide(Board board, Position center, FourSideOperation operation) {
+        Position left;
+        Position right;
+        Position up;
+        Position down;
+        if (center.getColumn() > 0) {
+            left = new Position(center.getRow(), center.getColumn() - 1);
+            operation.act(board, left, center);
+        }
+        if (center.getColumn() < Constants.BOARD_SIZE - 1) {
+            right = new Position(center.getRow(), center.getColumn() + 1);
+            operation.act(board, right, center);
+        }
+        if (center.getRow() > 0) {
+            up = new Position(center.getRow() - 1, center.getColumn());
+            operation.act(board, up, center);
+        }
+        if (center.getRow() < Constants.BOARD_SIZE - 1) {
+            down = new Position(center.getRow() + 1, center.getColumn());
+            operation.act(board, down, center);
+        }
+    }
+
+    static int applyToSideReturn(Board board, Position center, FourSideFunction function) {
+        Position left;
+        Position right;
+        Position up;
+        Position down;
+        int sum = 0;
+        if (center.getColumn() > 0) {
+            left = new Position(center.getRow(), center.getColumn() - 1);
+            sum += function.act(board, left, center);
+        }
+        if (center.getColumn() < Constants.BOARD_SIZE - 1) {
+            right = new Position(center.getRow(), center.getColumn() + 1);
+            sum += function.act(board, right, center);
+        }
+        if (center.getRow() > 0) {
+            up = new Position(center.getRow() - 1, center.getColumn());
+            sum += function.act(board, up, center);
+        }
+        if (center.getRow() < Constants.BOARD_SIZE - 1) {
+            down = new Position(center.getRow() + 1, center.getColumn());
+            sum += function.act(board, down, center);
+        }
+        return sum;
+    }
+
+    /**
+     * Interface used to abstract a function on two {@link Position}
+     */
+    interface FourSideOperation {
+        void act(Board board, Position side, Position center);
+    }
+
+    interface FourSideFunction {
+        int act(Board board, Position side, Position center);
     }
 }

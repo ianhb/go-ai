@@ -7,7 +7,7 @@ import ianhblakley.goai.framework.PositionState;
  *
  * Created by ian on 10/17/16.
  */
-interface DefaultPolicy {
+interface DefaultPolicy extends Runnable {
 
     /**
      * Simulates a game based on provided node and returns the winner of the simulation.
@@ -17,4 +17,8 @@ interface DefaultPolicy {
      * @return winning color
      */
     PositionState simulate(Node node);
+
+    interface DefaultPolicyFactory {
+        DefaultPolicy getDefaultFactory(Node n, PositionState color);
+    }
 }

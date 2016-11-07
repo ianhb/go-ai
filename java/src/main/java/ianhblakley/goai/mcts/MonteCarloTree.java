@@ -15,22 +15,7 @@ class MonteCarloTree {
     private final Node root;
 
     MonteCarloTree(Board board, PositionState color) {
-        root = new Node(null, board.deepCopy(), null, color);
-    }
-
-    /**
-     * Updates the tree by recording a win or loss for the bot owning the tree
-     * Moves up the tree from expansionNode to root
-     *
-     * @param expansionNode leaf node MCTS
-     * @param won           whether the bot won or lost the simulation
-     */
-    void backTrace(Node expansionNode, boolean won) {
-        while (expansionNode != null) {
-            if (won) { expansionNode.logWin(); }
-            else { expansionNode.logLoss(); }
-            expansionNode = expansionNode.getParent();
-        }
+        root = new Node(null, board, null, color);
     }
 
     Node getRoot() {

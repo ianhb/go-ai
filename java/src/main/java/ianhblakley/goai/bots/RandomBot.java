@@ -29,8 +29,8 @@ public class RandomBot extends AbstractBot {
         List<Position> randomPositions = new ArrayList<>(positions);
         Collections.shuffle(randomPositions);
         for (Position p : randomPositions) {
-            Move m = new Move(p, color, turnNumber);
-            if (StateChecker.isLegalMove(m, board, board.getLastBoard())) {
+            Move m = new Move(p, color);
+            if (StateChecker.isLegalMove(m, board)) {
                 playStone();
                 return m;
             }
