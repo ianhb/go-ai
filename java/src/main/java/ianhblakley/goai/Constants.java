@@ -11,4 +11,9 @@ public class Constants {
      * Size of each side of the board
      */
     public static final int BOARD_SIZE = 9;
+
+    /**
+     * Total number of threads to run
+     */
+    public static final int THREAD_COUNT = 1;
 }

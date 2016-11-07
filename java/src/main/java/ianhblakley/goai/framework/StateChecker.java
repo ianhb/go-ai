@@ -24,7 +24,7 @@ public class StateChecker {
         Board updatedState = state.deepCopy();
         updatedState.placeMoveLight(move);
         return (updatedState.getPositionState(move.getPosition()).equals(PositionState.EMPTY) ||
-                updatedState.getCell(move.getPosition()).getLibertyCount() == 0);
+                updatedState.getCell(move.getPosition()).getLibertyCount(state) == 0);
     }
 
     /**
@@ -66,11 +66,10 @@ public class StateChecker {
      * Currently checks for suicide and KO
      * @param move potential move
      * @param state current board state
-     * @param oldState board state before the last move was made
      * @return if the move is legal
      */
-    public static boolean isLegalMove(Move move, Board state, PositionState[][] oldState) {
-        return !checkKO(move, state, oldState) && !checkSuicide(move, state) && !checkSuicide(move, state) &&
+    public static boolean isLegalMove(Move move, Board state) {
+        return !checkSuicide(move, state) && !checkSuicide(move, state) &&
                 !checkNotEmpty(move, state);
     }
 }

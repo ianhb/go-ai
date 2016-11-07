@@ -1,10 +1,11 @@
 package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.framework.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Holds the state of a game in the MCT
@@ -15,6 +16,7 @@ import java.util.Set;
 class Node {
 
     private static final Random random = new Random(System.currentTimeMillis());
+    private static final Logger logger = LogManager.getFormatterLogger(Node.class);
 
     private final Node parent;
     private final Set<Node> children;
@@ -23,19 +25,22 @@ class Node {
     private final PositionState color;
     private final Board state;
     private final boolean terminalState;
-    private int wins;
-    private int plays;
+    private AtomicInteger wins;
+    private AtomicInteger plays;
 
     Node(Node parent, Board b, Position move, PositionState color) {
         this.parent = parent;
         this.children = new HashSet<>();
-        this.possibleChildren = b.getLegalMoves(color);
         this.color = color;
         this.state = b.deepCopy();
-        this.terminalState = b.isEndGame();
-        wins = 0;
-        plays = 0;
+        wins = new AtomicInteger(0);
+        plays = new AtomicInteger(0);
         this.move = move;
+        if (move != null) {
+            state.placeMove(new Move(move, color));
+        }
+        this.possibleChildren = new HashSet<>(state.getAvailableSpaces());
+        this.terminalState = b.isEndGame();
     }
 
     Position getMove() {
@@ -50,16 +55,16 @@ class Node {
      * Records a win found by simulation of this or child node
      */
     void logWin() {
-        wins++;
-        plays++;
+        wins.incrementAndGet();
+        plays.incrementAndGet();
     }
 
     /**
      * Records a loss found by simulation of this or child node
      */
     void logLoss() {
-        wins--;
-        plays++;
+        wins.decrementAndGet();
+        plays.incrementAndGet();
     }
 
     /**
@@ -79,16 +84,15 @@ class Node {
      * @return random move
      */
     private Position randomSelect(Set<Position> moves) {
-        int size = moves.size();
-        int randomInt = random.nextInt(size);
-        int i = 0;
-        for (Position p : moves) {
-            if (i == randomInt) {
-                return p;
-            }
-            i++;
+        List<Position> openPositions = new ArrayList<>(moves);
+        int randomInt = random.nextInt(openPositions.size());
+        Position randomMove = null;
+        while (randomMove == null || !StateChecker.isLegalMove(new Move(randomMove, color), state)) {
+            randomMove = openPositions.get(randomInt % (openPositions.size()));
+            randomInt++;
         }
-        return null;
+        assert StateChecker.isLegalMove(new Move(randomMove, color), state);
+        return openPositions.get(randomInt % (openPositions.size()));
     }
 
     Node getParent() {
@@ -132,21 +136,20 @@ class Node {
         assert possibleChildren.contains(position);
         possibleChildren.remove(position);
         Board childState = state.deepCopy();
-        childState.placeMove(new Move(position, Utils.getOppositeColor(color)));
         Node child = new Node(this, childState, position, Utils.getOppositeColor(color));
         children.add(child);
         return child;
     }
 
     double getWinProbability() {
-        if (plays == 0) {
+        if (plays.get() == 0) {
             return 0;
         }
-        return (double) wins / (double) plays;
+        return (double) wins.get() / (double) plays.get();
     }
 
     int getPlays() {
-        return plays;
+        return plays.get();
     }
 
     @Override

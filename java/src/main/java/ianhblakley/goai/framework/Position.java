@@ -5,13 +5,13 @@ import java.io.Serializable;
 /**
  * Corresponds to a position on the board
  * Contains a row and column, which correspond to the
- * first and second indices of the {@link Board#board} or {@link Board#cells}
+ * first and second indices of the {@link Board#board} or {@link CellManager#cellMap}
  * <p>
  * Created by ian on 10/12/16.
  */
 public class Position implements Serializable {
-    final int row;
-    final int column;
+    private final int row;
+    private final int column;
 
     public Position(int row, int column) {
         this.row = row;
