@@ -53,7 +53,7 @@ class Game:
         return 0
 
     def init_board(self):
-        board = numpy.zeros(pow(self.board_size, 2), dtype=numpy.uint8)
+        board = numpy.zeros(pow(self.board_size, 2), dtype=numpy.int8)
         if 'HA[' not in self.game_content:
             return board
         handicap_amount = int(self.game_content[self.game_content.find('HA[') + 3])
