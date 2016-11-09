@@ -29,7 +29,7 @@ def read_and_decode(filename_queue):
             'label': tf.FixedLenFeature([], tf.int64)
         }
     )
-    board = tf.decode_raw(features['board'], tf.uint8)
+    board = tf.decode_raw(features['board'], tf.int8)
     board.set_shape([go_game.BOARD_AREA])
     board = tf.cast(board, tf.float32)
     label = tf.cast(features['label'], tf.int32)
