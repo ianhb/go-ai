@@ -16,9 +16,7 @@ def _bytes_feature(value):
 
 
 def _board_feature(board):
-    board_feature = tf.train.Feature()
-    board_feature.int64_list.value.extend(board)
-    return board_feature
+    return _bytes_feature(board.tostring())
 
 
 class Game:
@@ -51,11 +49,11 @@ class Game:
         if self.game_content[index + 3] == 'B':
             return 1
         elif self.game_content[index + 3] == 'W':
-            return -1
+            return 0
         return 0
 
     def init_board(self):
-        board = numpy.zeros(pow(self.board_size, 2), dtype=numpy.int)
+        board = numpy.zeros(pow(self.board_size, 2), dtype=numpy.uint8)
         if 'HA[' not in self.game_content:
             return board
         handicap_amount = int(self.game_content[self.game_content.find('HA[') + 3])
