@@ -3,7 +3,7 @@ import time
 
 import tensorflow as tf
 
-import go_game
+import go_nn
 
 flags = tf.app.flags
 
@@ -12,7 +12,7 @@ flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate')
 flags.DEFINE_integer('num_epochs', 2, 'Number of epochs to run trainer')
 flags.DEFINE_integer('hidden1', 128, 'Number of units in hidden layer 1')
 flags.DEFINE_integer('hidden2', 32, 'Number of units in hidden layer 2')
-flags.DEFINE_integer('batch_size', 100, 'Batch size')
+flags.DEFINE_integer('batch_size', 1000, 'Batch size')
 flags.DEFINE_string('train_dir', 'datagen/data', 'Directory with training data')
 
 TRAIN_FILE = 'fuseki-TRAIN.tfrecords'
@@ -30,7 +30,7 @@ def read_and_decode(filename_queue):
         }
     )
     board = tf.decode_raw(features['board'], tf.int8)
-    board.set_shape([go_game.BOARD_AREA])
+    board.set_shape([go_nn.BOARD_AREA])
     board = tf.cast(board, tf.float32)
     label = tf.cast(features['label'], tf.int32)
     return board, label
@@ -57,10 +57,11 @@ def valid_inputs():
 
 def run_training():
     with tf.Graph().as_default():
-        boards, labels = train_inputs()
-        logits = go_game.inference(boards, FLAGS.hidden1, FLAGS.hidden2)
-        loss = go_game.loss(logits, labels)
-        train_op = go_game.training(loss, FLAGS.learning_rate)
+        t_boards, t_labels = train_inputs()
+        go_neural_net = go_nn.GoNN(FLAGS.hidden1, FLAGS.hidden2)
+        logits = go_neural_net.inference(t_boards)
+        loss = go_neural_net.loss(logits, t_labels)
+        train_op = go_neural_net.training(loss, FLAGS.learning_rate)
         init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
         sess = tf.Session()
         sess.run(init_op)
@@ -68,12 +69,12 @@ def run_training():
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         step = 0
         try:
+            start_time = time.time()
             while not coord.should_stop():
-                start_time = time.time()
                 _, loss_value = sess.run([train_op, loss])
-                duration = time.time() - start_time
-
-                if step % 100 == 0:
+                if step % FLAGS.batch_size == 0:
+                    duration = time.time() - start_time
+                    start_time = time.time()
                     print "Step {0}: loss = {1} ({2} sec)".format(step, loss_value, duration)
                 step += 1
         except tf.errors.OutOfRangeError:
@@ -81,6 +82,11 @@ def run_training():
         finally:
             coord.request_stop()
         coord.join(threads)
+        print "Evaluating"
+        v_boards, v_labels = valid_inputs()
+        correct_prediction = tf.equal(tf.argmax(go_neural_net.inference(v_boards), 1), tf.argmax(v_labels, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        print sess.run(accuracy)
         sess.close()
 
 
