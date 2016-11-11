@@ -55,43 +55,66 @@ def valid_inputs():
     return inputs(False, FLAGS.batch_size, FLAGS.num_epochs)
 
 
-def run_training():
-    with tf.Graph().as_default():
+def run_training(sess):
         t_boards, t_labels = train_inputs()
         go_neural_net = go_nn.GoNN(FLAGS.hidden1, FLAGS.hidden2)
         logits = go_neural_net.inference(t_boards)
         loss = go_neural_net.loss(logits, t_labels)
         train_op = go_neural_net.training(loss, FLAGS.learning_rate)
         init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
-        sess = tf.Session()
+        saver = tf.train.Saver()
         sess.run(init_op)
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-        step = 0
-        try:
-            start_time = time.time()
-            while not coord.should_stop():
-                _, loss_value = sess.run([train_op, loss])
-                if step % FLAGS.batch_size == 0:
-                    duration = time.time() - start_time
-                    start_time = time.time()
-                    print "Step {0}: loss = {1} ({2} sec)".format(step, loss_value, duration)
-                step += 1
-        except tf.errors.OutOfRangeError:
-            print "Done training for {0} epochs, {1} steps".format(FLAGS.num_epochs, step)
-        finally:
-            coord.request_stop()
-        coord.join(threads)
-        print "Evaluating"
-        v_boards, v_labels = valid_inputs()
-        correct_prediction = tf.equal(tf.argmax(go_neural_net.inference(v_boards), 1), tf.argmax(v_labels, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        print sess.run(accuracy)
-        sess.close()
+        if os.path.isfile(os.path.join(FLAGS.train_dir, "model.ckpt")):
+            print "Loading Model"
+            saver.restore(sess, os.path.join(FLAGS.train_dir, "model.ckpt"))
+            print "Model Restored"
+        else:
+            print "Training Model"
+            coord = tf.train.Coordinator()
+            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+            step = 0
+            try:
+                start_time = time.time()
+                while not coord.should_stop():
+                    _, loss_value = sess.run([train_op, loss])
+                    if step % FLAGS.batch_size == 0:
+                        duration = time.time() - start_time
+                        start_time = time.time()
+                        print "Step {0}: loss = {1} ({2} sec)".format(step, loss_value, duration)
+                    step += 1
+            except tf.errors.OutOfRangeError:
+                print "Done training for {0} epochs, {1} steps".format(FLAGS.num_epochs, step)
+            finally:
+                coord.request_stop()
+            coord.join(threads)
+            save_path = saver.save(sess, os.path.join(FLAGS.train_dir, "model.ckpt"))
+            print "Model saved in file {0}".format(save_path)
+
+        return go_neural_net
+
+
+def run_eval(sess, go_neural_net):
+    print "Evaluating"
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+    v_boards, v_labels = valid_inputs()
+    eval_op = go_neural_net.evaluation(go_neural_net.inference(v_boards), v_labels)
+    sess.run(eval_op)
+    print "Accuracy Predictions"
+
+    correct_prediction = tf.equal(tf.argmax(go_neural_net.inference(tf.gather(v_boards, [0, 1, 2, 3, 4, 5])), 1),
+                                  tf.argmax(tf.gather(v_labels, [0, 1, 2, 3, 4, 5]), 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    print sess.run(accuracy)
+    coord.request_stop()
+    coord.join(threads)
 
 
 def main(_):
-    run_training()
+    with tf.Graph().as_default():
+        sess = tf.Session()
+        nn = run_training(sess)
+        run_eval(sess, nn)
 
 
 if __name__ == '__main__':
