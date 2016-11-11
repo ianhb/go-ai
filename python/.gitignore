@@ -1,1 +1,4 @@
 .idea
+datagen/data
+*.pyc
+grpc/goai_pb2.py
