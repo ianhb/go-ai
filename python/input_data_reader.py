@@ -3,20 +3,18 @@ import time
 
 import tensorflow as tf
 
+import constants
 import go_nn
 
 flags = tf.app.flags
 
 FLAGS = flags.FLAGS
-flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate')
-flags.DEFINE_integer('hidden1', 128, 'Number of units in hidden layer 1')
-flags.DEFINE_integer('hidden2', 32, 'Number of units in hidden layer 2')
-flags.DEFINE_integer('batch_size', 1000, 'Batch size')
-flags.DEFINE_string('train_dir', 'datagen/data', 'Directory with training data')
-flags.DEFINE_string('summary_dir', 'summaries', 'Directory with summary logs')
-
-TRAIN_FILE = 'fuseki-TRAIN.tfrecords'
-VALIDATION_FILE = 'fuseki-VALID.tfrecords'
+flags.DEFINE_float('learning_rate', constants.LEARNING_RATE, 'Initial learning rate')
+flags.DEFINE_integer('hidden1', constants.HIDDEN1, 'Number of units in hidden layer 1')
+flags.DEFINE_integer('hidden2', constants.HIDDEN2, 'Number of units in hidden layer 2')
+flags.DEFINE_integer('batch_size', constants.BATCH_SIZE, 'Batch size')
+flags.DEFINE_string('train_dir', constants.DATA_DIR, 'Directory with training data')
+flags.DEFINE_string('summary_dir', constants.SUMMARY_DIR, 'Directory with summary logs')
 
 
 def read_and_decode(filename_queue):
@@ -30,14 +28,14 @@ def read_and_decode(filename_queue):
         }
     )
     board = tf.decode_raw(features['board'], tf.int8)
-    board.set_shape([go_nn.BOARD_AREA])
+    board.set_shape([constants.BOARD_AREA])
     board = tf.cast(board, tf.float32)
     label = tf.cast(features['label'], tf.int32)
     return board, label
 
 
 def inputs(train, batch_size):
-    filename = os.path.join(FLAGS.train_dir, TRAIN_FILE if train else VALIDATION_FILE)
+    filename = os.path.join(FLAGS.train_dir, constants.TRAIN_FILE if train else constants.VALIDATION_FILE)
     with tf.name_scope('input'):
         filename_queue = tf.train.string_input_producer([filename])
         board, label = read_and_decode(filename_queue)
@@ -105,21 +103,21 @@ def run_eval(sess, go_neural_net):
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
     tf.scalar_summary('accuracy', accuracy)
     tf.initialize_all_variables().run()
-    accuracies = []
+    mean_accuracy = 0
     step = 0
     try:
         while not coord.should_stop():
             batch_accuracy = sess.run(accuracy)
-            accuracies.append(batch_accuracy)
-            if step % 100 == 0:
-                print "Step {0} has cumulative accuracy: {1}".format(step, sum(accuracies) / float(len(accuracies)))
+            mean_accuracy += batch_accuracy
             step += 1
+            if step % 100 == 0:
+                print "Step {0} has cumulative accuracy: {1}".format(step, mean_accuracy / float(step))
     except tf.errors.OutOfRangeError:
         print "Out of Range"
     finally:
         coord.request_stop()
     coord.join(threads)
-    print "Final Accuracy: {0}".format(sum(accuracies) / float(len(accuracies)))
+    print "Final Accuracy: {0}".format(mean_accuracy / float(step))
 
 
 def main(_):

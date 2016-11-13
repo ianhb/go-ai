@@ -2,24 +2,21 @@ import math
 
 import tensorflow as tf
 
-NUM_CLASSES = 2
-
-BOARD_SIZE = 19
-BOARD_AREA = BOARD_SIZE * BOARD_SIZE
+import constants
 
 
 def loss(logits, labels):
     labels = tf.to_int64(labels)
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels, name='xentropy')
-    loss = tf.reduce_mean(cross_entropy, name='xentropy_mean')
-    return loss
+    loss_function = tf.reduce_mean(cross_entropy, name='xentropy_mean')
+    return loss_function
 
 
-def training(loss, learning_rate):
-    tf.scalar_summary(loss.op.name, loss)
+def training(loss_function, learning_rate):
+    tf.scalar_summary(loss_function.op.name, loss_function)
     optimizer = tf.train.GradientDescentOptimizer(learning_rate)
     global_step = tf.Variable(0, name="global_step", trainable=False)
-    train_op = optimizer.minimize(loss, global_step=global_step)
+    train_op = optimizer.minimize(loss_function, global_step=global_step)
     return train_op
 
 
@@ -32,7 +29,8 @@ class GoNN:
     def __init__(self, hidden1_units, hidden2_units):
         with tf.name_scope("hidden1"):
             self._h1_weights = tf.Variable(
-                tf.truncated_normal([BOARD_AREA, hidden1_units], stddev=1.0 / math.sqrt(float(BOARD_AREA))),
+                tf.truncated_normal([constants.BOARD_AREA, hidden1_units], stddev=1.0 / math.sqrt(float(
+                    constants.BOARD_AREA))),
                 name="weights")
             self._h1_biases = tf.Variable(tf.zeros([hidden1_units]), name='biases')
             variable_summaries(self._h1_weights, "hidden1/weights")
@@ -46,9 +44,10 @@ class GoNN:
             variable_summaries(self._h2_biases, "hidden2/biases")
         with tf.name_scope("softmax_linear"):
             self._sm_weights = tf.Variable(
-                tf.truncated_normal([hidden2_units, NUM_CLASSES], stddev=1.0 / math.sqrt(float(hidden2_units))),
+                tf.truncated_normal([hidden2_units, constants.NUM_CLASSES], stddev=1.0 /
+                                                                                   math.sqrt(float(hidden2_units))),
                 name="weights")
-            self._sm_biases = tf.Variable(tf.zeros([NUM_CLASSES]), name='biases')
+            self._sm_biases = tf.Variable(tf.zeros([constants.NUM_CLASSES]), name='biases')
             variable_summaries(self._sm_weights, "sm/weights")
             variable_summaries(self._sm_biases, "sm/biases")
 

@@ -2,8 +2,8 @@ syntax = "proto3";
 
 message Board {
 	enum PositionState {
-		BLACK = 0;
-		WHITE = 1;
+		PLAYER = 0;
+		OPPONENT = 1;
 		EMPTY = 2;
 	}
 	repeated PositionState array = 1;
@@ -24,6 +24,7 @@ message MoveRequest {
 message MoveResponse {
 	int32 id = 1;
 	Move best_move = 2;
+	float win_probability = 3;
 }
 
 service NNBot {
