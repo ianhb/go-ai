@@ -9,7 +9,6 @@ flags = tf.app.flags
 
 FLAGS = flags.FLAGS
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate')
-flags.DEFINE_integer('num_epochs', 2, 'Number of epochs to run trainer')
 flags.DEFINE_integer('hidden1', 128, 'Number of units in hidden layer 1')
 flags.DEFINE_integer('hidden2', 32, 'Number of units in hidden layer 2')
 flags.DEFINE_integer('batch_size', 1000, 'Batch size')
@@ -17,7 +16,7 @@ flags.DEFINE_string('train_dir', 'datagen/data', 'Directory with training data')
 flags.DEFINE_string('summary_dir', 'summaries', 'Directory with summary logs')
 
 TRAIN_FILE = 'fuseki-TRAIN.tfrecords'
-VALIDATION_FILE = 'fuseki.VALID.tfrecords'
+VALIDATION_FILE = 'fuseki-VALID.tfrecords'
 
 
 def read_and_decode(filename_queue):
@@ -37,11 +36,10 @@ def read_and_decode(filename_queue):
     return board, label
 
 
-def inputs(train, batch_size, num_epochs):
-    if not num_epochs: num_epochs = None
+def inputs(train, batch_size):
     filename = os.path.join(FLAGS.train_dir, TRAIN_FILE if train else VALIDATION_FILE)
     with tf.name_scope('input'):
-        filename_queue = tf.train.string_input_producer([filename], num_epochs=num_epochs)
+        filename_queue = tf.train.string_input_producer([filename])
         board, label = read_and_decode(filename_queue)
         boards, sparse_labels = tf.train.shuffle_batch([board, label], batch_size=batch_size, num_threads=2,
                                                        capacity=1000 + 3 * batch_size, min_after_dequeue=1000)
@@ -49,11 +47,11 @@ def inputs(train, batch_size, num_epochs):
 
 
 def train_inputs():
-    return inputs(True, FLAGS.batch_size, FLAGS.num_epochs)
+    return inputs(True, FLAGS.batch_size)
 
 
 def valid_inputs():
-    return inputs(False, FLAGS.batch_size, FLAGS.num_epochs)
+    return inputs(False, FLAGS.batch_size)
 
 
 def run_training(sess):
@@ -64,9 +62,6 @@ def run_training(sess):
         train_op = go_nn.training(loss, FLAGS.learning_rate)
         init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
         saver = tf.train.Saver()
-        merged = tf.merge_all_summaries()
-        train_writer = tf.train.SummaryWriter(FLAGS.summary_dir + "/train", sess.graph)
-
         sess.run(init_op)
         if os.path.isfile(os.path.join(FLAGS.train_dir, "model.ckpt")):
             print "Loading Model"
@@ -74,6 +69,8 @@ def run_training(sess):
             print "Model Restored"
         else:
             print "Training Model"
+            merged = tf.merge_all_summaries()
+            train_writer = tf.train.SummaryWriter(FLAGS.summary_dir + "/train", sess.graph)
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
             step = 0
@@ -100,28 +97,34 @@ def run_training(sess):
 
 def run_eval(sess, go_neural_net):
     print "Evaluating"
+    v_board, v_label = valid_inputs()
+    logits = go_neural_net.inference(v_board)
+    correct_prediction = tf.equal(tf.argmax(logits, 1), tf.cast(v_label, tf.int64))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-    v_boards, v_labels = valid_inputs()
-    init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
-    merged = tf.merge_all_summaries()
-    test_writer = tf.train.SummaryWriter(FLAGS.summary_dir + "/test")
-    print "Accuracy Predictions"
-    correct_prediction = tf.equal(tf.argmax(go_neural_net.inference(tf.gather(v_boards, [0, 1, 2, 3, 4, 5])), 1),
-                                  tf.argmax(tf.gather(v_labels, [0, 1, 2, 3, 4, 5]), 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     tf.scalar_summary('accuracy', accuracy)
-    sess.run(init_op)
-    summary, accuracy = sess.run([merged, accuracy])
-    test_writer.add_summary(summary)
-    print accuracy
-    coord.request_stop()
+    tf.initialize_all_variables().run()
+    accuracies = []
+    step = 0
+    try:
+        while not coord.should_stop():
+            batch_accuracy = sess.run(accuracy)
+            accuracies.append(batch_accuracy)
+            if step % 100 == 0:
+                print "Step {0} has cumulative accuracy: {1}".format(step, sum(accuracies) / float(len(accuracies)))
+            step += 1
+    except tf.errors.OutOfRangeError:
+        print "Out of Range"
+    finally:
+        coord.request_stop()
     coord.join(threads)
+    print "Final Accuracy: {0}".format(sum(accuracies) / float(len(accuracies)))
 
 
 def main(_):
     with tf.Graph().as_default():
-        sess = tf.Session()
+        sess = tf.InteractiveSession()
         nn = run_training(sess)
         run_eval(sess, nn)
 
