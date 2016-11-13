@@ -120,6 +120,8 @@ class CellManager {
     }
 
     private void merge(Cell kept, Cell deleted) {
+        assert kept.getPieces().size() > 0;
+        assert deleted.getPieces().size() > 0;
         cellSet.remove(deleted);
         Iterator<Position> setIterator = deleted.getPieces().iterator();
         while (setIterator.hasNext()) {
