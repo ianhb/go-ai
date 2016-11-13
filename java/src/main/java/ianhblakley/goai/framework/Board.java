@@ -5,9 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents a Go board
@@ -75,7 +73,6 @@ public class Board implements Serializable {
         assert !color.equals(PositionState.EMPTY);
         assert getPositionState(position).equals(PositionState.EMPTY);
         changePositionState(position, color);
-        cellManager.mergeCells(this, position);
         availableSpaces.remove(position);
         if (color.equals(PositionState.BLACK)) blacks++;
         else whites++;
@@ -106,8 +103,10 @@ public class Board implements Serializable {
         setPositionState(position, state);
         if (state != PositionState.EMPTY) {
             cellManager.createCell(position, state);
-        } else {
-            logger.debug("Should delete cell");
+            cellManager.mergeCells(this, position);
+        }
+        if (getPositionState(position) != PositionState.EMPTY) {
+            assert cellManager.getCell(position).getColor() == state;
         }
     }
 

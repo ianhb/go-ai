@@ -94,7 +94,7 @@ public class Utils {
         }
     }
 
-    static int applyToSideReturn(Board board, Position center, FourSideFunction function) {
+    static int applyToSideReturn(Board board, Position center, PositionState color, FourSideFunction function) {
         Position left;
         Position right;
         Position up;
@@ -102,19 +102,19 @@ public class Utils {
         int sum = 0;
         if (center.getColumn() > 0) {
             left = new Position(center.getRow(), center.getColumn() - 1);
-            sum += function.act(board, left, center);
+            sum += function.act(board, left, color);
         }
         if (center.getColumn() < Constants.BOARD_SIZE - 1) {
             right = new Position(center.getRow(), center.getColumn() + 1);
-            sum += function.act(board, right, center);
+            sum += function.act(board, right, color);
         }
         if (center.getRow() > 0) {
             up = new Position(center.getRow() - 1, center.getColumn());
-            sum += function.act(board, up, center);
+            sum += function.act(board, up, color);
         }
         if (center.getRow() < Constants.BOARD_SIZE - 1) {
             down = new Position(center.getRow() + 1, center.getColumn());
-            sum += function.act(board, down, center);
+            sum += function.act(board, down, color);
         }
         return sum;
     }
@@ -127,6 +127,6 @@ public class Utils {
     }
 
     interface FourSideFunction {
-        int act(Board board, Position side, Position center);
+        int act(Board board, Position side, PositionState color);
     }
 }
