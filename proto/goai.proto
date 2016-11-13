@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option java_package = "ianhblakley.goai.neuralnetworkconnection";
+
 message Board {
 	enum PositionState {
 		PLAYER = 0;

@@ -16,4 +16,8 @@ public class Constants {
      * Total number of threads to run
      */
     public static final int THREAD_COUNT = 1;
+
+    public static final String SERVER_ADDRESS = "localhost";
+
+    public static final int SERVER_PORT = 50010;
 }

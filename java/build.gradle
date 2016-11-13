@@ -13,6 +13,45 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
+    compile group: 'io.grpc', name: 'grpc-netty', version: '1.0.1'
+    compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.0.1'
+    compile group: 'io.grpc', name: 'grpc-stub', version: '1.0.1'
+}
+
+apply plugin: 'com.google.protobuf'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+    }
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir '../proto/'
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.1.0"
+    }
+    //noinspection GroovyAssignabilityCheck
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.0.1"
+        }
+    }
+    generatedFilesBaseDir = "$projectDir/src/generated"
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
 }
 
 apply plugin: 'application'
