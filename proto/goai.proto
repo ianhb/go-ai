@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+message Board {
+	enum PositionState {
+		PLAYER = 0;
+		OPPONENT = 1;
+		EMPTY = 2;
+	}
+	repeated PositionState array = 1;
+}
+
+message Move {
+	int32 row = 1;
+	int32 column = 2;
+}
+
+message MoveRequest {
+	int32 id = 1;
+	Board board = 2;
+	int32 turn_count = 3;
+	repeated Move potential_moves = 4;
+}
+
+message MoveResponse {
+	int32 id = 1;
+	Move best_move = 2;
+	float win_probability = 3;
+}
+
+service NNBot {
+	rpc GetMove (MoveRequest) returns (MoveResponse) {}
+}

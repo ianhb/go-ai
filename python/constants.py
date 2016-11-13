@@ -1,0 +1,17 @@
+NUM_CLASSES = 2
+
+BOARD_SIZE = 19
+BOARD_AREA = BOARD_SIZE * BOARD_SIZE
+
+MODEL_FILE = "datagen/data/model.ckpt"
+TRAIN_FILE = 'fuseki-TRAIN.tfrecords'
+VALIDATION_FILE = 'fuseki-VALID.tfrecords'
+
+LEARNING_RATE = 0.01
+HIDDEN1 = 128
+HIDDEN2 = 32
+BATCH_SIZE = 1000
+DATA_DIR = "datagen/data"
+SUMMARY_DIR = "summaries"
+
+SERVER_PORT = '50051'
