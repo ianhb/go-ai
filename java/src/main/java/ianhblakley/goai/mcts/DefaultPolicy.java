@@ -11,14 +11,13 @@ interface DefaultPolicy extends Runnable {
 
     /**
      * Simulates a game based on provided node and returns the winner of the simulation.
-     * The game is stated at the state of node
+     * The game is stated at the state of the node passed in the constructor
      *
-     * @param node start node
      * @return winning color
      */
-    PositionState simulate(Node node);
+    PositionState simulate();
 
     interface DefaultPolicyFactory {
-        DefaultPolicy getDefaultFactory(Node n, PositionState color);
+        DefaultPolicy getDefaultPolicy(Node n, PositionState color);
     }
 }
