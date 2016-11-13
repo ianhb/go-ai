@@ -22,16 +22,15 @@ class RandomDefaultPolicy implements DefaultPolicy {
 
     /**
      * Simulates a game using two {@link RandomBot} instances and returns the winning color
-     * Simulation is started at the board state of node
+     * Simulation is started at the board state of the node passed in the constructor
      *
-     * @param node start node
      * @return winning color
      */
     @Override
-    public PositionState simulate(Node node) {
+    public PositionState simulate() {
         RandomBot black = new RandomBot(PositionState.BLACK);
         RandomBot white = new RandomBot(PositionState.WHITE);
-        Board currentBoard = node.getState().deepCopy();
+        Board currentBoard = leafNode.getState().deepCopy();
         Game simulation = new Game(currentBoard, black, white);
         simulation.play(false);
         return simulation.getWinner();
@@ -42,7 +41,7 @@ class RandomDefaultPolicy implements DefaultPolicy {
      */
     @Override
     public void run() {
-        PositionState winner = simulate(leafNode);
+        PositionState winner = simulate();
         Node curNode = leafNode;
         boolean won = winner == color;
         while (curNode != null) {
@@ -56,7 +55,7 @@ class RandomDefaultPolicy implements DefaultPolicy {
 
     static class RandomDefaultPolicyFactory implements DefaultPolicyFactory {
         @Override
-        public DefaultPolicy getDefaultFactory(Node n, PositionState color) {
+        public DefaultPolicy getDefaultPolicy(Node n, PositionState color) {
             return new RandomDefaultPolicy(n, color);
         }
     }
