@@ -59,7 +59,7 @@ class CellManager {
     void checkCapture2(Board board, Move move) {
         Utils.FourSideOperation checkCapture = (board1, side, center) -> {
             if (board1.getPositionState(side) == Utils.getOppositeColor(board1.getPositionState(center))) {
-                int libertyCount = getCell(move.getPosition()).getLibertyCount(board1);
+                int libertyCount = getCell(side).getLibertyCount(board1);
                 if (libertyCount == 0) {
                     board1.removeCell(getCell(side));
                     delete(getCell(side));
@@ -153,7 +153,11 @@ class CellManager {
             builder.append(" ").append(p);
         }
         logger.debug("Deleting cell with pieces %s", builder.toString());
-        cell.getPieces().forEach(this::remove);
+        Iterator it = cell.getPieces().iterator();
+        while (it.hasNext()) {
+            it.next();
+            it.remove();
+        }
         cellSet.remove(cell);
     }
 

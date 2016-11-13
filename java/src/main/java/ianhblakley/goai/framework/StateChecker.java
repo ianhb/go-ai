@@ -21,10 +21,13 @@ public class StateChecker {
         if (state.getLiberties(move.getPosition()).size() > 0) {
             return false;
         }
-        Board updatedState = state.deepCopy();
-        updatedState.placeMoveLight(move);
-        return (updatedState.getPositionState(move.getPosition()).equals(PositionState.EMPTY) ||
-                updatedState.getCell(move.getPosition()).getLibertyCount(state) == 0);
+        Utils.FourSideFunction checkSides = (board, side, color) -> {
+            if (board.getPositionState(side) == PositionState.EMPTY) return 1;
+            assert board.getCell(side) != null;
+            if (board.getPositionState(side) == color && board.getCell(side).getLibertyCount(board) > 1) return 1;
+            return 0;
+        };
+        return Utils.applyToSideReturn(state, move.getPosition(), move.getColor(), checkSides) > 0;
     }
 
     /**
