@@ -105,21 +105,21 @@ def run_eval(sess, go_neural_net):
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
     tf.scalar_summary('accuracy', accuracy)
     tf.initialize_all_variables().run()
-    accuracies = []
+    mean_accuracy = 0
     step = 0
     try:
         while not coord.should_stop():
             batch_accuracy = sess.run(accuracy)
-            accuracies.append(batch_accuracy)
-            if step % 100 == 0:
-                print "Step {0} has cumulative accuracy: {1}".format(step, sum(accuracies) / float(len(accuracies)))
+            mean_accuracy += batch_accuracy
             step += 1
+            if step % 100 == 0:
+                print "Step {0} has cumulative accuracy: {1}".format(step, mean_accuracy / float(step))
     except tf.errors.OutOfRangeError:
         print "Out of Range"
     finally:
         coord.request_stop()
     coord.join(threads)
-    print "Final Accuracy: {0}".format(sum(accuracies) / float(len(accuracies)))
+    print "Final Accuracy: {0}".format(mean_accuracy / float(step))
 
 
 def main(_):
