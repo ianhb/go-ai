@@ -72,7 +72,6 @@ public class StateChecker {
      * @return if the move is legal
      */
     public static boolean isLegalMove(Move move, Board state) {
-        return !checkSuicide(move, state) && !checkSuicide(move, state) &&
-                !checkNotEmpty(move, state);
+        return !checkSuicide(move, state) && !checkNotEmpty(move, state);
     }
 }
