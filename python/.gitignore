@@ -1,5 +1,5 @@
 .idea
 datagen/data
 *.pyc
-grpc/goai_pb2.py
+grpc_server/goai_pb2.py
 summaries/*
