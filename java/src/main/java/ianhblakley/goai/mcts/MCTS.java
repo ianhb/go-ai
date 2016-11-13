@@ -19,21 +19,21 @@ public class MCTS {
     private static final int COMPUTE_THRESHOLD = 30;
 
     private final TreePolicy treePolicy;
-    private final DefaultPolicy defaultPolicy;
+    private final DefaultPolicy.DefaultPolicyFactory defaultPolicyFactory;
     private final PositionState color;
 
-    private MCTS(TreePolicy treePolicy, DefaultPolicy defaultPolicy, PositionState color) {
+    private MCTS(TreePolicy treePolicy, DefaultPolicy.DefaultPolicyFactory defaultPolicyFactory, PositionState color) {
         this.treePolicy = treePolicy;
-        this.defaultPolicy = defaultPolicy;
+        this.defaultPolicyFactory = defaultPolicyFactory;
         this.color = color;
     }
 
     public static MCTS randomMCTS(PositionState color) {
-        return new MCTS(new RandomTreePolicy(), new RandomDefaultPolicy(), color);
+        return new MCTS(new RandomTreePolicy(), new RandomDefaultPolicy.RandomDefaultPolicyFactory(), color);
     }
 
     public static MCTS uctMCTS(PositionState color) {
-        return new MCTS(new UCTTreePolicy(), new RandomDefaultPolicy(), color);
+        return new MCTS(new UCTTreePolicy(), new RandomDefaultPolicy.RandomDefaultPolicyFactory(), color);
     }
 
     public Position getMove(Board board) {
@@ -41,7 +41,7 @@ public class MCTS {
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < COMPUTE_THRESHOLD * 1000) {
             Node select = treePolicy.select(tree.getRoot());
-            PositionState winner = defaultPolicy.simulate(select);
+            PositionState winner = defaultPolicyFactory.getDefaultPolicy(select, color).simulate();
             tree.backTrace(select, winner == color);
         }
         logger.debug("Tree Size: %s", tree.getTreeSize());

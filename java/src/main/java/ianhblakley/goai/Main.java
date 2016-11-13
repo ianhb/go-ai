@@ -19,6 +19,7 @@ class Main {
     private static final Logger logger = LogManager.getFormatterLogger(Main.class);
 
     public static void main(String[] args) throws Exception {
+
         Bot black = new RandomBot(PositionState.BLACK);
         Bot white = new UctBot(PositionState.WHITE);
         Game game = new Game(black, white);
