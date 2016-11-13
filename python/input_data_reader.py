@@ -14,6 +14,7 @@ flags.DEFINE_integer('hidden1', 128, 'Number of units in hidden layer 1')
 flags.DEFINE_integer('hidden2', 32, 'Number of units in hidden layer 2')
 flags.DEFINE_integer('batch_size', 1000, 'Batch size')
 flags.DEFINE_string('train_dir', 'datagen/data', 'Directory with training data')
+flags.DEFINE_string('summary_dir', 'summaries', 'Directory with summary logs')
 
 TRAIN_FILE = 'fuseki-TRAIN.tfrecords'
 VALIDATION_FILE = 'fuseki.VALID.tfrecords'
@@ -59,10 +60,13 @@ def run_training(sess):
         t_boards, t_labels = train_inputs()
         go_neural_net = go_nn.GoNN(FLAGS.hidden1, FLAGS.hidden2)
         logits = go_neural_net.inference(t_boards)
-        loss = go_neural_net.loss(logits, t_labels)
-        train_op = go_neural_net.training(loss, FLAGS.learning_rate)
+        loss = go_nn.loss(logits, t_labels)
+        train_op = go_nn.training(loss, FLAGS.learning_rate)
         init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
         saver = tf.train.Saver()
+        merged = tf.merge_all_summaries()
+        train_writer = tf.train.SummaryWriter(FLAGS.summary_dir + "/train", sess.graph)
+
         sess.run(init_op)
         if os.path.isfile(os.path.join(FLAGS.train_dir, "model.ckpt")):
             print "Loading Model"
@@ -76,7 +80,8 @@ def run_training(sess):
             try:
                 start_time = time.time()
                 while not coord.should_stop():
-                    _, loss_value = sess.run([train_op, loss])
+                    _, loss_value, summary = sess.run([train_op, loss, merged])
+                    train_writer.add_summary(summary, step)
                     if step % FLAGS.batch_size == 0:
                         duration = time.time() - start_time
                         start_time = time.time()
@@ -98,14 +103,18 @@ def run_eval(sess, go_neural_net):
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
     v_boards, v_labels = valid_inputs()
-    eval_op = go_neural_net.evaluation(go_neural_net.inference(v_boards), v_labels)
-    sess.run(eval_op)
+    init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
+    merged = tf.merge_all_summaries()
+    test_writer = tf.train.SummaryWriter(FLAGS.summary_dir + "/test")
     print "Accuracy Predictions"
-
     correct_prediction = tf.equal(tf.argmax(go_neural_net.inference(tf.gather(v_boards, [0, 1, 2, 3, 4, 5])), 1),
                                   tf.argmax(tf.gather(v_labels, [0, 1, 2, 3, 4, 5]), 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    print sess.run(accuracy)
+    tf.scalar_summary('accuracy', accuracy)
+    sess.run(init_op)
+    summary, accuracy = sess.run([merged, accuracy])
+    test_writer.add_summary(summary)
+    print accuracy
     coord.request_stop()
     coord.join(threads)
 
