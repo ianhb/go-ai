@@ -8,13 +8,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Bot that uses {@link NeuralNetworkClient} to find the best move given the current game state
+ *
  * Created by ian on 11/13/16.
  */
 public class NeuralNetBot extends AbstractBot {
 
     private final NeuralNetworkClient client;
 
-    NeuralNetBot(PositionState color) {
+    public NeuralNetBot(PositionState color) {
         super(color);
         client = new NeuralNetworkClient(Constants.SERVER_ADDRESS, Constants.SERVER_PORT);
     }

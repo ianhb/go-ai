@@ -1,9 +1,6 @@
 package ianhblakley.goai;
 
-import ianhblakley.goai.bots.Bot;
-import ianhblakley.goai.bots.RandomBot;
-import ianhblakley.goai.bots.RandomMCTSBot;
-import ianhblakley.goai.bots.UctBot;
+import ianhblakley.goai.bots.*;
 import ianhblakley.goai.framework.Game;
 import ianhblakley.goai.framework.PositionState;
 import org.apache.logging.log4j.LogManager;
@@ -21,7 +18,7 @@ class Main {
     public static void main(String[] args) throws Exception {
 
         Bot black = new RandomBot(PositionState.BLACK);
-        Bot white = new UctBot(PositionState.WHITE);
+        Bot white = new NeuralNetBot(PositionState.WHITE);
         Game game = new Game(black, white);
         game.play(true);
         logger.info("Game: Random vs UCT");

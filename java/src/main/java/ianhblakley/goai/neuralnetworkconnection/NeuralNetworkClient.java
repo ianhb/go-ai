@@ -14,6 +14,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * Client interface to connect to grpc server that evaluates board states and potential moves using
+ * a neural network
+ *
  * Created by ian on 11/13/16.
  */
 public class NeuralNetworkClient {
@@ -28,7 +31,7 @@ public class NeuralNetworkClient {
         this(ManagedChannelBuilder.forAddress(host, port).usePlaintext(true));
     }
 
-    public NeuralNetworkClient(ManagedChannelBuilder<?> channelBuilder) {
+    private NeuralNetworkClient(ManagedChannelBuilder<?> channelBuilder) {
         channel = channelBuilder.build();
         blockingStub = NNBotGrpc.newBlockingStub(channel);
     }
@@ -57,7 +60,7 @@ public class NeuralNetworkClient {
         }
         requestBuilder.setTurnCount(turnCount);
         Goai.MoveRequest request = requestBuilder.build();
-        logger.trace("Sending RPC request to server %s", request);
+        logger.trace("Sending RPC request %s to server", request.getId());
         Goai.MoveResponse response = blockingStub.getMove(request);
         logger.trace("Recieved response with %s", response);
         assert request.getId() == response.getId();

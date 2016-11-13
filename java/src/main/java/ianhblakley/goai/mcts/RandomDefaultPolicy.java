@@ -31,6 +31,7 @@ class RandomDefaultPolicy implements DefaultPolicy {
         RandomBot black = new RandomBot(PositionState.BLACK);
         RandomBot white = new RandomBot(PositionState.WHITE);
         Board currentBoard = leafNode.getState().deepCopy();
+        currentBoard.verifyIntegrity();
         Game simulation = new Game(currentBoard, black, white);
         simulation.play(false);
         return simulation.getWinner();
