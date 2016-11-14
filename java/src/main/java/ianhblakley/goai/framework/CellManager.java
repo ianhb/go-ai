@@ -28,34 +28,6 @@ class CellManager {
         cellSet = new HashSet<>();
     }
 
-    /*    /**
-     * Checks if any cellMap are captured after a move is played
-     * Removes any captured pieces and updates counters
-     * Deletes cellMap that have been captured
-     * @param playedColor color of last played piece
-     *//*
-    void checkCapture(PositionState playedColor) {
-        Set<Cell> deletedCells = new HashSet<>();
-        Set<Cell> noLibertyCells = cellSet.stream().filter(cell -> cell.getLibertyCount() == 0).collect(Collectors.toSet());
-        if (noLibertyCells.size() > 1) {
-            boolean seenBlack = false;
-            boolean seenWhite = false;
-            for (Cell cell : noLibertyCells) {
-                seenBlack = seenBlack || cell.getColor() == PositionState.BLACK;
-                seenWhite = seenWhite || cell.getColor() == PositionState.WHITE;
-            }
-            if (seenBlack && seenWhite) {
-                noLibertyCells.stream().filter(cell -> cell.getColor().equals(Utils.getOppositeColor(playedColor)));
-            }
-        }
-        noLibertyCells.forEach(cell -> {
-            cell.delete();
-            deletedCells.add(cell);
-        });
-
-        cellSet.removeAll(deletedCells);
-    }*/
-
     void checkCapture2(Board board, Move move) {
         Utils.FourSideOperation checkCapture = (board1, side, center) -> {
             if (board1.getPositionState(side) == Utils.getOppositeColor(board1.getPositionState(center))) {
@@ -126,17 +98,19 @@ class CellManager {
         int deletedSize = deleted.getPieces().size();
         int totalSize = keptSize + deletedSize;
         cellSet.remove(deleted);
-        logger.debug("Merging cells %s\n and %s", kept, deleted);
+        logger.trace("Merging cells %s\n and %s", kept, deleted);
         for (Position p : deleted.getPieces()) {
             setCellMapCell(p, kept);
             kept.getPieces().add(p);
             assert kept.getPieces().contains(p);
         }
-        StringBuilder builder = new StringBuilder();
-        for (Position p : kept.getPieces()) {
-            builder.append(" ").append(p);
+        if (logger.isTraceEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            for (Position p : kept.getPieces()) {
+                builder.append(" ").append(p);
+            }
+            logger.trace("Full cell: %s", builder.toString());
         }
-        logger.debug("Full cell: %s", builder.toString());
         assert kept.getPieces().size() > 0;
         assert kept.getPieces().size() == totalSize;
     }
@@ -159,11 +133,13 @@ class CellManager {
 
     private void delete(Cell cell) {
         assert cell.getPieces().size() > 0;
-        StringBuilder builder = new StringBuilder();
-        for (Position p : cell.getPieces()) {
-            builder.append(" ").append(p);
+        if (logger.isTraceEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            for (Position p : cell.getPieces()) {
+                builder.append(" ").append(p);
+            }
+            logger.trace("Deleting cell with pieces %s", builder.toString());
         }
-        logger.debug("Deleting cell with pieces %s", builder.toString());
         Iterator it = cell.getPieces().iterator();
         while (it.hasNext()) {
             Position piece = (Position) it.next();

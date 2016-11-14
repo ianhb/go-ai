@@ -1,11 +1,14 @@
 package ianhblakley.goai.mcts;
 
+import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
 import ianhblakley.goai.framework.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.concurrent.*;
 
 
 /**
@@ -39,13 +42,31 @@ public class MCTS {
 
     public Position getMove(Board board) {
         MonteCarloTree tree = new MonteCarloTree(board, color);
-        long startTime = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - startTime) < COMPUTE_THRESHOLD * 1000) {
-            Node select = treePolicy.select(tree.getRoot());
-            PositionState winner = defaultPolicyFactory.getDefaultPolicy(select, color).simulate();
-            tree.backTrace(select, winner == color);
+        assert Constants.THREAD_COUNT > 0;
+        if (Constants.THREAD_COUNT < 2) {
+            long startTime = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - startTime) < COMPUTE_THRESHOLD * 1000) {
+                Node select = treePolicy.select(tree.getRoot());
+                DefaultPolicy policy = defaultPolicyFactory.getDefaultPolicy(select, color);
+                policy.run();
+            }
+        } else {
+            ThreadPoolExecutor consumers = new ThreadPoolExecutor(Constants.THREAD_COUNT - 1, Constants.THREAD_COUNT - 1,
+                    COMPUTE_THRESHOLD, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+            long startTime = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - startTime) < COMPUTE_THRESHOLD * 1000 && !consumers.isShutdown()) {
+                Node select = treePolicy.select(tree.getRoot());
+                DefaultPolicy policy = defaultPolicyFactory.getDefaultPolicy(select, color);
+                consumers.submit(policy);
+            }
+            consumers.shutdownNow();
+            logger.debug("Tree Size: %s", tree.getTreeSize());
+            try {
+                consumers.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        logger.debug("Tree Size: %s", tree.getTreeSize());
         Node bestMove = treePolicy.getBestMove(tree.getRoot(), 0);
         return bestMove.getMove();
     }

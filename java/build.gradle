@@ -18,5 +18,5 @@ dependencies {
 apply plugin: 'application'
 mainClassName = 'ianhblakley.goai.Main'
 applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml", "-ea",
-                             "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006"
+//                             "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006"
 ]
