@@ -16,4 +16,16 @@ public class Constants {
      * Total number of threads to run
      */
     public static final int THREAD_COUNT = 3;
+
+    /**
+     * Time in seconds that MCTS has to find the best move
+     */
+    public static final int COMPUTE_THRESHOLD = 10;
+
+
+    /**
+     * Whether or not to verify the state of the game between moves
+     */
+    public static final boolean VERIFY_STATES = true;
+
 }

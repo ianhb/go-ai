@@ -44,7 +44,7 @@ public class Game implements Externalizable {
     public Game(Bot black, Bot white) {
         this.black = black;
         this.white = white;
-        this.board = new Board();
+        this.board = new Board(false);
         turns = 0;
         moves = new ArrayList<>();
         logger.info("Initialized Game");

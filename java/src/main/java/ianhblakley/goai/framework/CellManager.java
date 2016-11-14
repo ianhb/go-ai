@@ -28,6 +28,13 @@ class CellManager {
         cellSet = new HashSet<>();
     }
 
+    /**
+     * Checks if playing move to board causes any cells to be captured
+     * Handles the deletion of the cell if it is captured
+     *
+     * @param board current board state
+     * @param move  last move played
+     */
     void checkCapture2(Board board, Move move) {
         Utils.FourSideOperation checkCapture = (board1, side, center) -> {
             if (board1.getPositionState(side) == Utils.getOppositeColor(board1.getPositionState(center))) {
@@ -73,6 +80,11 @@ class CellManager {
         return cellMap[position.getRow()][position.getColumn()];
     }
 
+    /**
+     * Returns a deep copy of the CellManager
+     *
+     * @return deep copy of this
+     */
     CellManager deepCopy() {
         CellManager copy = new CellManager();
         Set<Cell> cellSet2 = new HashSet<>();
@@ -89,6 +101,12 @@ class CellManager {
         return copy;
     }
 
+    /**
+     * Merges two cells together
+     * The nodes in deleted are added to kept and deleted is deleted
+     * @param kept cell to keep
+     * @param deleted cell to delete
+     */
     private void merge(Cell kept, Cell deleted) {
         assert kept.getPieces().size() > 0;
         assert deleted.getPieces().size() > 0;
@@ -115,6 +133,11 @@ class CellManager {
         assert kept.getPieces().size() == totalSize;
     }
 
+    /**
+     * Adds position to cell
+     * @param cell cell to add to
+     * @param position position to add
+     */
     private void add(Cell cell, Position position) {
         cell.add(position);
         setCellMapCell(position, cell);
@@ -123,6 +146,12 @@ class CellManager {
         assert cell.getPieces().contains(position);
     }
 
+    /**
+     * Creates a cell containing one piece at positon with state color
+     * @param position position of piece in cell
+     * @param color color of cell
+     * @return new cell contiaining piece
+     */
     Cell createCell(Position position, PositionState color) {
         Cell cell = new Cell(color);
         cellSet.add(cell);
@@ -131,6 +160,10 @@ class CellManager {
         return cell;
     }
 
+    /**
+     * Deletes a cell from {@link CellManager}
+     * @param cell cell to delete
+     */
     private void delete(Cell cell) {
         assert cell.getPieces().size() > 0;
         if (logger.isTraceEnabled()) {
@@ -149,12 +182,13 @@ class CellManager {
         cellSet.remove(cell);
     }
 
+    /**
+     * Updates the cellMap to point position to cell
+     * @param position position of piece in cell
+     * @param cell cell contiaining position
+     */
     private void setCellMapCell(Position position, Cell cell) {
         cellMap[position.getRow()][position.getColumn()] = cell;
-    }
-
-    void checkCell(Position p) {
-        assert getCell(p) == null;
     }
 
     Set<Cell> getCellSet() {
