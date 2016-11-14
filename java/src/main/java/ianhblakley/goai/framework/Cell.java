@@ -52,10 +52,6 @@ class Cell implements Serializable {
         pieces.add(p);
     }
 
-    void remove(Position p) {
-        pieces.remove(p);
-    }
-
     /**
      * Calculates the liberties of the cell
      *
@@ -70,4 +66,13 @@ class Cell implements Serializable {
         return possibleEyes.size();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Cell\n").append("Color: ").append(color).append("\nPositions: ");
+        for (Position p : getPieces()) {
+            builder.append(p).append(", ");
+        }
+        return builder.toString();
+    }
 }

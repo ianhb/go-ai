@@ -3,6 +3,7 @@ package ianhblakley.goai.mcts;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
+import ianhblakley.goai.framework.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +26,7 @@ public class MCTS {
     private MCTS(TreePolicy treePolicy, DefaultPolicy.DefaultPolicyFactory defaultPolicyFactory, PositionState color) {
         this.treePolicy = treePolicy;
         this.defaultPolicyFactory = defaultPolicyFactory;
-        this.color = color;
+        this.color = Utils.getOppositeColor(color);
     }
 
     public static MCTS randomMCTS(PositionState color) {

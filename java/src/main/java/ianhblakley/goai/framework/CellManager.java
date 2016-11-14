@@ -61,8 +61,9 @@ class CellManager {
             if (board1.getPositionState(side) == Utils.getOppositeColor(board1.getPositionState(center))) {
                 int libertyCount = getCell(side).getLibertyCount(board1);
                 if (libertyCount == 0) {
-                    board1.removeCell(getCell(side));
+                    board1.removeCellFromBoard(getCell(side));
                     delete(getCell(side));
+                    assert getCell(side) == null;
                 }
             }
         };
@@ -79,9 +80,11 @@ class CellManager {
         assert board.getPositionState(position) != PositionState.EMPTY;
         Utils.FourSideOperation merge = (board1, side, center) -> {
             assert board1.getPositionState(center) != PositionState.EMPTY;
-            if (board1.getPositionState(center) == board1.getPositionState(side)) {
+            if (board1.getPositionState(center) == board1.getPositionState(side) &&
+                    !getCell(center).equals(getCell(side))) {
                 assert getCell(side).getColor() == board1.getPositionState(side);
                 merge(getCell(side), getCell(center));
+                assert getCell(side).getPieces().size() > 0;
             }
         };
         Utils.applyToSide(board, position, merge);
@@ -104,7 +107,7 @@ class CellManager {
         Cell[][] cellMap2 = new Cell[Constants.BOARD_SIZE][Constants.BOARD_SIZE];
         for (Cell cell : cellSet) {
             Cell copyCell = new Cell(cell);
-            cellSet2.add(cell);
+            cellSet2.add(copyCell);
             for (Position p : cell.getPieces()) {
                 cellMap2[p.getRow()][p.getColumn()] = copyCell;
             }
@@ -114,40 +117,48 @@ class CellManager {
         return copy;
     }
 
-    private void remove(Position position) {
-        getCell(position).remove(position);
-        setCellMapCell(position, null);
-    }
-
     private void merge(Cell kept, Cell deleted) {
+        assert kept.getPieces().size() > 0;
+        assert deleted.getPieces().size() > 0;
+        assert kept.getColor() == deleted.getColor();
+        assert !kept.equals(deleted);
+        int keptSize = kept.getPieces().size();
+        int deletedSize = deleted.getPieces().size();
+        int totalSize = keptSize + deletedSize;
         cellSet.remove(deleted);
-        Iterator<Position> setIterator = deleted.getPieces().iterator();
-        while (setIterator.hasNext()) {
-            Position p = setIterator.next();
-            setCellMapCell(p, null);
-            add(kept, p);
-            setIterator.remove();
+        logger.debug("Merging cells %s\n and %s", kept, deleted);
+        for (Position p : deleted.getPieces()) {
+            setCellMapCell(p, kept);
+            kept.getPieces().add(p);
+            assert kept.getPieces().contains(p);
         }
         StringBuilder builder = new StringBuilder();
         for (Position p : kept.getPieces()) {
             builder.append(" ").append(p);
         }
         logger.debug("Full cell: %s", builder.toString());
+        assert kept.getPieces().size() > 0;
+        assert kept.getPieces().size() == totalSize;
     }
 
     private void add(Cell cell, Position position) {
         cell.add(position);
         setCellMapCell(position, cell);
+        assert cell.getPieces().size() > 0;
+        assert getCell(position) == cell;
+        assert cell.getPieces().contains(position);
     }
 
     Cell createCell(Position position, PositionState color) {
         Cell cell = new Cell(color);
         cellSet.add(cell);
         add(cell, position);
+        assert cell.getPieces().size() > 0;
         return cell;
     }
 
     private void delete(Cell cell) {
+        assert cell.getPieces().size() > 0;
         StringBuilder builder = new StringBuilder();
         for (Position p : cell.getPieces()) {
             builder.append(" ").append(p);
@@ -155,7 +166,8 @@ class CellManager {
         logger.debug("Deleting cell with pieces %s", builder.toString());
         Iterator it = cell.getPieces().iterator();
         while (it.hasNext()) {
-            it.next();
+            Position piece = (Position) it.next();
+            setCellMapCell(piece, null);
             it.remove();
         }
         cellSet.remove(cell);
@@ -167,5 +179,9 @@ class CellManager {
 
     void checkCell(Position p) {
         assert getCell(p) == null;
+    }
+
+    Set<Cell> getCellSet() {
+        return cellSet;
     }
 }

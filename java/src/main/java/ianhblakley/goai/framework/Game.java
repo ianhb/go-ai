@@ -91,6 +91,7 @@ public class Game implements Externalizable {
                 if (moves != null) {
                     moves.add(blackMove);
                 }
+                board.verifyIntegrity();
             } else {
                 if (verbose) logger.info("Black passed on turn %s", turns);
             }
@@ -104,6 +105,7 @@ public class Game implements Externalizable {
                 if (moves != null) {
                     moves.add(whiteMove);
                 }
+                board.verifyIntegrity();
             } else {
                 if (verbose) logger.info("White passed on turn %s", turns);
             }
