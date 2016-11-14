@@ -44,7 +44,7 @@ public class Game implements Externalizable {
     public Game(Bot black, Bot white) {
         this.black = black;
         this.white = white;
-        this.board = new Board();
+        this.board = new Board(false);
         turns = 0;
         moves = new ArrayList<>();
         logger.info("Initialized Game");
@@ -91,6 +91,7 @@ public class Game implements Externalizable {
                 if (moves != null) {
                     moves.add(blackMove);
                 }
+                board.verifyIntegrity();
             } else {
                 if (verbose) logger.info("Black passed on turn %s", turns);
             }
@@ -104,6 +105,7 @@ public class Game implements Externalizable {
                 if (moves != null) {
                     moves.add(whiteMove);
                 }
+                board.verifyIntegrity();
             } else {
                 if (verbose) logger.info("White passed on turn %s", turns);
             }

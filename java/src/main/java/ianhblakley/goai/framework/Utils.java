@@ -67,7 +67,7 @@ public class Utils {
 
     /**
      * Applies {@link FourSideOperation#act(Board, Position, Position)} to each of the neighbors of center
-     *
+     * @param board board on which to apply operation
      * @param center    center position
      * @param operation operation to apply
      */
@@ -94,6 +94,15 @@ public class Utils {
         }
     }
 
+    /**
+     * Applies {@link FourSideFunction#act(Board, Position, PositionState)} to each of the neighbors of center
+     *
+     * @param board    board on which to apply function
+     * @param center   center position
+     * @param color    color of the piece at center position of board
+     * @param function function to apply
+     * @return sum of result of function applied to each side
+     */
     static int applyToSideReturn(Board board, Position center, PositionState color, FourSideFunction function) {
         Position left;
         Position right;
@@ -120,12 +129,15 @@ public class Utils {
     }
 
     /**
-     * Interface used to abstract a function on two {@link Position}
+     * Interface used to abstract an operation on two {@link Position}
      */
     interface FourSideOperation {
         void act(Board board, Position side, Position center);
     }
 
+    /**
+     * Interface used to abstract a function on two {@link Position}
+     */
     interface FourSideFunction {
         int act(Board board, Position side, PositionState color);
     }

@@ -141,6 +141,11 @@ class Node {
         return child;
     }
 
+    /**
+     * Returns the percentage of simulated games that started at this state that the player won
+     *
+     * @return wins / games of simulations below node
+     */
     double getWinProbability() {
         if (plays.get() == 0) {
             return 0;

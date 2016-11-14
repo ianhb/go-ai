@@ -5,7 +5,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents a Go board
@@ -17,7 +19,7 @@ public class Board implements Serializable {
     private static final Logger logger = LogManager.getFormatterLogger(Board.class);
 
     // Current state of each position of the board
-    private PositionState[][] board;
+    private PositionState[][] boardMap;
 
     private CellManager cellManager;
     // Number of black pieces on board
@@ -28,13 +30,17 @@ public class Board implements Serializable {
     private int blackCaptured;
     // Number of white pieces caputred by black
     private int whiteCaptured;
-    // Copy of the previous board state
+    // Copy of the previous boardMap state
     private PositionState[][] previousState;
 
     private Set<Position> availableSpaces;
 
-    public Board() {
-        board = new PositionState[Constants.BOARD_SIZE][Constants.BOARD_SIZE];
+    public Board(boolean clean) {
+        if (clean) {
+            previousState = null;
+            return;
+        }
+        boardMap = new PositionState[Constants.BOARD_SIZE][Constants.BOARD_SIZE];
 
         cellManager = new CellManager();
         availableSpaces = new HashSet<>();
@@ -51,12 +57,8 @@ public class Board implements Serializable {
         previousState = null;
     }
 
-    public Board(boolean clean) {
-        previousState = null;
-    }
-
     /**
-     * Set of all open positions on the board
+     * Set of all open positions on the boardMap
      *
      * @return current open positions
      */
@@ -74,23 +76,26 @@ public class Board implements Serializable {
         assert getPositionState(position).equals(PositionState.EMPTY);
         changePositionState(position, color);
         availableSpaces.remove(position);
-        if (color.equals(PositionState.BLACK)) blacks++;
-        else whites++;
+        if (color.equals(PositionState.BLACK)) {
+            blacks++;
+        } else {
+            whites++;
+        }
         assert getPositionState(position) == color;
         assert cellManager.getCell(position) != null;
     }
 
     /**
-     * Returns the current state of the board at position position
+     * Returns the current state of the boardMap at position position
      * @param position query position
-     * @return state of board at position
+     * @return state of boardMap at position
      */
     public PositionState getPositionState(Position position) {
-        return board[position.getRow()][position.getColumn()];
+        return boardMap[position.getRow()][position.getColumn()];
     }
 
     /**
-     * Returns the current state of the board at position (row, column)
+     * Returns the current state of the boardMap at position (row, column)
      * @param row row of position
      * @param column column of position
      * @return state of baord at position
@@ -99,6 +104,13 @@ public class Board implements Serializable {
         return getPositionState(new Position(row, column));
     }
 
+    /**
+     * Changes a state of the boardMap to state
+     * Uses {@link CellManager} to create and merge affected cells
+     *
+     * @param position position to change
+     * @param state    state to change to
+     */
     private void changePositionState(Position position, PositionState state) {
         setPositionState(position, state);
         if (state != PositionState.EMPTY) {
@@ -110,10 +122,18 @@ public class Board implements Serializable {
         }
     }
 
+    /**
+     * Sets the position on boardMap to state
+     * posiion != null
+     * state != EMPTY
+     *
+     * @param position position to change
+     * @param state    state to change to
+     */
     private void setPositionState(Position position, PositionState state) {
         assert getPositionState(position) != state;
         assert position != null;
-        board[position.getRow()][position.getColumn()] = state;
+        boardMap[position.getRow()][position.getColumn()] = state;
     }
 
 
@@ -135,12 +155,42 @@ public class Board implements Serializable {
         changePositionState(position, PositionState.EMPTY);
     }
 
-    void removeCell(Cell cell) {
+    /**
+     * Remove the given cell from the boardMap, updating counts of moves and checking that deletion didn't
+     * make the boardMap into an inconsistent state
+     * @param cell cell to delete
+     */
+    void removeCellFromBoard(Cell cell) {
+        assert cell != null;
+        int turnCount = getTurnCount();
+        int removeCount = cell.getPieces().size();
+        int currentCaptured;
+        int currentPlayed;
+        if (cell.getColor() == PositionState.BLACK) {
+            currentCaptured = blackCaptured;
+            currentPlayed = blacks;
+        } else {
+            currentCaptured = whiteCaptured;
+            currentPlayed = whites;
+        }
         cell.getPieces().forEach(this::removePosition);
+        assert getTurnCount() == turnCount;
+        if (cell.getColor() == PositionState.BLACK) {
+            assert blacks == currentPlayed - removeCount;
+            assert blackCaptured == currentCaptured + removeCount;
+        } else {
+            assert whites == currentPlayed - removeCount;
+            assert whiteCaptured == currentCaptured + removeCount;
+        }
+
     }
 
     Cell getCell(Position p) {
         return cellManager.getCell(p);
+    }
+
+    private Cell getCell(int row, int column) {
+        return cellManager.getCell(new Position(row, column));
     }
 
     /**
@@ -148,9 +198,10 @@ public class Board implements Serializable {
      * @param move move to play
      */
     public void placeMove(Move move) {
-        previousState = Utils.deepCopyBoard(board);
+        previousState = Utils.deepCopyBoard(boardMap);
         placePiece(move.getColor(), move.getPosition());
         cellManager.checkCapture2(this, move);
+        verifyIntegrity();
     }
 
     /**
@@ -173,8 +224,8 @@ public class Board implements Serializable {
     }
 
 
-    PositionState[][] getBoard() {
-        return board;
+    PositionState[][] getBoardMap() {
+        return boardMap;
     }
 
     /**
@@ -187,12 +238,12 @@ public class Board implements Serializable {
 
     /**
      * Returns a deep copy of the board
-     * {@link #board} and {@link #cellManager} are deep copied
+     * {@link #boardMap} and {@link #cellManager} are deep copied
      * @return deep copy of this
      */
     public Board deepCopy() {
         Board board = new Board(false);
-        board.board = Utils.deepCopyBoard(this.board);
+        board.boardMap = Utils.deepCopyBoard(this.boardMap);
         board.cellManager = cellManager.deepCopy();
         board.blacks = blacks;
         board.whites = whites;
@@ -201,6 +252,32 @@ public class Board implements Serializable {
         board.availableSpaces = new HashSet<>(availableSpaces);
         board.previousState = Utils.deepCopyBoard(previousState);
         return board;
+    }
+
+    /**
+     * Verify the integrity of the board to try to catch inconsistencies
+     */
+    public void verifyIntegrity() {
+        if (Constants.VERIFY_STATES) {
+            for (int row = 0; row < Constants.BOARD_SIZE; row++) {
+                for (int column = 0; column < Constants.BOARD_SIZE; column++) {
+                    if (getPositionState(row, column) != PositionState.EMPTY) {
+                        assert getCell(row, column) != null;
+                    }
+                }
+            }
+            int blackCells = 0;
+            int whiteCells = 0;
+            for (Cell cell : cellManager.getCellSet()) {
+                if (cell.getColor() == PositionState.BLACK) {
+                    blackCells += cell.getPieces().size();
+                } else {
+                    whiteCells += cell.getPieces().size();
+                }
+            }
+            assert blacks == blackCells;
+            assert whites == whiteCells;
+        }
     }
 
 
@@ -216,7 +293,7 @@ public class Board implements Serializable {
         string.append(new String(new char[Constants.BOARD_SIZE * 3]).replace('\0', '_'));
         string.append('\n');
         for (int i = 0; i < Constants.BOARD_SIZE; i++) {
-            PositionState[] row = board[i];
+            PositionState[] row = boardMap[i];
             string.append(String.format("%1$2s", i)).append("|");
             for (PositionState state : row) {
                 string.append(" ");
@@ -277,19 +354,7 @@ public class Board implements Serializable {
     }
 
     /**
-     * Returns a copy of the board matrix from before the last move was played
-     * Retusn null if it is the first play of the game
-     * @return copy of previous board matrix or null
-     */
-    PositionState[][] getLastBoard() {
-        if (previousState == null) {
-            return null;
-        }
-        return Utils.deepCopyBoard(previousState);
-    }
-
-    /**
-     * Equality is based on same type and by equality of game board matrix
+     * Equality is based on same type and by equality of game boardMap matrix
      */
     @Override
     public boolean equals(Object o) {
@@ -297,13 +362,13 @@ public class Board implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
 
         Board board1 = (Board) o;
-        return Arrays.deepEquals(board, board1.board);
+        return Arrays.deepEquals(boardMap, board1.boardMap);
 
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(board);
+        return Arrays.deepHashCode(boardMap);
     }
 
 }

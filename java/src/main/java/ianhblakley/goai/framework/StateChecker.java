@@ -46,7 +46,7 @@ public class StateChecker {
         updatedState.placeMoveLight(move);
         for (int i = 0; i < Constants.BOARD_SIZE; i++) {
             for (int j = 0; j < Constants.BOARD_SIZE; j++) {
-                if (updatedState.getBoard()[i][j] != oldState[i][j]) {
+                if (updatedState.getBoardMap()[i][j] != oldState[i][j]) {
                     return false;
                 }
             }

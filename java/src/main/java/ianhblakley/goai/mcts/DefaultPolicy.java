@@ -17,6 +17,9 @@ interface DefaultPolicy extends Runnable {
      */
     PositionState simulate();
 
+    /**
+     * Factory to create {@link DefaultPolicy} for each simulation
+     */
     interface DefaultPolicyFactory {
         DefaultPolicy getDefaultPolicy(Node n, PositionState color);
     }
