@@ -112,6 +112,9 @@ class CellManager {
         assert deleted.getPieces().size() > 0;
         assert kept.getColor() == deleted.getColor();
         assert !kept.equals(deleted);
+        int keptSize = kept.getPieces().size();
+        int deletedSize = deleted.getPieces().size();
+        int totalSize = keptSize + deletedSize;
         cellSet.remove(deleted);
         logger.trace("Merging cells %s\n and %s", kept, deleted);
         for (Position p : deleted.getPieces()) {
