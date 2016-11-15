@@ -8,10 +8,16 @@ import ianhblakley.goai.mcts.MCTS;
  * <p>
  * Created by ian on 10/25/16.
  */
-public class RandomMCTSBot extends MCTSBot {
+class RandomMCTSBot extends MCTSBot {
 
-    public RandomMCTSBot(PositionState color) {
+    RandomMCTSBot(PositionState color) {
         super(color);
         mcts = MCTS.randomMCTS(color);
     }
+
+    @Override
+    public String toString() {
+        return "Random MCTS Bot";
+    }
+
 }

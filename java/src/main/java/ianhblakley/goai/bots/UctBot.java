@@ -8,11 +8,16 @@ import ianhblakley.goai.mcts.MCTS;
  * <p>
  * Created by ian on 10/17/16.
  */
-public class UctBot extends MCTSBot {
+class UctBot extends MCTSBot {
 
-    public UctBot(PositionState color) {
+    UctBot(PositionState color) {
         super(color);
         mcts = MCTS.uctMCTS(color);
+    }
+
+    @Override
+    public String toString() {
+        return "UCT MCTS Bot";
     }
 
 }

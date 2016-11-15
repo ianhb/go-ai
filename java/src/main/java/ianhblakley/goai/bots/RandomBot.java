@@ -37,4 +37,10 @@ public class RandomBot extends AbstractBot {
         }
         return new Move();
     }
+
+    @Override
+    public String toString() {
+        return "Random Bot";
+    }
+
 }

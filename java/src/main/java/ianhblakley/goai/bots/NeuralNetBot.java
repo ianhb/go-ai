@@ -12,11 +12,11 @@ import java.util.Set;
  *
  * Created by ian on 11/13/16.
  */
-public class NeuralNetBot extends AbstractBot {
+class NeuralNetBot extends AbstractBot {
 
     private final NeuralNetworkClient client;
 
-    public NeuralNetBot(PositionState color) {
+    NeuralNetBot(PositionState color) {
         super(color);
         client = new NeuralNetworkClient(Constants.SERVER_ADDRESS, Constants.SERVER_PORT);
     }
@@ -37,4 +37,10 @@ public class NeuralNetBot extends AbstractBot {
         playStone();
         return new Move(bestMove, color);
     }
+
+    @Override
+    public String toString() {
+        return "Neural Net Bot";
+    }
+
 }
