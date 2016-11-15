@@ -25,8 +25,8 @@ class Node {
     private final PositionState color;
     private final Board state;
     private final boolean terminalState;
-    private AtomicInteger wins;
-    private AtomicInteger plays;
+    private final AtomicInteger wins;
+    private final AtomicInteger plays;
 
     Node(Node parent, Board b, Position move, PositionState color) {
         this.parent = parent;
@@ -75,6 +75,9 @@ class Node {
      */
     Node selectNewRandomChild() {
         Position randomMove = randomSelect(getPossibleChildren());
+        if (randomMove == null) {
+            return this;
+        }
         return addChild(randomMove);
     }
 
@@ -86,8 +89,17 @@ class Node {
     private Position randomSelect(Set<Position> moves) {
         List<Position> openPositions = new ArrayList<>(moves);
         int randomInt = random.nextInt(openPositions.size());
+        int firstRandomInt = randomInt;
         Position randomMove = null;
         while (randomMove == null || !StateChecker.isLegalMove(new Move(randomMove, color), state)) {
+            if (firstRandomInt + openPositions.size() == randomInt) {
+                logger.debug("No Open Moves");
+                for (Position p : openPositions) {
+                    logger.debug("Move %s is legal: %s", p, StateChecker.isLegalMove(new Move(p, color), state));
+                }
+                possibleChildren.clear();
+                return null;
+            }
             randomMove = openPositions.get(randomInt % (openPositions.size()));
             randomInt++;
         }

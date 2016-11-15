@@ -32,25 +32,6 @@ public class Utils {
     }
 
     /**
-     * Returns a deep copy of the cell matrix
-     * @param original original cell matrix
-     * @return new copy of the cells
-     */
-    static Cell[][] deepCopyCells(Cell[][] original) {
-        if (original == null) {
-            return null;
-        }
-
-        final Cell[][] result = new Cell[original.length][];
-        for (int i = 0; i < original.length; i++) {
-            result[i] = Arrays.copyOf(original[i], original[i].length);
-            // For Java versions prior to Java 6 use the next:
-            // System.arraycopy(original[i], 0, result[i], 0, original[i].length);
-        }
-        return result;
-    }
-
-    /**
      * Returns the opposite color of color
      * Throws {@link AssertionError} if color is {@link PositionState#EMPTY}
      * @param color color to invert

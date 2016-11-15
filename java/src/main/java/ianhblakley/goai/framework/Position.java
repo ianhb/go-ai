@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Corresponds to a position on the board
  * Contains a row and column, which correspond to the
- * first and second indices of the {@link Board#board} or {@link CellManager#cellMap}
+ * first and second indices of the {@link Board#boardMap} or {@link CellManager#cellMap}
  * <p>
  * Created by ian on 10/12/16.
  */

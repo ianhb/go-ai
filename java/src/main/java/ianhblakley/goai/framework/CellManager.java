@@ -150,14 +150,12 @@ class CellManager {
      * Creates a cell containing one piece at positon with state color
      * @param position position of piece in cell
      * @param color color of cell
-     * @return new cell contiaining piece
      */
-    Cell createCell(Position position, PositionState color) {
+    void createCell(Position position, PositionState color) {
         Cell cell = new Cell(color);
         cellSet.add(cell);
         add(cell, position);
         assert cell.getPieces().size() > 0;
-        return cell;
     }
 
     /**

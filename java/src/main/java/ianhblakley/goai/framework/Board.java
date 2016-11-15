@@ -242,7 +242,7 @@ public class Board implements Serializable {
      * @return deep copy of this
      */
     public Board deepCopy() {
-        Board board = new Board(false);
+        Board board = new Board(true);
         board.boardMap = Utils.deepCopyBoard(this.boardMap);
         board.cellManager = cellManager.deepCopy();
         board.blacks = blacks;
