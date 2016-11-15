@@ -17,8 +17,14 @@ public class Constants {
      */
     public static final int THREAD_COUNT = 3;
 
+    /**
+     * Address of the neural network server
+     */
     public static final String SERVER_ADDRESS = "localhost";
 
+    /**
+     * Port of the neural network server
+     */
     public static final int SERVER_PORT = 50051;
     
     /**
