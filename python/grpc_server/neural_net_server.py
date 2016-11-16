@@ -12,7 +12,7 @@ from grpc_server import goai_pb2
 
 
 def build_moves(board, moves):
-    board_as_features = numpy.empty(shape=(len(moves), constants.BOARD_AREA))
+    board_as_features = numpy.empty(shape=(len(moves) + 1, constants.BOARD_AREA))
     for i in range(len(board)):
         if board[i] == goai_pb2.Board.PLAYER:
             state = 1
@@ -47,11 +47,14 @@ class NeuralNetServer(goai_pb2.NNBotServicer):
         print "Received RPC"
         board_list = build_moves(request.board.array, request.potential_moves)
         best_index, probability = self.find_best_move(board_list)
-        print "Move {0} has win chance of {1}".format(request.potential_moves[best_index], probability)
         response = goai_pb2.MoveResponse()
         response.id = request.id
-        response.best_move.row = request.potential_moves[best_index].row
-        response.best_move.column = request.potential_moves[best_index].column
+        if best_index == len(board_list) - 1:
+            print "Pass has win chance of {0}".format(probability)
+        else:
+            print "Move {0} has win chance of {1}".format(request.potential_moves[best_index], probability)
+            response.best_move.row = request.potential_moves[best_index].row
+            response.best_move.column = request.potential_moves[best_index].column
         response.win_probability = float(probability)
         return response
 
