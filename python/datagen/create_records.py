@@ -1,6 +1,7 @@
 import datetime
 import os
 import sys
+import tarfile
 import threading
 import time
 from multiprocessing import Value
@@ -9,7 +10,8 @@ import tensorflow as tf
 
 import game
 
-GAME_DIR = '../../../kgs/sgf'
+GAME_ARCHIVE = 'data/kgs_data.tar.gz'
+GAME_DIR = 'data/sgf'
 OUTPUT_FILE = 'data/fuseki-{0}.tfrecords'
 
 counter_lock = threading.Lock()
@@ -31,10 +33,13 @@ def write_file(thread_id, files, thread_game_counter):
         sys.stdout.flush()
     writer.close()
 
-
+print "Extracting Game Files from {0} to {1}".format(GAME_ARCHIVE, GAME_DIR)
+tar = tarfile.open(GAME_ARCHIVE, 'r:gz')
+tar.extractall(path='data')
+tar.close()
 game_files = os.listdir(GAME_DIR)
 game_counter = Value('i', 0)
-
+print "Creating records from {0} games".format(len(game_files))
 train_thread = threading.Thread(
     target=write_file, args=["TRAIN", game_files[0: 3 * len(game_files) / 5],
                              game_counter])
