@@ -64,7 +64,11 @@ public class NeuralNetworkClient {
         Goai.MoveResponse response = blockingStub.getMove(request);
         logger.trace("Recieved response with %s", response);
         assert request.getId() == response.getId();
-        return new Position(response.getBestMove().getRow(), response.getBestMove().getColumn());
+        if (response.hasBestMove()) {
+            return new Position(response.getBestMove().getRow(), response.getBestMove().getColumn());
+        } else {
+            return null;
+        }
     }
 
 }

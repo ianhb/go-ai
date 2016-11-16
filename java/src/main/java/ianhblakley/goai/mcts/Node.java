@@ -40,7 +40,14 @@ class Node {
             state.placeMove(new Move(move, color));
         }
         this.possibleChildren = new HashSet<>(state.getAvailableSpaces());
-        this.terminalState = b.isEndGame();
+        Iterator positionIterator = possibleChildren.iterator();
+        while (positionIterator.hasNext()) {
+            if (!StateChecker.isLegalMove(new Move((Position) positionIterator.next(), color), state)) {
+                positionIterator.remove();
+            }
+        }
+        //this.possibleChildren.add(null);
+        this.terminalState = possibleChildren.size() == 0;
     }
 
     Position getMove() {
@@ -89,22 +96,9 @@ class Node {
     private Position randomSelect(Set<Position> moves) {
         List<Position> openPositions = new ArrayList<>(moves);
         int randomInt = random.nextInt(openPositions.size());
-        int firstRandomInt = randomInt;
-        Position randomMove = null;
-        while (randomMove == null || !StateChecker.isLegalMove(new Move(randomMove, color), state)) {
-            if (firstRandomInt + openPositions.size() == randomInt) {
-                logger.debug("No Open Moves");
-                for (Position p : openPositions) {
-                    logger.debug("Move %s is legal: %s", p, StateChecker.isLegalMove(new Move(p, color), state));
-                }
-                possibleChildren.clear();
-                return null;
-            }
-            randomMove = openPositions.get(randomInt % (openPositions.size()));
-            randomInt++;
-        }
-        assert StateChecker.isLegalMove(new Move(randomMove, color), state);
-        return openPositions.get(randomInt % (openPositions.size()));
+        Position randomMove = openPositions.get(randomInt);
+        if (randomMove != null) assert StateChecker.isLegalMove(new Move(randomMove, color), state);
+        return randomMove;
     }
 
     Node getParent() {

@@ -34,6 +34,9 @@ class NeuralNetBot extends AbstractBot {
             }
         }
         Position bestMove = client.getBestPosition(color, turnNumber, board, legalMoves);
+        if (bestMove == null) {
+            return new Move();
+        }
         playStone();
         return new Move(bestMove, color);
     }

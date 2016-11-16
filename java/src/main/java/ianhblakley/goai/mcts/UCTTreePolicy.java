@@ -1,11 +1,16 @@
 package ianhblakley.goai.mcts;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Tree Policy used by the MCTS when computing using UCT
  * <p>
  * Created by ian on 10/25/16.
  */
 class UCTTreePolicy implements TreePolicy {
+
+    private static final Logger logger = LogManager.getFormatterLogger(UCTTreePolicy.class);
 
     /**
      * Expansion scalar taken from IEEE article
@@ -14,6 +19,7 @@ class UCTTreePolicy implements TreePolicy {
 
     @Override
     public Node select(Node root) {
+        assert root != null;
         while (root.isNotTerminalState()) {
             if (root.isNotFullyExpanded()) {
                 return expand(root);
@@ -35,6 +41,9 @@ class UCTTreePolicy implements TreePolicy {
                 bestChild = child;
                 bestUctValue = childValue;
             }
+        }
+        if (bestChild == null) {
+            logger.debug("Returning null bestChild");
         }
         return bestChild;
     }

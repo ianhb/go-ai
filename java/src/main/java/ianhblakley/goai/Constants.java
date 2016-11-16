@@ -30,7 +30,7 @@ public class Constants {
     /**
      * Time in seconds that MCTS has to find the best move
      */
-    public static final int COMPUTE_THRESHOLD = 10;
+    public static final int COMPUTE_THRESHOLD = 5;
 
     /**
      * Whether or not to verify the state of the game between moves

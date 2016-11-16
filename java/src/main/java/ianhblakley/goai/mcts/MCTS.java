@@ -95,6 +95,9 @@ public class MCTS {
             }
         }
         Node bestMove = treePolicy.getBestMove(tree.getRoot(), 0);
+        if (bestMove == null) {
+            return null;
+        }
         return bestMove.getMove();
     }
 
