@@ -47,6 +47,7 @@ class Node {
             }
         }
         //this.possibleChildren.add(null);
+        // TODO: add pass as a possible child
         this.terminalState = possibleChildren.size() == 0;
     }
 
