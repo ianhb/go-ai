@@ -16,6 +16,7 @@ public class BotFactory {
     private static final String RANDOM_MCTS_BOT = "RandomMCTSBot";
     private static final String UCT_BOT = "UctBot";
     private static final String NEURAL_NET_BOT = "NeuralNetBot";
+    private static final String HUMAN_BOT = "HumanBot";
 
     public static Bot getBot(PositionState color, String type) {
         switch (type) {
@@ -27,6 +28,8 @@ public class BotFactory {
                 return new UctBot(color);
             case NEURAL_NET_BOT:
                 return new NeuralNetBot(color);
+            case HUMAN_BOT:
+                return new HumanBot(color);
             default:
                 return new RandomBot(color);
         }
