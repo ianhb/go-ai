@@ -1,6 +1,5 @@
 package ianhblakley.goai.bots;
 
-import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.*;
 import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
 
@@ -18,7 +17,7 @@ class NeuralNetBot extends AbstractBot {
 
     NeuralNetBot(PositionState color) {
         super(color);
-        client = new NeuralNetworkClient(Constants.SERVER_ADDRESS, Constants.SERVER_PORT);
+        client = NeuralNetworkClient.getInstance();
     }
 
     @Override

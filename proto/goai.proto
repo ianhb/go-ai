@@ -16,6 +16,10 @@ message Move {
 	int32 column = 2;
 }
 
+message BoardValue {
+	float value = 1;
+}
+
 message MoveRequest {
 	int32 id = 1;
 	Board board = 2;
@@ -30,5 +34,8 @@ message MoveResponse {
 }
 
 service NNBot {
-	rpc GetMove (MoveRequest) returns (MoveResponse) {}
+	rpc GetMoveFast (MoveRequest) returns (MoveResponse) {}
+	rpc GetMoveSlow (MoveRequest) returns (MoveResponse) {}
+	rpc GetValue (Board) returns (BoardValue) {}
 }
+

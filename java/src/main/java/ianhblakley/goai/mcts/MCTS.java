@@ -57,6 +57,10 @@ public class MCTS {
         return new MCTS(new UCTTreePolicy(), new RandomDefaultPolicy.RandomDefaultPolicyFactory(), color);
     }
 
+    public static MCTS alphaMCTS(PositionState color) {
+        return new MCTS(new AlphaTreePolicy(), new AlphaDefaultPolicy.AlphaDefaultPolicyFactory(), color);
+    }
+
     /**
      * Finds the best move for the given board for the player color
      *
