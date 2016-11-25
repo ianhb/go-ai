@@ -1,10 +1,7 @@
 package ianhblakley.goai.neuralnetworkconnection;
 
 import ianhblakley.goai.Constants;
-import ianhblakley.goai.framework.Board;
-import ianhblakley.goai.framework.Position;
-import ianhblakley.goai.framework.PositionState;
-import ianhblakley.goai.framework.Utils;
+import ianhblakley.goai.framework.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -72,6 +69,10 @@ public class NeuralNetworkClient {
         Goai.BoardValue value = blockingStub.getValue(board1);
         logger.trace("Received board value %s", value.getValue());
         return value.getValue();
+    }
+
+    public void logGame(Game game) {
+        // TODO
     }
 
     private Goai.MoveRequest buildRequest(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {

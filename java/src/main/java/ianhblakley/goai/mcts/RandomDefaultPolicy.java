@@ -10,14 +10,10 @@ import ianhblakley.goai.framework.PositionState;
  *
  * Created by ian on 10/17/16.
  */
-class RandomDefaultPolicy implements DefaultPolicy {
-
-    private final Node leafNode;
-    private final PositionState color;
+class RandomDefaultPolicy extends AbstractDefaultPolicy {
 
     private RandomDefaultPolicy(Node leaf, PositionState color) {
-        this.leafNode = leaf;
-        this.color = color;
+        super(leaf, color);
     }
 
     /**
@@ -37,22 +33,6 @@ class RandomDefaultPolicy implements DefaultPolicy {
         return simulation.getWinner();
     }
 
-    /**
-     * Runs a simulation of a game and backtraces the result up the tree
-     */
-    @Override
-    public void run() {
-        PositionState winner = simulate();
-        Node curNode = leafNode;
-        boolean won = winner == color;
-        while (curNode != null) {
-            if (won) curNode.logWin();
-            else curNode.logLoss();
-            won = !won;
-            curNode = curNode.getParent();
-        }
-
-    }
 
     static class RandomDefaultPolicyFactory implements DefaultPolicyFactory {
         @Override

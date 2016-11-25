@@ -11,14 +11,10 @@ import ianhblakley.goai.framework.PositionState;
  * <p>
  * Created by ian on 11/24/16.
  */
-class AlphaDefaultPolicy implements DefaultPolicy {
-
-    private final Node leafNode;
-    private final PositionState color;
+class AlphaDefaultPolicy extends AbstractDefaultPolicy {
 
     private AlphaDefaultPolicy(Node leaf, PositionState color) {
-        this.leafNode = leaf;
-        this.color = color;
+        super(leaf, color);
     }
 
     /**
@@ -36,19 +32,6 @@ class AlphaDefaultPolicy implements DefaultPolicy {
         Game simulation = new Game(currentBoard, black, white);
         simulation.play(false);
         return simulation.getWinner();
-    }
-
-    @Override
-    public void run() {
-        PositionState winner = simulate();
-        Node curNode = leafNode;
-        boolean won = winner == color;
-        while (curNode != null) {
-            if (won) curNode.logWin();
-            else curNode.logLoss();
-            won = !won;
-            curNode = curNode.getParent();
-        }
     }
 
     static class AlphaDefaultPolicyFactory implements DefaultPolicy.DefaultPolicyFactory {
