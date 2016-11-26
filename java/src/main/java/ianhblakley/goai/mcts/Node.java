@@ -1,6 +1,7 @@
 package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.framework.*;
+import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,6 +28,8 @@ class Node {
     private final boolean terminalState;
     private final AtomicInteger wins;
     private final AtomicInteger plays;
+    private Set<ValuedBoard> movesAsBoards;
+    private float value;
 
     Node(Node parent, Board b, Position move, PositionState color) {
         this.parent = parent;
@@ -89,6 +92,38 @@ class Node {
         return addChild(randomMove);
     }
 
+    Node selectHighestValueChild(NeuralNetworkClient client) {
+        if (movesAsBoards == null) {
+            movesAsBoards = new HashSet<>();
+            createMovesAsBoards(client);
+        }
+        float highestValue = Float.MIN_VALUE;
+        ValuedBoard highestValueChild = null;
+        for (ValuedBoard b : movesAsBoards) {
+            if (b.getValue() >= highestValue) {
+                highestValue = b.getValue();
+                highestValueChild = b;
+            }
+        }
+        assert highestValueChild != null;
+        Node newChild = addChild(highestValueChild.getMove(), highestValueChild.getBoard());
+        newChild.setValue(highestValueChild.getValue());
+        movesAsBoards.remove(highestValueChild);
+        return newChild;
+    }
+
+    private void createMovesAsBoards(NeuralNetworkClient client) {
+        assert movesAsBoards.size() == 0;
+        for (Position p : getPossibleChildren()) {
+            Board copy = state.deepCopy();
+            copy.placeMove(new Move(p, color));
+            float value = client.getValue(color, copy);
+            ValuedBoard valuedBoard = new ValuedBoard(copy, value, p);
+            movesAsBoards.add(valuedBoard);
+        }
+        assert movesAsBoards.size() == getPossibleChildren().size();
+    }
+
     /**
      * Randomly selects a move from moves
      * @param moves set of possible moves
@@ -139,11 +174,16 @@ class Node {
      * @return node representing position made from current state
      */
     private Node addChild(Position position) {
+        Board childState = state.deepCopy();
+        childState.placeMove(new Move(position, color));
+        return addChild(position, childState);
+    }
+
+    private Node addChild(Position position, Board board) {
         assert possibleChildren.size() > 0;
         assert possibleChildren.contains(position);
         possibleChildren.remove(position);
-        Board childState = state.deepCopy();
-        Node child = new Node(this, childState, position, Utils.getOppositeColor(color));
+        Node child = new Node(this, board, position, Utils.getOppositeColor(color));
         children.add(child);
         return child;
     }
@@ -164,10 +204,41 @@ class Node {
         return plays.get();
     }
 
+    float getValue() {
+        return value;
+    }
+
+    private void setValue(float value) {
+        this.value = value;
+    }
+
     @Override
     public String toString() {
         return String.valueOf(getWinProbability());
     }
 
+    private class ValuedBoard {
+        private final Board board;
+        private final float value;
+        private final Position move;
+
+        ValuedBoard(Board board, float value, Position move) {
+            this.board = board;
+            this.value = value;
+            this.move = move;
+        }
+
+        Board getBoard() {
+            return board;
+        }
+
+        float getValue() {
+            return value;
+        }
+
+        Position getMove() {
+            return move;
+        }
+    }
 }
 

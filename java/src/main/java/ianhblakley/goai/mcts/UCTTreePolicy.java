@@ -32,6 +32,7 @@ class UCTTreePolicy implements TreePolicy {
 
     @Override
     public Node getBestMove(Node n, double cP) {
+        assert n.getChildren().size() > 0;
         Node bestChild = null;
         double bestUctValue = -1;
         for (Node child : n.getChildren()) {
@@ -45,6 +46,7 @@ class UCTTreePolicy implements TreePolicy {
         if (bestChild == null) {
             logger.debug("Returning null bestChild");
         }
+        assert bestChild != null;
         return bestChild;
     }
 
