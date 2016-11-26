@@ -20,12 +20,22 @@ public class Constants {
     /**
      * Address of the neural network server
      */
-    public static final String SERVER_ADDRESS = "localhost";
+    public static final String NEURAL_SERVER_ADDRESS = "localhost";
 
     /**
      * Port of the neural network server
      */
-    public static final int SERVER_PORT = 50051;
+    public static final int NEURAL_SERVER_PORT = 50051;
+
+    /**
+     * Address of the neural network server
+     */
+    public static final String LOGGER_SERVER_ADDRESS = "localhost";
+
+    /**
+     * Port of the neural network server
+     */
+    public static final int LOGGER_SERVER_PORT = 50052;
 
     /**
      * Time in seconds that MCTS has to find the best move

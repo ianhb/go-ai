@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option java_package = "ianhblakley.goai.neuralnetworkconnection";
+
+message Game {
+	enum BoardState {
+		BLACK = 0;
+		WHITE = 1;
+		EMPTY = 2;
+		DRAW = 3;	
+	}
+	message GameState {
+		repeated BoardState state = 1;
+	}
+	repeated GameState gameStates = 1;
+	BoardState winner = 2;
+}
+
+message LogResponse {
+	bool success = 1;
+}
+
+service GameLogger {
+	rpc LogGame (Game) returns (LogResponse) {}	
+}
+

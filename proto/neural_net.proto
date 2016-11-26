@@ -11,19 +11,6 @@ message Board {
 	repeated PositionState array = 1;
 }
 
-message Game {
-	enum BoardState {
-		BLACK = 0;
-		WHITE = 1;
-		EMPTY = 2;
-		DRAW = 3;	
-	}
-	message GameState {
-		repeated BoardState state = 1;
-	}
-	repeated GameState gameStates = 1;
-	BoardState winner = 2;
-}
 
 message Move {
 	int32 row = 1;
@@ -47,14 +34,9 @@ message MoveResponse {
 	float win_probability = 3;
 }
 
-message LogResponse {
-	bool success = 1;
-}
-
-service NNBot {
+service NetService {
 	rpc GetMoveFast (MoveRequest) returns (MoveResponse) {}
 	rpc GetMoveSlow (MoveRequest) returns (MoveResponse) {}
 	rpc GetValue (Board) returns (BoardValue) {}
-	rpc LogGame (Game) returns (LogResponse) {}	
 }
 

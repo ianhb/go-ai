@@ -1,7 +1,10 @@
 package ianhblakley.goai.neuralnetworkconnection;
 
 import ianhblakley.goai.Constants;
-import ianhblakley.goai.framework.*;
+import ianhblakley.goai.framework.Board;
+import ianhblakley.goai.framework.Position;
+import ianhblakley.goai.framework.PositionState;
+import ianhblakley.goai.framework.Utils;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -20,8 +23,8 @@ public class NeuralNetworkClient {
 
     private static final Logger logger = LogManager.getFormatterLogger(NeuralNetworkClient.class);
 
-    private static NeuralNetworkClient ourInstance = new NeuralNetworkClient(Constants.SERVER_ADDRESS, Constants.SERVER_PORT);
-    private final NNBotGrpc.NNBotBlockingStub blockingStub;
+    private static NeuralNetworkClient ourInstance = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS, Constants.NEURAL_SERVER_PORT);
+    private final NetServiceGrpc.NetServiceBlockingStub blockingStub;
     private final AtomicInteger idCount = new AtomicInteger(0);
 
     private NeuralNetworkClient(String host, int port) {
@@ -30,7 +33,7 @@ public class NeuralNetworkClient {
 
     private NeuralNetworkClient(ManagedChannelBuilder<?> channelBuilder) {
         ManagedChannel channel = channelBuilder.build();
-        blockingStub = NNBotGrpc.newBlockingStub(channel);
+        blockingStub = NetServiceGrpc.newBlockingStub(channel);
     }
 
     public static NeuralNetworkClient getInstance() {
@@ -38,9 +41,9 @@ public class NeuralNetworkClient {
     }
 
     public Position getBestPosition(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
-        Goai.MoveRequest request = buildRequest(color, turnCount, board, possiblePositions);
+        NeuralNet.MoveRequest request = buildRequest(color, turnCount, board, possiblePositions);
         logger.trace("Sending slow RPC request %s to server", request.getId());
-        Goai.MoveResponse response = blockingStub.getMoveSlow(request);
+        NeuralNet.MoveResponse response = blockingStub.getMoveSlow(request);
         logger.trace("Recieved response with %s", response);
         assert request.getId() == response.getId();
         if (response.hasBestMove()) {
@@ -51,9 +54,9 @@ public class NeuralNetworkClient {
     }
 
     public Position getSimulationPosition(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
-        Goai.MoveRequest request = buildRequest(color, turnCount, board, possiblePositions);
+        NeuralNet.MoveRequest request = buildRequest(color, turnCount, board, possiblePositions);
         logger.trace("Sending fast RPC request %s to server", request.getId());
-        Goai.MoveResponse response = blockingStub.getMoveFast(request);
+        NeuralNet.MoveResponse response = blockingStub.getMoveFast(request);
         logger.trace("Recieved response with %s", response);
         assert request.getId() == response.getId();
         if (response.hasBestMove()) {
@@ -64,42 +67,38 @@ public class NeuralNetworkClient {
     }
 
     public float getValue(PositionState color, Board board) {
-        Goai.Board board1 = buildBoard(color, board);
+        NeuralNet.Board board1 = buildBoard(color, board);
         logger.trace("Sending value RPC request to server");
-        Goai.BoardValue value = blockingStub.getValue(board1);
+        NeuralNet.BoardValue value = blockingStub.getValue(board1);
         logger.trace("Received board value %s", value.getValue());
         return value.getValue();
     }
 
-    public void logGame(Game game) {
-        // TODO
-    }
-
-    private Goai.MoveRequest buildRequest(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
-        Goai.MoveRequest.Builder requestBuilder = Goai.MoveRequest.newBuilder();
+    private NeuralNet.MoveRequest buildRequest(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
+        NeuralNet.MoveRequest.Builder requestBuilder = NeuralNet.MoveRequest.newBuilder();
         requestBuilder.setId(idCount.getAndIncrement());
 
-        Goai.Board protoBoard = buildBoard(color, board);
+        NeuralNet.Board protoBoard = buildBoard(color, board);
         requestBuilder.setBoard(protoBoard);
         for (Position position : possiblePositions) {
-            requestBuilder.addPotentialMoves(Goai.Move.newBuilder().setRow(position.getRow()).
+            requestBuilder.addPotentialMoves(NeuralNet.Move.newBuilder().setRow(position.getRow()).
                     setColumn(position.getColumn()).build());
         }
         requestBuilder.setTurnCount(turnCount);
         return requestBuilder.build();
     }
 
-    private Goai.Board buildBoard(PositionState color, Board board) {
-        Goai.Board.Builder protoBoard = Goai.Board.newBuilder();
+    private NeuralNet.Board buildBoard(PositionState color, Board board) {
+        NeuralNet.Board.Builder protoBoard = NeuralNet.Board.newBuilder();
         for (int row = 0; row < Constants.BOARD_SIZE; row++) {
             for (int column = 0; column < Constants.BOARD_SIZE; column++) {
                 PositionState indexState = board.getPositionState(row, column);
                 if (indexState == color) {
-                    protoBoard.addArray(Goai.Board.PositionState.PLAYER);
+                    protoBoard.addArray(NeuralNet.Board.PositionState.PLAYER);
                 } else if (indexState == Utils.getOppositeColor(color)) {
-                    protoBoard.addArray(Goai.Board.PositionState.OPPONENT);
+                    protoBoard.addArray(NeuralNet.Board.PositionState.OPPONENT);
                 } else {
-                    protoBoard.addArray(Goai.Board.PositionState.EMPTY);
+                    protoBoard.addArray(NeuralNet.Board.PositionState.EMPTY);
                 }
             }
         }
