@@ -8,7 +8,7 @@ import tensorflow as tf
 from concurrent import futures
 
 import constants
-from grpc_server import game_logger_pb2
+from generated import game_logger_pb2
 
 GENERATED_FILENAME = "gen-{0}.tfrecords".format(dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%f"))
 

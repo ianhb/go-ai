@@ -7,7 +7,7 @@ import tensorflow as tf
 from concurrent import futures
 
 import constants
-from grpc_server import neural_net_pb2
+from generated import neural_net_pb2
 from neural_nets import fast
 from neural_nets import slow
 
