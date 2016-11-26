@@ -85,14 +85,14 @@ class NeuralNetServer(neural_net_pb2.NetServiceServicer):
     def find_best_fast_move(self, states):
         with self._graph.as_default():
             logits = self._fast_neural_net.inference(tf.cast(states, tf.float32))
-            return self.find_best_move(states, logits)
+            return self.find_best_move(logits)
 
     def find_best_slow_move(self, states):
         with self._graph.as_default():
             logits = self._slow_neural_net.inference(tf.cast(states, tf.float32))
-            return self.find_best_move(states, logits)
+            return self.find_best_move(logits)
 
-    def find_best_move(self, states, logits):
+    def find_best_move(self, logits):
         win_probabilities = logits.eval(session=self._session)
         best_index = numpy.argmax(win_probabilities, axis=0)[0]
         return best_index, win_probabilities[best_index][0]
@@ -101,11 +101,11 @@ class NeuralNetServer(neural_net_pb2.NetServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     neural_net_pb2.add_NetServiceServicer_to_server(NeuralNetServer(), server)
-    server.add_insecure_port('[::]:' + constants.SERVER_PORT)
+    server.add_insecure_port('[::]:' + constants.NET_SERVER_PORT)
     server.start()
     print "Server Started"
     while True:
-        time.sleep(0.1)
+        time.sleep(1)
 
 
 if __name__ == '__main__':

@@ -3,3 +3,4 @@ datagen/data/
 *.pyc
 summaries/
 grpc_server/neural_net_pb2.py
+grpc_server/game_logger_pb2.py

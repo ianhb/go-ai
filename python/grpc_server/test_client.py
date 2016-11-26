@@ -6,7 +6,7 @@ from grpc_server.neural_net_pb2 import Move
 
 
 def test_connection():
-    channel = grpc.insecure_channel('localhost:' + constants.SERVER_PORT)
+    channel = grpc.insecure_channel('localhost:' + constants.NET_SERVER_PORT)
     stub = neural_net_pb2.NetServiceStub(channel)
 
     request = neural_net_pb2.MoveRequest()
