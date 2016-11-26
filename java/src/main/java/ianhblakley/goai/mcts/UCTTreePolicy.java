@@ -43,7 +43,7 @@ class UCTTreePolicy implements TreePolicy {
             }
         }
         if (bestChild == null) {
-            logger.debug("Returning null bestChild");
+            logger.debug("Returning null bestChild. Child set size %s", n.getChildren().size());
         }
         return bestChild;
     }
