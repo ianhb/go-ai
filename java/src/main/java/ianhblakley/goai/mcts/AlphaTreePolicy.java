@@ -28,6 +28,13 @@ class AlphaTreePolicy implements TreePolicy {
         return root;
     }
 
+    /**
+     * Best move is decided by a sum of Neural Net Value and win probability
+     *
+     * @param n  parent node
+     * @param cP expansion factor for UCT
+     * @return best immediate child of n
+     */
     @Override
     public Node getBestMove(Node n, double cP) {
         assert n.getChildren().size() > 0;
@@ -45,10 +52,21 @@ class AlphaTreePolicy implements TreePolicy {
         return bestChild;
     }
 
+    /**
+     * Expands by selecting the child state that has the highest neural net value
+     * @param n node to expand
+     * @return child of n with highest value
+     */
     private Node expand(Node n) {
         return n.selectHighestValueChild(client);
     }
 
+    /**
+     * Expands based on the child with the highest combined value and win probability
+     * Divides win probability to encourage expansion
+     * @param n node to select child from
+     * @return best child to expand
+     */
     private Node selectExpansionChild(Node n) {
         assert n.getChildren().size() > 0;
         double bestChildValue = Float.MIN_VALUE;

@@ -40,6 +40,16 @@ public class NeuralNetworkClient {
         return ourInstance;
     }
 
+    /**
+     * Gets the best position to play from a given game state
+     * Uses the bigger/slower policy neural net
+     *
+     * @param color             color of move to play
+     * @param turnCount         current turnCount
+     * @param board             current baord state
+     * @param possiblePositions possible positions to play
+     * @return best move according to slow policy neural net
+     */
     public Position getBestPosition(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
         NeuralNet.MoveRequest request = buildRequest(color, turnCount, board, possiblePositions);
         logger.trace("Sending slow RPC request %s to server", request.getId());
@@ -53,6 +63,15 @@ public class NeuralNetworkClient {
         }
     }
 
+    /**
+     * Gets the best position to play from a given game state for MCTS simulations
+     * Uses the smaller/faster policy neural net
+     * @param color color of move to play
+     * @param turnCount current turnCount
+     * @param board current baord state
+     * @param possiblePositions possible positions to play
+     * @return best move according to fast policy neural net
+     */
     public Position getSimulationPosition(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
         NeuralNet.MoveRequest request = buildRequest(color, turnCount, board, possiblePositions);
         logger.trace("Sending fast RPC request %s to server", request.getId());
@@ -66,6 +85,13 @@ public class NeuralNetworkClient {
         }
     }
 
+    /**
+     * Returns the value of the current game state for color
+     * Returns float between 0 and 1
+     * @param color color to evaluate for
+     * @param board current board state
+     * @return 0-1 value of current board state
+     */
     public float getValue(PositionState color, Board board) {
         NeuralNet.Board board1 = buildBoard(color, board);
         logger.trace("Sending value RPC request to server");
@@ -74,6 +100,14 @@ public class NeuralNetworkClient {
         return value.getValue();
     }
 
+    /**
+     * Builds a {@link ianhblakley.goai.neuralnetworkconnection.NeuralNet.MoveRequest} from provided parameters
+     * @param color color to play
+     * @param turnCount current # of turns
+     * @param board current board state
+     * @param possiblePositions possible playable positions
+     * @return request to send to server
+     */
     private NeuralNet.MoveRequest buildRequest(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
         NeuralNet.MoveRequest.Builder requestBuilder = NeuralNet.MoveRequest.newBuilder();
         requestBuilder.setId(idCount.getAndIncrement());
@@ -88,6 +122,13 @@ public class NeuralNetworkClient {
         return requestBuilder.build();
     }
 
+    /**
+     * Builds a {@link ianhblakley.goai.neuralnetworkconnection.NeuralNet.Board} from a {@link Board} and
+     * {@link PositionState}. Pieces are translated into PLAYER and OPPONENT depending on color
+     * @param color color to build board for
+     * @param board current board state
+     * @return proto representation of board
+     */
     private NeuralNet.Board buildBoard(PositionState color, Board board) {
         NeuralNet.Board.Builder protoBoard = NeuralNet.Board.newBuilder();
         for (int row = 0; row < Constants.BOARD_SIZE; row++) {
