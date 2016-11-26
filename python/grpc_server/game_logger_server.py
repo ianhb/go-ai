@@ -25,7 +25,7 @@ def _board_feature(board):
     return _bytes_feature(board.tostring())
 
 
-class GameLoggerServer(game_logger_pb2.GameLoggerServicer):
+class GameLoggerServer(game_logger_pb2.GameLoggerServiceServicer):
     def __init__(self):
         super(GameLoggerServer, self).__init__()
         self._game_count = 0
@@ -68,7 +68,7 @@ class GameLoggerServer(game_logger_pb2.GameLoggerServicer):
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    game_logger_pb2.add_GameLoggerServicer_to_server(GameLoggerServer(), server)
+    game_logger_pb2.add_GameLoggerServiceServicer_to_server(GameLoggerServer(), server)
     server.add_insecure_port('[::]:' + constants.LOG_SERVER_PORT)
     server.start()
     print "Game Logger Server Started"

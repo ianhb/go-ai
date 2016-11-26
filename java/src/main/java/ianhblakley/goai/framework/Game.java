@@ -31,7 +31,7 @@ public class Game implements Externalizable {
     // Number of elapsed turns
     private int turns;
     // All moves made thus far
-    private List<Move> moves;
+    private List<PositionState[][]> boardStates;
     // Winner of the game, initially null
     private PositionState winner;
 
@@ -46,7 +46,7 @@ public class Game implements Externalizable {
         this.white = white;
         this.board = new Board(false);
         turns = 0;
-        moves = new ArrayList<>();
+        boardStates = new ArrayList<>();
         logger.info("Initialized Game");
         winner = null;
         scorer = Scorer.getDefaultScorer();
@@ -88,9 +88,7 @@ public class Game implements Externalizable {
             if (blackMove.isNotPass()) {
                 if (verbose) logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
                 board.placeMove(blackMove);
-                if (moves != null) {
-                    moves.add(blackMove);
-                }
+                boardStates.add(Utils.deepCopyBoard(board.getBoardMap()));
                 board.verifyIntegrity();
             } else {
                 if (verbose) logger.info("Black passed on turn %s", turns);
@@ -102,9 +100,7 @@ public class Game implements Externalizable {
             if (whiteMove.isNotPass()) {
                 if (verbose) logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
                 board.placeMove(whiteMove);
-                if (moves != null) {
-                    moves.add(whiteMove);
-                }
+                boardStates.add(Utils.deepCopyBoard(board.getBoardMap()));
                 board.verifyIntegrity();
             } else {
                 if (verbose) logger.info("White passed on turn %s", turns);
@@ -129,6 +125,10 @@ public class Game implements Externalizable {
         return winner;
     }
 
+    public List<PositionState[][]> getBoardStates() {
+        return boardStates;
+    }
+
     public void printStats() {
         logger.info("Moves %s", turns);
         logger.info("Game won by %s with score %s - %s", winner,
@@ -145,7 +145,7 @@ public class Game implements Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(board);
         out.writeInt(turns);
-        out.writeObject(moves);
+        out.writeObject(boardStates);
         out.writeObject(white.getClass());
         out.writeObject(black.getClass());
     }
@@ -162,7 +162,7 @@ public class Game implements Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         board = (Board) in.readObject();
         turns = in.readInt();
-        moves = (List<Move>) in.readObject();
+        boardStates = (List<PositionState[][]>) in.readObject();
         white = null;
         black = null;
     }

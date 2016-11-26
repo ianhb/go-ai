@@ -20,7 +20,7 @@ message LogResponse {
 	bool success = 1;
 }
 
-service GameLogger {
+service GameLoggerService {
 	rpc LogGame (Game) returns (LogResponse) {}	
 }
 
