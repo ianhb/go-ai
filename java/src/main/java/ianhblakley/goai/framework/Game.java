@@ -24,6 +24,7 @@ public class Game implements Externalizable {
     private static final Logger logger = LogManager.getFormatterLogger(Game.class);
 
     private final Scorer scorer;
+    private final boolean verbose;
     // Current board
     private Board board;
     private Bot black;
@@ -41,10 +42,11 @@ public class Game implements Externalizable {
      * @param black black bot
      * @param white white bot
      */
-    public Game(Bot black, Bot white) {
+    public Game(Bot black, Bot white, boolean verbose) {
         this.black = black;
         this.white = white;
         this.board = new Board(false);
+        this.verbose = verbose;
         turns = 0;
         moves = new ArrayList<>();
         logger.info("Initialized Game");
@@ -65,13 +67,13 @@ public class Game implements Externalizable {
         turns = b.getTurnCount();
         winner = null;
         scorer = Scorer.getDefaultScorer();
+        verbose = false;
     }
 
     /**
      * Plays the game, querying bots for moves and continuing until both players pass
-     * @param verbose whether or not to write log messages
      */
-    public void play(boolean verbose) {
+    public void play() {
         // Used because deserialized games won't have bots
         if (black == null || white == null) {
             logger.error("Can't play games from logs");
@@ -83,34 +85,11 @@ public class Game implements Externalizable {
         int whiteCaptured = 0;
         do {
             // Blacks Move
-            turns++;
-            blackMove = black.getPlay(board, turns);
-            if (blackMove.isNotPass()) {
-                if (verbose) logger.info("Black played move %s on turn %s", blackMove.getPosition(), turns);
-                board.placeMove(blackMove);
-                if (moves != null) {
-                    moves.add(blackMove);
-                }
-                board.verifyIntegrity();
-            } else {
-                if (verbose) logger.info("Black passed on turn %s", turns);
-            }
-
+            blackMove = playMove(black);
             // Whites Move
-            turns++;
-            whiteMove = white.getPlay(board, turns);
-            if (whiteMove.isNotPass()) {
-                if (verbose) logger.info("White played move %s on turn %s", whiteMove.getPosition(), turns);
-                board.placeMove(whiteMove);
-                if (moves != null) {
-                    moves.add(whiteMove);
-                }
-                board.verifyIntegrity();
-            } else {
-                if (verbose) logger.info("White passed on turn %s", turns);
-            }
+            whiteMove = playMove(white);
             if (verbose) {
-                logger.trace("Game Board:\n %s", board);
+                logger.trace("Game BoardScene:\n %s", board);
                 if (board.getBlackCaptured() > blackCaptured) {
                     logger.trace("Blacks Captured: %s", board.getBlackCaptured() - blackCaptured);
                     blackCaptured = board.getBlackCaptured();
@@ -122,7 +101,7 @@ public class Game implements Externalizable {
             }
             // Continue until both players pass
         } while (blackMove.isNotPass() || whiteMove.isNotPass());
-        this.winner = scorer.winner(board, verbose);
+        this.winner = score();
     }
 
     public PositionState getWinner() {
@@ -133,7 +112,27 @@ public class Game implements Externalizable {
         logger.info("Moves %s", turns);
         logger.info("Game won by %s with score %s - %s", winner,
                 scorer.getBlackScore(), scorer.getWhiteScore());
-        logger.info("Final Board" + board.toString());
+        logger.info("Final BoardScene" + board.toString());
+    }
+
+    private PositionState score() {
+        return scorer.winner(board, verbose);
+    }
+
+    private Move playMove(Bot bot) {
+        turns++;
+        Move move = bot.getPlay(board, turns);
+        if (move.isNotPass()) {
+            if (verbose) logger.info("%s played move %s on turn %s", move.getColor(), move.getPosition(), turns);
+            board.placeMove(move);
+            if (moves != null) {
+                moves.add(move);
+            }
+            board.verifyIntegrity();
+        } else {
+            if (verbose) logger.info("%s passed on turn %s", move.getColor(), turns);
+        }
+        return move;
     }
 
     /**

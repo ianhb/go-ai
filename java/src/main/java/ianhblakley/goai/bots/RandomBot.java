@@ -21,10 +21,10 @@ public class RandomBot extends AbstractBot {
 
     @Override
     public Move getPlay(Board board, int turnNumber) {
-        if (checkCannotPlay()) return new Move();
+        if (checkCannotPlay()) return new Move(color);
         Set<Position> positions = board.getAvailableSpaces();
         if (positions.size() == 0) {
-            return new Move();
+            return new Move(color);
         }
         List<Position> randomPositions = new ArrayList<>(positions);
         Collections.shuffle(randomPositions);
@@ -35,7 +35,7 @@ public class RandomBot extends AbstractBot {
                 return m;
             }
         }
-        return new Move();
+        return new Move(color);
     }
 
     @Override

@@ -23,11 +23,12 @@ public class Move implements Serializable {
     /**
      * Move representing a pass
      */
-    public Move() {
+    public Move(PositionState color) {
         pass = true;
+        this.color = color;
     }
 
-    Position getPosition() {
+    public Position getPosition() {
         return position;
     }
 
@@ -35,7 +36,7 @@ public class Move implements Serializable {
         return color;
     }
 
-    boolean isNotPass() {
+    public boolean isNotPass() {
         return !pass;
     }
 }

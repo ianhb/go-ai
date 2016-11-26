@@ -25,11 +25,11 @@ abstract class MCTSBot extends AbstractBot {
     public Move getPlay(Board board, int turnNumber) {
         assert mcts != null;
         if (checkCannotPlay()) {
-            return new Move();
+            return new Move(color);
         }
         Position m = mcts.getMove(board);
         if (m == null) {
-            return new Move();
+            return new Move(color);
         }
         playStone();
         return new Move(m, color);

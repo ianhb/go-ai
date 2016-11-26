@@ -32,11 +32,11 @@ public class HumanBot extends AbstractBot {
 
     @Override
     public Move getPlay(Board board, int turnNumber) {
-        System.out.println("Current Board State");
+        System.out.println("Current BoardScene State");
         System.out.println(board);
         if (checkCannotPlay()) {
             System.out.println("Player doesn't have any stones to play");
-            return new Move();
+            return new Move(color);
         }
         System.out.println("Player Move: ");
         while (true) {
@@ -44,7 +44,7 @@ public class HumanBot extends AbstractBot {
                 String input = inputReader.readLine();
                 if (input.contains("pass")) {
                     System.out.println("Player Passing");
-                    return new Move();
+                    return new Move(color);
                 }
                 assert input.contains(" ");
                 int row = Integer.parseInt(input.substring(0, input.indexOf(" ")));

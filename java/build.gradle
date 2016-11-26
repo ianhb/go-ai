@@ -25,6 +25,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.7.0'
     }
 }
 
@@ -56,6 +57,15 @@ protobuf {
             grpc {}
         }
     }
+}
+
+apply plugin: 'javafx-gradle-plugin'
+jfx {
+    // minimal requirement for jfxJar-task
+    mainClass = 'ianhblakley.goai.gui.Main'
+
+    // minimal requirement for jfxNative-task
+    vendor = 'Ian Blakley'
 }
 
 apply plugin: 'application'
