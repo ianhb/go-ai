@@ -23,7 +23,7 @@ $ virtualenv goaivenv
 $ source goaivenv/bin/activate
 $ cd goai/python
 $ pip install -r requirements.txt
-$ python -m grpc.tools.protoc -I../proto --python_out=grpc_server --grpc_python_out=grpc_server ../proto/goai.proto
+$ python -m grpc.tools.protoc -I../proto --python_out=grpc_server --grpc_python_out=grpc_server ../proto/*.proto
 ```
 
 Generating data and training the model:

@@ -35,7 +35,7 @@ class GameLoggerServer(game_logger_pb2.GameLoggerServicer):
     def LogGame(self, request, context):
 
         winner = request.winner
-        if winner == game_logger_pb2._GAME_BOARDSTATE.BLACK:
+        if winner == game_logger_pb2.Game.BLACK:
             value = 1
         else:
             value = 0
@@ -55,9 +55,9 @@ class GameLoggerServer(game_logger_pb2.GameLoggerServicer):
     def process_move(self, state, winner, turn_count):
         board = numpy.zeros((361, 1))
         for index in range(state.size):
-            if state[index] == game_logger_pb2._GAME_BOARDSTATE.BLACK:
+            if state[index] == game_logger_pb2.Game.BLACK:
                 board[index] = 1
-            elif state[index] == game_logger_pb2._GAME_BOARDSTATE.WHITE:
+            elif state[index] == game_logger_pb2.Game.WHITE:
                 board[index] = -1
         example = tf.train.Example(features=tf.train.Features(feature={
             'board': _board_feature(board),

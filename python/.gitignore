@@ -1,5 +1,6 @@
 .idea/
 datagen/data/
+datagen/generated/
 *.pyc
 summaries/
 grpc_server/neural_net_pb2.py
