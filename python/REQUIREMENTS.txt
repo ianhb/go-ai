@@ -1,10 +1,12 @@
 enum34==1.1.6
 funcsigs==1.0.2
 futures==3.0.5
+grpc==0.3.post19
 grpcio==1.0.1
+grpcio-tools==1.0.1
 mock==2.0.0
 numpy==1.11.2
 pbr==1.10.0
 protobuf==3.0.0
 six==1.10.0
-tensorflow==0.11.0rc2
+tensorflow==0.11.0
