@@ -1,20 +1,21 @@
-import constants
 import grpc
-from grpc_server import goai_pb2
-from grpc_server.goai_pb2 import Move
+
+import constants
+from grpc_server import neural_net_pb2
+from grpc_server.neural_net_pb2 import Move
 
 
 def test_connection():
     channel = grpc.insecure_channel('localhost:' + constants.SERVER_PORT)
-    stub = goai_pb2.NNBotStub(channel)
+    stub = neural_net_pb2.NetServiceStub(channel)
 
-    request = goai_pb2.MoveRequest()
+    request = neural_net_pb2.MoveRequest()
     request.id = 1
     for i in range(361):
-        request.board.array.append(goai_pb2.Board.EMPTY)
+        request.board.array.append(neural_net_pb2.Board.EMPTY)
     request.turn_count = 2
     request.potential_moves.extend([Move(row=2, column=2), Move(row=1, column=1)])
-    print stub.GetMove(request)
+    print stub.GetMoveSlow(request)
 
 
 if __name__ == '__main__':

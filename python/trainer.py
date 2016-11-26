@@ -4,14 +4,16 @@ import time
 import tensorflow as tf
 
 import constants
-import go_nn
+from neural_nets import fast
+from neural_nets import slow
+from neural_nets import tools
 
 flags = tf.app.flags
 
 FLAGS = flags.FLAGS
 flags.DEFINE_float('learning_rate', constants.LEARNING_RATE, 'Initial learning rate')
-flags.DEFINE_integer('hidden1', constants.HIDDEN1, 'Number of units in hidden layer 1')
-flags.DEFINE_integer('hidden2', constants.HIDDEN2, 'Number of units in hidden layer 2')
+flags.DEFINE_integer('hidden1', constants.FAST_HIDDEN1, 'Number of units in hidden layer 1')
+flags.DEFINE_integer('hidden2', constants.FAST_HIDDEN2, 'Number of units in hidden layer 2')
 flags.DEFINE_integer('batch_size', constants.BATCH_SIZE, 'Batch size')
 flags.DEFINE_string('train_dir', constants.DATA_DIR, 'Directory with training data')
 flags.DEFINE_string('summary_dir', constants.SUMMARY_DIR, 'Directory with summary logs')
@@ -52,18 +54,31 @@ def valid_inputs():
     return inputs(False, FLAGS.batch_size)
 
 
-def run_training(sess):
-        t_boards, t_labels = train_inputs()
-        go_neural_net = go_nn.GoNN(FLAGS.hidden1, FLAGS.hidden2)
-        logits = go_neural_net.inference(t_boards)
-        loss = go_nn.loss(logits, t_labels)
-        train_op = go_nn.training(loss, FLAGS.learning_rate)
+def build_fast_train_func():
+    t_boards, t_labels = train_inputs()
+    go_neural_net = fast.FastNN()
+    logits = go_neural_net.inference(t_boards)
+    loss = tools.loss(logits, t_labels)
+    train_op = tools.training(loss, FLAGS.learning_rate)
+    return go_neural_net, train_op, loss
+
+
+def build_slow_train_func():
+    t_boards, t_labels = train_inputs()
+    go_neural_net = slow.SlowNN()
+    logits = go_neural_net.inference(t_boards)
+    loss = tools.loss(logits, t_labels)
+    train_op = tools.training(loss, FLAGS.learning_rate)
+    return go_neural_net, train_op, loss
+
+
+def run_training(sess, train_op, loss, model_name):
         init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
         saver = tf.train.Saver()
         sess.run(init_op)
-        if os.path.isfile(os.path.join(FLAGS.train_dir, "model.ckpt")):
+        if os.path.isfile(model_name):
             print "Loading Model"
-            saver.restore(sess, os.path.join(FLAGS.train_dir, "model.ckpt"))
+            saver.restore(sess, model_name)
             print "Model Restored"
         else:
             print "Training Model"
@@ -87,16 +102,14 @@ def run_training(sess):
             finally:
                 coord.request_stop()
             coord.join(threads)
-            save_path = saver.save(sess, os.path.join(FLAGS.train_dir, "model.ckpt"))
+            save_path = saver.save(sess, model_name)
             print "Model saved in file {0}".format(save_path)
 
-        return go_neural_net
 
-
-def run_eval(sess, go_neural_net):
+def run_eval(sess, neural_net):
     print "Evaluating"
     v_board, v_label = valid_inputs()
-    logits = go_neural_net.inference(v_board)
+    logits = neural_net.inference(v_board)
     correct_prediction = tf.equal(tf.argmax(logits, 1), tf.cast(v_label, tf.int64))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     coord = tf.train.Coordinator()
@@ -122,9 +135,15 @@ def run_eval(sess, go_neural_net):
 
 def main(_):
     with tf.Graph().as_default():
-        sess = tf.InteractiveSession()
-        nn = run_training(sess)
-        run_eval(sess, nn)
+        sess = tf.Session()
+        print "Training and Evaluating Fast Neural Net"
+        fast_nn, fast_train, fast_loss = build_fast_train_func()
+        run_training(sess, fast_train, fast_loss, constants.FAST_MODEL_FILE)
+        run_eval(sess, fast_nn)
+        print "Training and Evaluating Slow Neural Net"
+        slow_nn, slow_train, slow_loss = build_slow_train_func()
+        run_training(sess, slow_train, slow_loss, constants.SLOW_MODEL_FILE)
+        run_eval(sess, slow_nn)
 
 
 if __name__ == '__main__':

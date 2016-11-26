@@ -2,4 +2,4 @@
 datagen/data/
 *.pyc
 summaries/
-grpc_server/goai_pb2.py
+grpc_server/neural_net_pb2.py
