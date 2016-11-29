@@ -7,6 +7,7 @@ import constants
 from neural_nets import fast
 from neural_nets import slow
 from neural_nets import tools
+from neural_nets import value
 
 flags = tf.app.flags
 
@@ -17,6 +18,8 @@ flags.DEFINE_integer('hidden2', constants.FAST_HIDDEN2, 'Number of units in hidd
 flags.DEFINE_integer('batch_size', constants.BATCH_SIZE, 'Batch size')
 flags.DEFINE_string('train_dir', constants.DATA_DIR, 'Directory with training data')
 flags.DEFINE_string('summary_dir', constants.SUMMARY_DIR, 'Directory with summary logs')
+flags.DEFINE_string('model_type', 'fast', 'Model type to train: fast, slow, value')
+flags.DEFINE_integer('num_epochs', constants.NUM_EPOCHS, 'Number of times to run through training data')
 
 
 def read_and_decode(filename_queue):
@@ -39,7 +42,7 @@ def read_and_decode(filename_queue):
 def inputs(train, batch_size):
     filename = os.path.join(FLAGS.train_dir, constants.TRAIN_FILE if train else constants.VALIDATION_FILE)
     with tf.name_scope('input'):
-        filename_queue = tf.train.string_input_producer([filename])
+        filename_queue = tf.train.string_input_producer([filename], num_epochs=FLAGS.num_epochs)
         board, label = read_and_decode(filename_queue)
         boards, sparse_labels = tf.train.shuffle_batch([board, label], batch_size=batch_size, num_threads=2,
                                                        capacity=1000 + 3 * batch_size, min_after_dequeue=1000)
@@ -58,7 +61,7 @@ def build_fast_train_func():
     t_boards, t_labels = train_inputs()
     go_neural_net = fast.FastNN()
     logits = go_neural_net.inference(t_boards)
-    loss = tools.loss(logits, t_labels)
+    loss = tools.soft_max_loss(logits, t_labels)
     train_op = tools.training(loss, FLAGS.learning_rate)
     return go_neural_net, train_op, loss
 
@@ -67,43 +70,57 @@ def build_slow_train_func():
     t_boards, t_labels = train_inputs()
     go_neural_net = slow.SlowNN()
     logits = go_neural_net.inference(t_boards)
-    loss = tools.loss(logits, t_labels)
+    loss = tools.soft_max_loss(logits, t_labels)
     train_op = tools.training(loss, FLAGS.learning_rate)
     return go_neural_net, train_op, loss
 
 
-def run_training(sess, train_op, loss, model_name):
-        init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
-        saver = tf.train.Saver()
-        sess.run(init_op)
-        if os.path.isfile(model_name):
-            print "Loading Model"
-            saver.restore(sess, model_name)
-            print "Model Restored"
-        else:
-            print "Training Model"
-            merged = tf.merge_all_summaries()
-            train_writer = tf.train.SummaryWriter(FLAGS.summary_dir + "/train", sess.graph)
-            coord = tf.train.Coordinator()
-            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-            step = 0
-            try:
+def build_value_train_func():
+    t_boards, t_labels = train_inputs()
+    go_neural_net = value.ValueNN()
+    logits = go_neural_net.inference(t_boards)
+    loss = tools.soft_max_loss(logits, t_labels)
+    train_op = tools.training(loss, FLAGS.learning_rate)
+    return go_neural_net, train_op, loss
+
+
+def run_training(sess, train_op, loss, name):
+    init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
+    sess.run(init_op)
+    print "Training Model"
+    merged = tf.merge_all_summaries()
+    train_writer = tf.train.SummaryWriter(FLAGS.summary_dir + "/train/" + name, sess.graph)
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+    step = 0
+    saver = tf.train.Saver()
+    try:
+        start_time = time.time()
+        while not coord.should_stop():
+            _, loss_value, summary = sess.run([train_op, loss, merged])
+            train_writer.add_summary(summary, step)
+            if step % FLAGS.batch_size == 0:
+                duration = time.time() - start_time
                 start_time = time.time()
-                while not coord.should_stop():
-                    _, loss_value, summary = sess.run([train_op, loss, merged])
-                    train_writer.add_summary(summary, step)
-                    if step % FLAGS.batch_size == 0:
-                        duration = time.time() - start_time
-                        start_time = time.time()
-                        print "Step {0}: loss = {1} ({2} sec)".format(step, loss_value, duration)
-                    step += 1
-            except tf.errors.OutOfRangeError:
-                print "Done training for {0} epochs, {1} steps".format(FLAGS.num_epochs, step)
-            finally:
-                coord.request_stop()
-            coord.join(threads)
-            save_path = saver.save(sess, model_name)
-            print "Model saved in file {0}".format(save_path)
+                print "Step {0}: loss = {1} ({2} sec)".format(step, loss_value, duration)
+            if step % 10000 == 0:
+                if name == constants.SLOW:
+                    saver.save(sess, constants.SLOW_MODEL_FILE)
+                elif name == constants.FAST:
+                    saver.save(sess, constants.FAST_MODEL_FILE)
+                elif name == constants.VALUE:
+                    saver.save(sess, constants.VALUE_MODEL_FILE)
+                print "Saved Checkpoint"
+            step += 1
+    except tf.errors.OutOfRangeError:
+        print "Done training for {0} epochs, {1} steps".format(FLAGS.num_epochs, step)
+    finally:
+        coord.request_stop()
+    coord.join(threads)
+    if name == constants.SLOW:
+        saver.save(sess, constants.SLOW_MODEL_FILE)
+    elif name == constants.FAST:
+        saver.save(sess, constants.FAST_MODEL_FILE)
 
 
 def run_eval(sess, neural_net):
@@ -133,17 +150,62 @@ def run_eval(sess, neural_net):
     print "Final Accuracy: {0}".format(mean_accuracy / float(step))
 
 
-def main(_):
+def train_fast():
     with tf.Graph().as_default():
         sess = tf.Session()
-        print "Training and Evaluating Fast Neural Net"
         fast_nn, fast_train, fast_loss = build_fast_train_func()
-        run_training(sess, fast_train, fast_loss, constants.FAST_MODEL_FILE)
+        if os.path.isfile(constants.FAST_MODEL_FILE):
+            saver = tf.train.Saver()
+            print "Loading Fast Neural Net Model"
+            saver.restore(sess, constants.FAST_MODEL_FILE)
+        else:
+            print "Training Fast Neural Net"
+            run_training(sess, fast_train, fast_loss, constants.FAST)
+        print "Evaluating Fast Neural Net"
         run_eval(sess, fast_nn)
-        print "Training and Evaluating Slow Neural Net"
+        sess.close()
+
+
+def train_slow():
+    with tf.Graph().as_default():
+        sess = tf.Session()
         slow_nn, slow_train, slow_loss = build_slow_train_func()
-        run_training(sess, slow_train, slow_loss, constants.SLOW_MODEL_FILE)
+        saver = tf.train.Saver()
+        if os.path.isfile(constants.SLOW_MODEL_FILE):
+            print "Loading Slow Neural Net Model"
+            saver.restore(sess, constants.SLOW_MODEL_FILE)
+        else:
+            print "Training Slow Neural Net"
+            run_training(sess, slow_train, slow_loss, constants.SLOW)
+            saver.save(sess, constants.SLOW_MODEL_FILE)
+        print "Evaluating Slow Neural Net"
         run_eval(sess, slow_nn)
+        sess.close()
+
+
+def train_value():
+    with tf.Graph().as_default():
+        sess = tf.Session()
+        value_nn, value_train, value_loss = build_value_train_func()
+        saver = tf.train.Saver()
+        if os.path.isfile(constants.VALUE_MODEL_FILE):
+            print "Loading Models"
+            saver.restore(sess, constants.VALUE_MODEL_FILE)
+        else:
+            print "Training Value Neural Net"
+            run_training(sess, value_train, value_loss, constants.VALUE)
+        print "Evaluating Fast Neural Net"
+        run_eval(sess, value_nn)
+        sess.close()
+
+
+def main(_):
+    if FLAGS.model_type == constants.FAST:
+        train_fast()
+    elif FLAGS.model_type == constants.SLOW:
+        train_slow()
+    elif FLAGS.model_type == constants.VALUE:
+        train_value()
 
 
 if __name__ == '__main__':

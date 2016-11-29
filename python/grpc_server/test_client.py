@@ -1,8 +1,8 @@
 import grpc
 
 import constants
-from grpc_server import neural_net_pb2
-from grpc_server.neural_net_pb2 import Move
+from generated import neural_net_pb2
+from generated.neural_net_pb2 import Move
 
 
 def test_connection():
@@ -16,6 +16,11 @@ def test_connection():
     request.turn_count = 2
     request.potential_moves.extend([Move(row=2, column=2), Move(row=1, column=1)])
     print stub.GetMoveSlow(request)
+
+    request = neural_net_pb2.Board()
+    for i in range(361):
+        request.array.append(neural_net_pb2.Board.EMPTY)
+    print stub.GetValue(request)
 
 
 if __name__ == '__main__':

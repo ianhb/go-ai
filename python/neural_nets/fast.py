@@ -3,7 +3,7 @@ import math
 import tensorflow as tf
 
 import constants
-from tools import variable_summaries
+from neural_nets.tools import variable_summaries
 
 
 class FastNN:
@@ -41,7 +41,7 @@ class FastNN:
                 tf.histogram_summary("hidden1/pre-activations", hidden1)
             with tf.name_scope("hidden2"):
                 hidden2 = tf.nn.relu(tf.matmul(hidden1, self._h2_weights) + self._h2_biases)
-                tf.histogram_summary("hidden2/pre-activations", hidden2)
+                tf.histogram_summary("hidden2/pre-activations", hidden1)
             with tf.name_scope("softmax_linear"):
                 logits = tf.nn.relu(tf.matmul(hidden2, self._sm_weights) + self._sm_biases)
                 tf.histogram_summary("sm/pre-activations", logits)

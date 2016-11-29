@@ -1,7 +1,8 @@
 .idea/
-datagen/data/
-datagen/generated/
+datagen/data/*
+datagen/generated/*
 *.pyc
-summaries/
+summaries/*
 generated/neural_net_pb2.py
 generated/game_logger_pb2.py
+models/*

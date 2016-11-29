@@ -3,8 +3,12 @@ NUM_CLASSES = 2
 BOARD_SIZE = 19
 BOARD_AREA = BOARD_SIZE * BOARD_SIZE
 
-FAST_MODEL_FILE = "models/fast_model.ckpt"
+SLOW = 'slow'
+FAST = 'fast'
+VALUE = 'value'
+
 SLOW_MODEL_FILE = "models/slow_model.ckpt"
+FAST_MODEL_FILE = "models/fast_model.ckpt"
 VALUE_MODEL_FILE = "models/value_model.ckpt"
 TRAIN_FILE = 'fuseki-TRAIN.tfrecords'
 VALIDATION_FILE = 'fuseki-VALID.tfrecords'
@@ -13,6 +17,7 @@ LEARNING_RATE = 0.01
 FAST_HIDDEN1 = 128
 FAST_HIDDEN2 = 32
 BATCH_SIZE = 1000
+NUM_EPOCHS = 2
 
 SLOW_HIDDEN1 = 256
 SLOW_HIDDEN2 = 256
