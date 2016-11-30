@@ -20,6 +20,7 @@ flags.DEFINE_string('train_dir', constants.DATA_DIR, 'Directory with training da
 flags.DEFINE_string('summary_dir', constants.SUMMARY_DIR, 'Directory with summary logs')
 flags.DEFINE_string('model_type', 'fast', 'Model type to train: fast, slow, value')
 flags.DEFINE_integer('num_epochs', constants.NUM_EPOCHS, 'Number of times to run through training data')
+flags.DEFINE_bool('log_summaries', False, 'Save summary logs')
 
 
 def read_and_decode(filename_queue):
@@ -39,22 +40,26 @@ def read_and_decode(filename_queue):
     return board, label
 
 
-def inputs(train, batch_size):
-    filename = os.path.join(FLAGS.train_dir, constants.TRAIN_FILE if train else constants.VALIDATION_FILE)
+def train_inputs():
+    batch_size = FLAGS.batch_size
+    filename = os.path.join(FLAGS.train_dir, constants.TRAIN_FILE)
     with tf.name_scope('input'):
-        filename_queue = tf.train.string_input_producer([filename], num_epochs=FLAGS.num_epochs)
+        filename_queue = tf.train.string_input_producer([filename])
         board, label = read_and_decode(filename_queue)
         boards, sparse_labels = tf.train.shuffle_batch([board, label], batch_size=batch_size, num_threads=2,
                                                        capacity=1000 + 3 * batch_size, min_after_dequeue=1000)
         return boards, sparse_labels
 
 
-def train_inputs():
-    return inputs(True, FLAGS.batch_size)
-
-
 def valid_inputs():
-    return inputs(False, FLAGS.batch_size)
+    batch_size = FLAGS.batch_size
+    filename = os.path.join(FLAGS.train_dir, constants.VALIDATION_FILE)
+    with tf.name_scope('input'):
+        filename_queue = tf.train.string_input_producer([filename])
+        board, label = read_and_decode(filename_queue)
+        boards, sparse_labels = tf.train.shuffle_batch([board, label], batch_size=batch_size, num_threads=2,
+                                                       capacity=1000 + 3 * batch_size, min_after_dequeue=1000)
+        return boards, sparse_labels
 
 
 def build_fast_train_func():
@@ -98,7 +103,8 @@ def run_training(sess, train_op, loss, name):
         start_time = time.time()
         while not coord.should_stop():
             _, loss_value, summary = sess.run([train_op, loss, merged])
-            train_writer.add_summary(summary, step)
+            if FLAGS.log_summaries:
+                train_writer.add_summary(summary, step)
             if step % FLAGS.batch_size == 0:
                 duration = time.time() - start_time
                 start_time = time.time()
@@ -125,6 +131,7 @@ def run_training(sess, train_op, loss, name):
 
 def run_eval(sess, neural_net):
     print "Evaluating"
+    sess.run(tf.initialize_all_variables())
     v_board, v_label = valid_inputs()
     logits = neural_net.inference(v_board)
     correct_prediction = tf.equal(tf.argmax(logits, 1), tf.cast(v_label, tf.int64))
@@ -132,7 +139,6 @@ def run_eval(sess, neural_net):
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
     tf.scalar_summary('accuracy', accuracy)
-    tf.initialize_all_variables().run()
     mean_accuracy = 0
     step = 0
     try:
