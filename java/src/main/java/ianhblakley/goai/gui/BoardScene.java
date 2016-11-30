@@ -19,6 +19,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 /**
+ * Holds a {@link Scene} of a Go board
+ *
  * Created by ian on 11/16/16.
  */
 class BoardScene {
@@ -66,6 +68,7 @@ class BoardScene {
             circle.setFill(Color.BLACK);
         } else {
             circle.setFill(Color.WHITE);
+            circle.setStroke(Color.BLACK);
         }
         grid.add(circle, move.getPosition().getColumn(), move.getPosition().getRow());
         GridPane.setHalignment(circle, HPos.CENTER);
