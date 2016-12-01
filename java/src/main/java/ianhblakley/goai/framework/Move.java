@@ -39,4 +39,9 @@ public class Move implements Serializable {
     public boolean isNotPass() {
         return !pass;
     }
+
+    @Override
+    public String toString() {
+        return color + ": " + position;
+    }
 }

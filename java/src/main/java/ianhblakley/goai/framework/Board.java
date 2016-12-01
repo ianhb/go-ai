@@ -199,7 +199,9 @@ public class Board implements Serializable {
      */
     public void placeMove(Move move) {
         previousState = Utils.deepCopyBoard(boardMap);
+        logger.trace("StateChecker has liberties %s", StateChecker.checkSuicide(move, this));
         placePiece(move.getColor(), move.getPosition());
+        logger.trace("Liberty Count %s", getCell(move.getPosition()).getLibertyCount(this));
         cellManager.checkCapture2(this, move);
         verifyIntegrity();
     }
@@ -212,15 +214,6 @@ public class Board implements Serializable {
     void placeMoveLight(Move move) {
         placePiece(move.getColor(), move.getPosition());
         cellManager.checkCapture2(this, move);
-    }
-
-    /**
-     * Returns whether the current board cannot have news played on it
-     * @return if the game can't go on
-     */
-    public boolean isEndGame() {
-        return previousState != null &&
-                (getTurnCount() == Math.pow(Constants.BOARD_SIZE, 2));
     }
 
 
@@ -259,6 +252,7 @@ public class Board implements Serializable {
      */
     public void verifyIntegrity() {
         if (Constants.VERIFY_STATES) {
+            logger.trace("Verifying State with %s cells", cellManager.getCellSet().size());
             for (int row = 0; row < Constants.BOARD_SIZE; row++) {
                 for (int column = 0; column < Constants.BOARD_SIZE; column++) {
                     if (getPositionState(row, column) != PositionState.EMPTY) {
@@ -268,12 +262,15 @@ public class Board implements Serializable {
             }
             int blackCells = 0;
             int whiteCells = 0;
+            logger.trace("Board %s", System.identityHashCode(this));
             for (Cell cell : cellManager.getCellSet()) {
                 if (cell.getColor() == PositionState.BLACK) {
                     blackCells += cell.getPieces().size();
                 } else {
                     whiteCells += cell.getPieces().size();
                 }
+                int libertyCount = cell.getLibertyCount(this);
+                assert libertyCount > 0;
             }
             assert blacks == blackCells;
             assert whites == whiteCells;

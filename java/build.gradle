@@ -16,6 +16,7 @@ dependencies {
     compile group: 'io.grpc', name: 'grpc-netty', version: '1.0.1'
     compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.0.1'
     compile group: 'io.grpc', name: 'grpc-stub', version: '1.0.1'
+    compile 'com.google.guava:guava:20.0'
 }
 
 apply plugin: 'com.google.protobuf'
@@ -39,6 +40,7 @@ sourceSets {
 
 clean {
     delete "$projectDir/src/main/generated"
+    delete "$projectDir/logs"
 }
 
 protobuf {
@@ -63,7 +65,13 @@ apply plugin: 'javafx-gradle-plugin'
 jfx {
     // minimal requirement for jfxJar-task
     mainClass = 'ianhblakley.goai.gui.Main'
-
+    jfxMainAppJarName = "goai-jfx.jar"
+    additionalAppResources= 'src'
+    bundleArguments = [
+            licenseType: 'GPLv3',
+            licenseFile: 'LICENSE'
+    ]
+    jvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml", "-ea"]
     // minimal requirement for jfxNative-task
     vendor = 'Ian Blakley'
 }

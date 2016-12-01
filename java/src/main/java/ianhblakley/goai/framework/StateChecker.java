@@ -17,7 +17,7 @@ public class StateChecker {
      * @param state current board state
      * @return if the move results in suicide
      */
-    private static boolean checkSuicide(Move move, Board state) {
+    static boolean checkSuicide(Move move, Board state) {
         if (state.getLiberties(move.getPosition()).size() > 0) {
             return false;
         }
@@ -27,7 +27,11 @@ public class StateChecker {
             if (board.getPositionState(side) == color && board.getCell(side).getLibertyCount(board) > 1) return 1;
             return 0;
         };
-        return Utils.applyToSideReturn(state, move.getPosition(), move.getColor(), checkSides) > 0;
+        int liberties = Utils.applyToSideReturn(state, move.getPosition(), move.getColor(), checkSides);
+        if (liberties <= 0) {
+            return false;
+        }
+        return liberties > 0;
     }
 
     /**

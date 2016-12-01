@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class BotFactory {
 
-    private static final String RANDOM_BOT = "RandomBot";
+    public static final String RANDOM_BOT = "RandomBot";
     private static final String RANDOM_MCTS_BOT = "RandomMCTSBot";
     private static final String UCT_BOT = "UctBot";
     private static final String NEURAL_NET_BOT = "NeuralNetBot";

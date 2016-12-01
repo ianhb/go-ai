@@ -6,6 +6,7 @@ import ianhblakley.goai.framework.Move;
 import ianhblakley.goai.framework.PositionState;
 import ianhblakley.goai.framework.scoring.Scorer;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,61 +17,62 @@ import java.util.concurrent.TimeUnit;
  *
  * Created by ian on 11/16/16.
  */
-class GuiGame implements Runnable {
+class GuiGame extends Task<PositionState> {
 
     private static final Logger logger = LogManager.getFormatterLogger(GuiGame.class);
-
-    private final Bot black;
-    private final Bot white;
-
     private final Scorer scorer;
-
     private final Board board;
+    private Bot black;
+    private Bot white;
     private BoardScene scene;
 
     private int turns;
 
-    GuiGame(Bot black, Bot white, BoardScene scene) {
-        this.black = black;
-        this.white = white;
+    GuiGame(BoardScene scene) {
         this.board = new Board(false);
         this.scene = scene;
         this.scorer = Scorer.getDefaultScorer();
     }
 
-    /**
-     * Plays the game, querying bots for moves and continuing until both players pass
-     */
+    void setBots(Bot black, Bot white) {
+        this.black = black;
+        this.white = white;
+    }
+
     @Override
-    public void run() {
+    public PositionState call() throws Exception {
         // Used because deserialized games won't have bots
         if (black == null || white == null) {
             logger.error("Can't play games from logs");
-            return;
+            return null;
         }
         Move blackMove;
         Move whiteMove;
         do {
             // Blacks Move
             blackMove = playMove(black);
+            logger.trace("Playing %s", blackMove);
             try {
-                TimeUnit.SECONDS.sleep(1);
+                TimeUnit.MILLISECONDS.sleep(100);
             } catch (InterruptedException e) {
                 logger.error("Sleep Error ", e);
+                return null;
             }
 
             // Whites Move
             whiteMove = playMove(white);
+            logger.trace("Playing %s", whiteMove);
             try {
-                TimeUnit.SECONDS.sleep(1);
+                TimeUnit.MILLISECONDS.sleep(100);
             } catch (InterruptedException e) {
                 logger.error("Sleep Error ", e);
+                return null;
             }
 
             // Continue until both players pass
         } while (blackMove.isNotPass() || whiteMove.isNotPass());
-        PositionState winner = scorer.winner(this.board, false);
-        scene.displayWinner(winner);
+        logger.debug("Game Over");
+        return scorer.winner(this.board, false);
     }
 
     private Move playMove(Bot bot) {
@@ -78,14 +80,17 @@ class GuiGame implements Runnable {
         Move move = bot.getPlay(board, turns);
         if (move.isNotPass()) {
             board.placeMove(move);
-            board.verifyIntegrity();
+            Platform.runLater(new BoardUpdater(move));
         }
-        Platform.runLater(new BoardUpdater(move));
         return move;
     }
 
     void setScene(BoardScene scene) {
         this.scene = scene;
+    }
+
+    Scorer getScorer() {
+        return scorer;
     }
 
     class BoardUpdater implements Runnable {

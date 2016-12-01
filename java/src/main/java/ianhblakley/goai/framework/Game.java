@@ -128,7 +128,6 @@ public class Game implements Externalizable {
             if (moves != null) {
                 moves.add(move);
             }
-            board.verifyIntegrity();
         } else {
             if (verbose) logger.info("%s passed on turn %s", move.getColor(), turns);
         }

@@ -17,6 +17,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Holds a {@link Scene} of a Go board
@@ -24,6 +27,8 @@ import javafx.scene.shape.Circle;
  * Created by ian on 11/16/16.
  */
 class BoardScene {
+
+    private static Logger logger = LogManager.getFormatterLogger(BoardScene.class);
 
     private final GridPane grid;
     private final Scene scene;
@@ -33,29 +38,35 @@ class BoardScene {
         grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.getStyleClass().add("game-grid");
-        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+        for (int i = 0; i < Constants.BOARD_SIZE + 1; i++) {
             ColumnConstraints columnConstraints = new ColumnConstraints();
-            columnConstraints.setPercentWidth(100.0 / Constants.BOARD_SIZE);
+            columnConstraints.setPercentWidth(100.0 / (Constants.BOARD_SIZE + 1));
             grid.getColumnConstraints().add(columnConstraints);
             RowConstraints rowConstraints = new RowConstraints();
-            rowConstraints.setPercentHeight(100.0 / Constants.BOARD_SIZE);
+            rowConstraints.setPercentHeight(100.0 / (Constants.BOARD_SIZE + 1));
             grid.getRowConstraints().add(rowConstraints);
         }
-        for (int row = 0; row < Constants.BOARD_SIZE; row++) {
-            for (int column = 0; column < Constants.BOARD_SIZE; column++) {
+        for (int row = 1; row < Constants.BOARD_SIZE + 1; row++) {
+            grid.add(new Text(String.valueOf(row - 1)), 0, row);
+        }
+        for (int column = 1; column < Constants.BOARD_SIZE + 1; column++) {
+            grid.add((new Text(String.valueOf(column - 1))), column, 0);
+        }
+        for (int row = 1; row < Constants.BOARD_SIZE + 1; row++) {
+            for (int column = 1; column < Constants.BOARD_SIZE + 1; column++) {
                 Pane pane = new Pane();
                 pane.getStyleClass().add("game-grid-cell");
-                if (row == 0) {
+                if (row == 1) {
                     pane.getStyleClass().add("first-row");
                 }
-                if (column == 0) {
+                if (column == 1) {
                     pane.getStyleClass().add("first-column");
                 }
                 grid.add(pane, column, row);
             }
         }
 
-        scene = new Scene(grid, 500, 500);
+        scene = new Scene(grid, 600, 600);
         scene.getStylesheets().add(BoardScene.class.getResource("game.css").toExternalForm());
         pieceMap = new Circle[Constants.BOARD_SIZE][Constants.BOARD_SIZE];
     }
@@ -70,14 +81,11 @@ class BoardScene {
             circle.setFill(Color.WHITE);
             circle.setStroke(Color.BLACK);
         }
-        grid.add(circle, move.getPosition().getColumn(), move.getPosition().getRow());
+        grid.add(circle, move.getPosition().getColumn() + 1, move.getPosition().getRow() + 1);
         GridPane.setHalignment(circle, HPos.CENTER);
         GridPane.setValignment(circle, VPos.CENTER);
         pieceMap[move.getPosition().getRow()][move.getPosition().getColumn()] = circle;
-    }
-
-    void displayWinner(PositionState winner) {
-
+        logger.trace("Placed Move %s", move.getPosition());
     }
 
     void updateBoard(Board board) {
@@ -87,6 +95,8 @@ class BoardScene {
                     case EMPTY:
                         if (pieceMap[row][column] != null) {
                             grid.getChildren().remove(pieceMap[row][column]);
+                            pieceMap[row][column] = null;
+                            logger.debug("Removing piece from %s, %s", row, column);
                         }
                         break;
                     case BLACK:
