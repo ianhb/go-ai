@@ -44,8 +44,8 @@ class Main {
 
     private static PositionState playGame(Bot black, Bot white, boolean verbose) {
         logger.info("Starting game between %s and %s", black, white);
-        Game game = new Game(black, white);
-        game.play(verbose);
+        Game game = new Game(black, white, verbose);
+        game.play();
         logger.info("Game Finished: %s vs %s", black, white);
         game.printStats();
         return game.getWinner();

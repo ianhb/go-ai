@@ -22,9 +22,9 @@ class NeuralNetBot extends AbstractBot {
 
     @Override
     public Move getPlay(Board board, int turnNumber) {
-        if (checkCannotPlay()) return new Move();
+        if (checkCannotPlay()) return new Move(color);
         Set<Position> positionSet = board.getAvailableSpaces();
-        if (positionSet.size() == 0) return new Move();
+        if (positionSet.size() == 0) return new Move(color);
         Set<Position> legalMoves = new HashSet<>();
         for (Position p : positionSet) {
             Move m = new Move(p, color);
@@ -34,7 +34,7 @@ class NeuralNetBot extends AbstractBot {
         }
         Position bestMove = client.getBestPosition(color, turnNumber, board, legalMoves);
         if (bestMove == null) {
-            return new Move();
+            return new Move(color);
         }
         playStone();
         return new Move(bestMove, color);

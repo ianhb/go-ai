@@ -1,6 +1,8 @@
 package ianhblakley.goai.framework;
 
 import ianhblakley.goai.Constants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Used to validate whether or not a move is a valid move
@@ -9,6 +11,8 @@ import ianhblakley.goai.Constants;
  * Created by ian on 10/12/16.
  */
 public class StateChecker {
+
+    private static final Logger logger = LogManager.getFormatterLogger(StateChecker.class);
 
     /**
      * Checks if making move results in the piece commiting suicide
@@ -22,12 +26,17 @@ public class StateChecker {
             return false;
         }
         Utils.FourSideFunction checkSides = (board, side, color) -> {
-            if (board.getPositionState(side) == PositionState.EMPTY) return 1;
+            if (board.getPositionState(side) == PositionState.EMPTY) {
+                return 1;
+            }
             assert board.getCell(side) != null;
-            if (board.getPositionState(side) == color && board.getCell(side).getLibertyCount(board) > 1) return 1;
+            if (board.getPositionState(side) == color && board.getCell(side).getLibertyCount(board) > 1) {
+                return 1;
+            }
             return 0;
         };
-        return Utils.applyToSideReturn(state, move.getPosition(), move.getColor(), checkSides) > 0;
+        int liberties = Utils.applyToSideReturn(state, move.getPosition(), move.getColor(), checkSides);
+        return liberties == 0;
     }
 
     /**

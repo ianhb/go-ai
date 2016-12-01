@@ -16,6 +16,7 @@ dependencies {
     compile group: 'io.grpc', name: 'grpc-netty', version: '1.0.1'
     compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.0.1'
     compile group: 'io.grpc', name: 'grpc-stub', version: '1.0.1'
+    compile 'com.google.guava:guava:20.0'
 }
 
 apply plugin: 'com.google.protobuf'
@@ -25,6 +26,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.0'
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.7.0'
     }
 }
 
@@ -38,6 +40,7 @@ sourceSets {
 
 clean {
     delete "$projectDir/src/main/generated"
+    delete "$projectDir/logs"
 }
 
 protobuf {
@@ -58,7 +61,25 @@ protobuf {
     }
 }
 
+apply plugin: 'javafx-gradle-plugin'
+jfx {
+    // minimal requirement for jfxJar-task
+    mainClass = 'ianhblakley.goai.gui.Main'
+    jfxMainAppJarName = "goai-jfx.jar"
+    additionalAppResources= 'src'
+    bundleArguments = [
+            licenseType: 'GPLv3',
+            licenseFile: 'LICENSE'
+    ]
+    jvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml", "-ea"]
+    // minimal requirement for jfxNative-task
+    vendor = 'Ian Blakley'
+}
+
 apply plugin: 'application'
+run{
+    standardInput = System.in
+}
 mainClassName = 'ianhblakley.goai.Main'
 applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml", "-ea",
 //                             "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006"

@@ -9,6 +9,7 @@ Beta Go relies on several components to work correctly:
 * Java 8
 * Python 2.7
 * Gradle 3.1
+* JavaFX 
 
 
 ### Installation
@@ -25,6 +26,8 @@ $ cd goai/python
 $ pip install -r requirements.txt
 $ python -m grpc.tools.protoc -I../proto --python_out=generated --grpc_python_out=generated ../proto/*.proto
 ```
+Since TensorFlow isn't in PyPi, it has to be installed manually. Instruction to install the lastest version 
+can are [here](https://www.tensorflow.org/versions/r0.11/get_started/os_setup.html)
 
 Generating data and training the model:
 ```sh
@@ -53,6 +56,11 @@ $ gradle :clean :build :run
 * **Random MCTS Bot:** Uses the Monte Carlo Tree Search algorithm with random expansion
 * **UCT Bot:** Uses the Monte Carlo Tree Search algorithm with Upper Confidence Threshold expansion
 * **Neural Network Bot:** Uses a trained neural network to select move given the current board state
+* **Human Bot:** Takes console input to make a move
+
+### Acknowledgements
+
+* (JavaFX-Gradle-Plugin)[https://github.com/FibreFoX/javafx-gradle-plugin]
 
 
 

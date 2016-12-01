@@ -4,8 +4,6 @@ import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Move;
 import ianhblakley.goai.framework.PositionState;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Abstract Bot that handles ensuring that no bot has played more stones than supposed to
@@ -14,7 +12,6 @@ import org.apache.logging.log4j.Logger;
  */
 abstract class AbstractBot implements Bot {
 
-    private final static Logger logger = LogManager.getFormatterLogger(RandomBot.class);
     final PositionState color;
     private int stones;
 
