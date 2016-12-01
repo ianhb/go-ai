@@ -204,16 +204,6 @@ public class Board implements Serializable {
         verifyIntegrity();
     }
 
-    /**
-     * Places a move but doesn't record the previous state
-     * Used by {@link StateChecker} to check prospective moves
-     * @param move potential move
-     */
-    void placeMoveLight(Move move) {
-        placePiece(move.getColor(), move.getPosition());
-        cellManager.checkCapture2(this, move);
-    }
-
 
     PositionState[][] getBoardMap() {
         return boardMap;

@@ -19,7 +19,7 @@ public class GameLoggerClient {
 
     private static final Logger logger = LogManager.getFormatterLogger(GameLoggerClient.class);
 
-    private static GameLoggerClient ourInstance = new GameLoggerClient(Constants.LOGGER_SERVER_ADDRESS, Constants.LOGGER_SERVER_PORT);
+    private static final GameLoggerClient ourInstance = new GameLoggerClient(Constants.LOGGER_SERVER_ADDRESS, Constants.LOGGER_SERVER_PORT);
     private final GameLoggerServiceGrpc.GameLoggerServiceBlockingStub blockingStub;
 
 

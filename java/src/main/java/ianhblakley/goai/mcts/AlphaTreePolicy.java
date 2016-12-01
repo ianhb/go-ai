@@ -11,9 +11,9 @@ import org.apache.logging.log4j.Logger;
  */
 class AlphaTreePolicy implements TreePolicy {
 
-    private static Logger logger = LogManager.getFormatterLogger(AlphaTreePolicy.class);
+    private static final Logger logger = LogManager.getFormatterLogger(AlphaTreePolicy.class);
 
-    private NeuralNetworkClient client = NeuralNetworkClient.getInstance();
+    private final NeuralNetworkClient client = NeuralNetworkClient.getInstance();
 
     @Override
     public Node select(Node root) {

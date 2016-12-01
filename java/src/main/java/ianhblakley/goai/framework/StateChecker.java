@@ -1,9 +1,5 @@
 package ianhblakley.goai.framework;
 
-import ianhblakley.goai.Constants;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  * Used to validate whether or not a move is a valid move
  * Includes checks for suicide moves and Ko moves
@@ -11,8 +7,6 @@ import org.apache.logging.log4j.Logger;
  * Created by ian on 10/12/16.
  */
 public class StateChecker {
-
-    private static final Logger logger = LogManager.getFormatterLogger(StateChecker.class);
 
     /**
      * Checks if making move results in the piece commiting suicide
@@ -37,30 +31,6 @@ public class StateChecker {
         };
         int liberties = Utils.applyToSideReturn(state, move.getPosition(), move.getColor(), checkSides);
         return liberties == 0;
-    }
-
-    /**
-     * Checks if making the move will result in KO, or return to a previous gamestate
-     * Only checks last move to avoid immediate return to previous state
-     * @param move potential move
-     * @param state current board state
-     * @param oldState board state before last move was made
-     * @return if the move results in KO
-     */
-    private static boolean checkKO(Move move, Board state, PositionState[][] oldState) {
-        if (oldState == null) {
-            return false;
-        }
-        Board updatedState = state.deepCopy();
-        updatedState.placeMoveLight(move);
-        for (int i = 0; i < Constants.BOARD_SIZE; i++) {
-            for (int j = 0; j < Constants.BOARD_SIZE; j++) {
-                if (updatedState.getBoardMap()[i][j] != oldState[i][j]) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**

@@ -23,7 +23,7 @@ public class NeuralNetworkClient {
 
     private static final Logger logger = LogManager.getFormatterLogger(NeuralNetworkClient.class);
 
-    private static NeuralNetworkClient ourInstance = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS, Constants.NEURAL_SERVER_PORT);
+    private static final NeuralNetworkClient ourInstance = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS, Constants.NEURAL_SERVER_PORT);
     private final NetServiceGrpc.NetServiceBlockingStub blockingStub;
     private final AtomicInteger idCount = new AtomicInteger(0);
 

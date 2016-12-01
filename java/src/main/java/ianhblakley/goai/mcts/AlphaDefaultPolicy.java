@@ -30,7 +30,7 @@ class AlphaDefaultPolicy extends AbstractDefaultPolicy {
         Board currentBoard = leafNode.getState().deepCopy();
         currentBoard.verifyIntegrity();
         Game simulation = new Game(currentBoard, black, white);
-        simulation.play(false);
+        simulation.play();
         return simulation.getWinner();
     }
 

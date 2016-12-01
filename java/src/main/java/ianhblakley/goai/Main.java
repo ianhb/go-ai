@@ -28,7 +28,7 @@ class Main {
                 for (int rounds = 0; rounds < 10; rounds++) {
                     Bot black = BotFactory.getBot(PositionState.BLACK, botSet.get(i));
                     Bot white = BotFactory.getBot(PositionState.WHITE, botSet.get(j));
-                    PositionState winner = playGame(black, white, true);
+                    PositionState winner = playGame(black, white);
                     if (winner == PositionState.BLACK) {
                         wins++;
                     }
@@ -42,9 +42,9 @@ class Main {
         winnerStats.forEach(logger::info);
     }
 
-    private static PositionState playGame(Bot black, Bot white, boolean verbose) {
+    private static PositionState playGame(Bot black, Bot white) {
         logger.info("Starting game between %s and %s", black, white);
-        Game game = new Game(black, white, verbose);
+        Game game = new Game(black, white, true);
         game.play();
         logger.info("Game Finished: %s vs %s", black, white);
         game.printStats();

@@ -129,8 +129,8 @@ public class Game implements Externalizable {
         if (move.isNotPass()) {
             if (verbose) logger.info("%s played move %s on turn %s", move.getColor(), move.getPosition(), turns);
             board.placeMove(move);
-            if (moves != null) {
-                moves.add(move);
+            if (boardStates != null) {
+                boardStates.add(Utils.deepCopyBoard(board.getBoardMap()));
             }
         } else {
             if (verbose) logger.info("%s passed on turn %s", move.getColor(), turns);

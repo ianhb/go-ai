@@ -2,8 +2,6 @@ package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.framework.*;
 import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 class Node {
 
     private static final Random random = new Random(System.currentTimeMillis());
-    private static final Logger logger = LogManager.getFormatterLogger(Node.class);
 
     private final Node parent;
     private final Set<Node> children;
@@ -43,12 +40,7 @@ class Node {
             state.placeMove(new Move(move, color));
         }
         this.possibleChildren = new HashSet<>(state.getAvailableSpaces());
-        Iterator positionIterator = possibleChildren.iterator();
-        while (positionIterator.hasNext()) {
-            if (!StateChecker.isLegalMove(new Move((Position) positionIterator.next(), color), state)) {
-                positionIterator.remove();
-            }
-        }
+        possibleChildren.removeIf(o -> !StateChecker.isLegalMove(new Move(o, color), state));
         //this.possibleChildren.add(null);
         // TODO: add pass as a possible child
         this.terminalState = possibleChildren.size() == 0;
