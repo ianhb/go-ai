@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class RandomBot extends AbstractBot {
 
-    private static Logger logger = LogManager.getFormatterLogger(RandomBot.class);
+    private static final Logger logger = LogManager.getFormatterLogger(RandomBot.class);
 
     public RandomBot(PositionState color) {
         super(color);
@@ -33,15 +33,12 @@ public class RandomBot extends AbstractBot {
         if (legalMoves.size() == 0) {
             return new Move(color);
         }
-        logger.trace("Open Spaces: %s Legal Move Count: %s", positions.size(), legalMoves.size());
-
         List<Position> randomPositions = new ArrayList<>(legalMoves);
         Collections.shuffle(randomPositions);
         Move m = new Move(randomPositions.get(0), color);
         assert (StateChecker.isLegalMove(m, board));
         playStone();
         logger.trace("Playing %s", m);
-        logger.trace("Board %s", System.identityHashCode(board));
         return m;
     }
 

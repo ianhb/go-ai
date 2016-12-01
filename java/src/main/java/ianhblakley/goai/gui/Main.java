@@ -55,6 +55,7 @@ public class Main extends Application {
         whiteBotSelect.getSelectionModel().select(BotFactory.RANDOM_BOT);
         ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
         Button start = new Button("Play");
+        start.requestFocus();
         start.setOnAction(actionEvent -> {
             Bot black = BotFactory.getBot(PositionState.BLACK, blackBotSelect.getValue());
             Bot white = BotFactory.getBot(PositionState.WHITE, whiteBotSelect.getValue());
@@ -71,7 +72,7 @@ public class Main extends Application {
                 VBox dialog = new VBox();
                 dialog.getChildren().add(new Text("Winner: " + result + "\n Score: BLACK: " +
                         guiGame.getScorer().getBlackScore() + " -- WHITE: " + guiGame.getScorer().getWhiteScore()));
-                Scene dialogScene = new Scene(dialog, 200, 50);
+                Scene dialogScene = new Scene(dialog, 300, 50);
                 winnerPopup.setScene(dialogScene);
                 winnerPopup.show();
             });

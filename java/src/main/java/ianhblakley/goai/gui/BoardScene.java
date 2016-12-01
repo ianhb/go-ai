@@ -28,7 +28,7 @@ import org.apache.logging.log4j.Logger;
  */
 class BoardScene {
 
-    private static Logger logger = LogManager.getFormatterLogger(BoardScene.class);
+    private static final Logger logger = LogManager.getFormatterLogger(BoardScene.class);
 
     private final GridPane grid;
     private final Scene scene;

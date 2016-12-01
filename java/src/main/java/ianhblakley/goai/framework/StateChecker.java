@@ -1,6 +1,8 @@
 package ianhblakley.goai.framework;
 
 import ianhblakley.goai.Constants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Used to validate whether or not a move is a valid move
@@ -10,6 +12,8 @@ import ianhblakley.goai.Constants;
  */
 public class StateChecker {
 
+    private static final Logger logger = LogManager.getFormatterLogger(StateChecker.class);
+
     /**
      * Checks if making move results in the piece commiting suicide
      *
@@ -17,21 +21,22 @@ public class StateChecker {
      * @param state current board state
      * @return if the move results in suicide
      */
-    static boolean checkSuicide(Move move, Board state) {
+    private static boolean checkSuicide(Move move, Board state) {
         if (state.getLiberties(move.getPosition()).size() > 0) {
             return false;
         }
         Utils.FourSideFunction checkSides = (board, side, color) -> {
-            if (board.getPositionState(side) == PositionState.EMPTY) return 1;
+            if (board.getPositionState(side) == PositionState.EMPTY) {
+                return 1;
+            }
             assert board.getCell(side) != null;
-            if (board.getPositionState(side) == color && board.getCell(side).getLibertyCount(board) > 1) return 1;
+            if (board.getPositionState(side) == color && board.getCell(side).getLibertyCount(board) > 1) {
+                return 1;
+            }
             return 0;
         };
         int liberties = Utils.applyToSideReturn(state, move.getPosition(), move.getColor(), checkSides);
-        if (liberties <= 0) {
-            return false;
-        }
-        return liberties > 0;
+        return liberties == 0;
     }
 
     /**

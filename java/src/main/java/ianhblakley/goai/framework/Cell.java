@@ -1,8 +1,5 @@
 package ianhblakley.goai.framework;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,8 +9,6 @@ import java.util.Set;
  * Holds the positions of its pieces, the number of liberties it has and the color of the cell
  */
 class Cell implements Serializable {
-
-    private static final Logger logger = LogManager.getFormatterLogger(Cell.class);
 
     private final Set<Position> pieces;
     private PositionState color;

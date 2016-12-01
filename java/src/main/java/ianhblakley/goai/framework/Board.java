@@ -199,9 +199,7 @@ public class Board implements Serializable {
      */
     public void placeMove(Move move) {
         previousState = Utils.deepCopyBoard(boardMap);
-        logger.trace("StateChecker has liberties %s", StateChecker.checkSuicide(move, this));
         placePiece(move.getColor(), move.getPosition());
-        logger.trace("Liberty Count %s", getCell(move.getPosition()).getLibertyCount(this));
         cellManager.checkCapture2(this, move);
         verifyIntegrity();
     }
@@ -262,7 +260,6 @@ public class Board implements Serializable {
             }
             int blackCells = 0;
             int whiteCells = 0;
-            logger.trace("Board %s", System.identityHashCode(this));
             for (Cell cell : cellManager.getCellSet()) {
                 if (cell.getColor() == PositionState.BLACK) {
                     blackCells += cell.getPieces().size();
