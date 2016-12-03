@@ -4,6 +4,7 @@ import ianhblakley.goai.bots.Bot;
 import ianhblakley.goai.bots.BotFactory;
 import ianhblakley.goai.framework.Game;
 import ianhblakley.goai.framework.PositionState;
+import ianhblakley.goai.neuralnetworkconnection.GameLoggerClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +19,7 @@ import java.util.List;
 class Main {
 
     private static final Logger logger = LogManager.getFormatterLogger(Main.class);
+    private static GameLoggerClient client = GameLoggerClient.getInstance();
 
     public static void main(String[] args) throws Exception {
         List<String> winnerStats = new ArrayList<>();
@@ -48,6 +50,7 @@ class Main {
         game.play();
         logger.info("Game Finished: %s vs %s", black, white);
         game.printStats();
+        client.logGame(game);
         return game.getWinner();
     }
 }
