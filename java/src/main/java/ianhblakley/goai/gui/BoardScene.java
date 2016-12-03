@@ -55,6 +55,7 @@ class BoardScene {
         for (int row = 1; row < Constants.BOARD_SIZE + 1; row++) {
             for (int column = 1; column < Constants.BOARD_SIZE + 1; column++) {
                 Pane pane = new Pane();
+
                 pane.getStyleClass().add("game-grid-cell");
                 if (row == 1) {
                     pane.getStyleClass().add("first-row");

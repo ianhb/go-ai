@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 
@@ -10,7 +11,11 @@ import constants
 from generated import neural_net_pb2
 from neural_nets import fast
 from neural_nets import slow
-from neural_nets import value
+
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT)
+logger = logging.getLogger("Neural-Net-Server")
+logger.setLevel(logging.CRITICAL)
 
 
 def build_moves(board, moves):
@@ -72,51 +77,48 @@ class NeuralNetServer(neural_net_pb2.NetServiceServicer):
             saver = tf.train.Saver()
             saver.restore(self._fast_session, constants.FAST_MODEL_FILE)
         self._value_graph = tf.Graph()
-        with self._value_graph.as_default():
-            self._value_session = tf.Session()
-            self._value_neural_net = value.ValueNN()
-            saver = tf.train.Saver()
-            saver.restore(self._value_session, constants.VALUE_MODEL_FILE)
 
-        print "Models Restored"
+        logger.info("Models Restored")
 
     def GetMoveFast(self, request, context):
-        print "Received RPC"
+        logger.debug("Received RPC")
         board_list = build_moves(request.board.array, request.potential_moves)
         best_index, probability = self.find_best_fast_move(board_list)
         response = neural_net_pb2.MoveResponse()
         response.id = request.id
         if best_index == len(board_list) - 1:
-            print "Pass has win chance of {0}".format(probability)
+            logger.info("Pass has win chance of {0}".format(probability))
         else:
-            print "Move {0} has win chance of {1}".format(request.potential_moves[best_index], probability)
+            logger.info("Move has win chance of {0}".format(probability))
             response.best_move.row = request.potential_moves[best_index].row
             response.best_move.column = request.potential_moves[best_index].column
         response.win_probability = float(probability)
         return response
 
     def GetMoveSlow(self, request, context):
-        print "Received RPC"
+        logger.debug("Received Value RPC")
         board_list = build_moves(request.board.array, request.potential_moves)
         best_index, probability = self.find_best_slow_move(board_list)
         response = neural_net_pb2.MoveResponse()
         response.id = request.id
         if best_index == len(board_list) - 1:
-            print "Pass has win chance of {0}".format(probability)
+            logger.info("Pass has win chance of {0}".format(probability))
         else:
-            print "Move {0} has win chance of {1}".format(request.potential_moves[best_index], probability)
+            logger.info("Move {0} has win chance of {1}".format(request.potential_moves[best_index], probability))
             response.best_move.row = request.potential_moves[best_index].row
             response.best_move.column = request.potential_moves[best_index].column
         response.win_probability = float(probability)
         return response
 
-    def GetValue(self, request, context):
-        print "Received RPC"
-        board = build_board(request.array)
-        board_value = self.find_value(board)
-        response = neural_net_pb2.BoardValue()
-        print "Board has value of {0}".format(board_value)
-        response.value = board_value
+    def GetValues(self, request, context):
+        logger.debug("Received Value RPC")
+        board = build_moves(request.board.array, request.potential_moves)
+        with self._fast_graph.as_default():
+            logits = self._fast_neural_net.inference(tf.cast(board, tf.float32))
+            board_values = logits.eval(session=self._fast_session)
+        response = neural_net_pb2.BoardValues()
+        for board_value in board_values:
+            response.board_values.append(float(board_value[0]))
         return response
 
     def find_best_fast_move(self, states):
@@ -125,26 +127,20 @@ class NeuralNetServer(neural_net_pb2.NetServiceServicer):
             return find_best_move(logits, self._fast_session)
 
     def find_best_slow_move(self, states):
-        with self._slow_graph.as_default():
-            logits = self._slow_neural_net.inference(tf.cast(states, tf.float32))
-            return find_best_move(logits, self._slow_session)
-
-    def find_value(self, board):
-        with self._value_graph.as_default():
-            logits = self._value_neural_net.inference(tf.cast(board, tf.float32))
-            board_value = logits.eval(session=self._value_session)
-            return float(board_value[0][0])
+        with self._fast_graph.as_default():
+            logits = self._fast_neural_net.inference(tf.cast(states, tf.float32))
+            return find_best_move(logits, self._fast_session)
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+def serve(port):
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
     neural_net_pb2.add_NetServiceServicer_to_server(NeuralNetServer(), server)
-    server.add_insecure_port('[::]:' + constants.NET_SERVER_PORT)
+    server.add_insecure_port('[::]:' + port)
     server.start()
-    print "Server Started"
+    logger.info("Server Started")
     while True:
         time.sleep(1)
 
 
 if __name__ == '__main__':
-    serve()
+    serve(str(constants.NET_SERVER_PORT))

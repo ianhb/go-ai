@@ -157,6 +157,8 @@ def run_eval(sess, neural_net):
 
 
 def train_fast():
+    if not os.path.exists(os.path.dirname(constants.FAST_MODEL_FILE)):
+        os.mkdir(os.path.dirname(constants.FAST_MODEL_FILE))
     with tf.Graph().as_default():
         sess = tf.Session()
         fast_nn, fast_train, fast_loss = build_fast_train_func()
@@ -173,17 +175,18 @@ def train_fast():
 
 
 def train_slow():
+    if not os.path.exists(os.path.dirname(constants.SLOW_MODEL_FILE)):
+        os.mkdir(os.path.dirname(constants.SLOW_MODEL_FILE))
     with tf.Graph().as_default():
         sess = tf.Session()
         slow_nn, slow_train, slow_loss = build_slow_train_func()
-        saver = tf.train.Saver()
         if os.path.isfile(constants.SLOW_MODEL_FILE):
+            saver = tf.train.Saver()
             print "Loading Slow Neural Net Model"
             saver.restore(sess, constants.SLOW_MODEL_FILE)
         else:
             print "Training Slow Neural Net"
             run_training(sess, slow_train, slow_loss, constants.SLOW)
-            saver.save(sess, constants.SLOW_MODEL_FILE)
         print "Evaluating Slow Neural Net"
         run_eval(sess, slow_nn)
         sess.close()

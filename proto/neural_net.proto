@@ -17,8 +17,12 @@ message Move {
 	int32 column = 2;
 }
 
-message BoardValue {
-	float value = 1;
+message ValueRequest {
+	repeated Board boards = 1;
+}
+
+message BoardValues {
+	repeated float board_values = 1;
 }
 
 message MoveRequest {
@@ -37,6 +41,6 @@ message MoveResponse {
 service NetService {
 	rpc GetMoveFast (MoveRequest) returns (MoveResponse) {}
 	rpc GetMoveSlow (MoveRequest) returns (MoveResponse) {}
-	rpc GetValue (Board) returns (BoardValue) {}
+	rpc GetValues (MoveRequest) returns (BoardValues) {}
 }
 

@@ -13,7 +13,7 @@ class AlphaTreePolicy implements TreePolicy {
 
     private static final Logger logger = LogManager.getFormatterLogger(AlphaTreePolicy.class);
 
-    private final NeuralNetworkClient client = NeuralNetworkClient.getInstance();
+    private final NeuralNetworkClient client = NeuralNetworkClient.getInstance(1);
 
     @Override
     public Node select(Node root) {
@@ -38,7 +38,7 @@ class AlphaTreePolicy implements TreePolicy {
     @Override
     public Node getBestMove(Node n, double cP) {
         assert n.getChildren().size() > 0;
-        double minValue = Float.MIN_VALUE;
+        double minValue = Float.NEGATIVE_INFINITY;
         Node bestChild = null;
         for (Node child : n.getChildren()) {
             double childValue = child.getValue() + child.getWinProbability();
@@ -69,10 +69,11 @@ class AlphaTreePolicy implements TreePolicy {
      */
     private Node selectExpansionChild(Node n) {
         assert n.getChildren().size() > 0;
-        double bestChildValue = Float.MIN_VALUE;
+        double bestChildValue = Float.NEGATIVE_INFINITY;
         Node bestChild = null;
         for (Node child : n.getChildren()) {
-            double childValue = child.getValue() + (child.getWinProbability() / child.getPlays());
+            double childValue = child.getValue();
+            if (child.getPlays() > 0) childValue += (child.getWinProbability() / child.getPlays() + 1);
             if (childValue >= bestChildValue) {
                 bestChildValue = childValue;
                 bestChild = child;

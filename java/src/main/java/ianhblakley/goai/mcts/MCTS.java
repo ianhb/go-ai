@@ -91,7 +91,7 @@ public class MCTS {
                 consumers.submit(policy);
             }
             consumers.shutdownNow();
-            logger.debug("Tree Size: %s", tree.getTreeSize());
+            logger.debug("Tree Size: %s Games Played: %s", tree.getTreeSize(), tree.getRoot().getPlays());
             try {
                 consumers.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
             } catch (InterruptedException e) {

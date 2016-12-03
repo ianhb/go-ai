@@ -7,8 +7,8 @@ SLOW = 'slow'
 FAST = 'fast'
 VALUE = 'value'
 
-SLOW_MODEL_FILE = "models/slow_model.ckpt"
-FAST_MODEL_FILE = "models/fast_model.ckpt"
+SLOW_MODEL_FILE = "models/slow/model.ckpt"
+FAST_MODEL_FILE = "models/fast/model.ckpt"
 VALUE_MODEL_FILE = "models/value_model.ckpt"
 TRAIN_FILE = 'fuseki-TRAIN.tfrecords'
 VALIDATION_FILE = 'fuseki-VALID.tfrecords'
@@ -37,7 +37,7 @@ DATA_DIR = "datagen/data"
 GENERATED_DATA_DIR = "datagen/generated"
 SUMMARY_DIR = "summaries"
 
-NET_SERVER_PORT = '50051'
-LOG_SERVER_PORT = '50052'
+NET_SERVER_PORT = 50051
+LOG_SERVER_PORT = '50050'
 
 LOGGED_GAMES_PER_FILE = 10000

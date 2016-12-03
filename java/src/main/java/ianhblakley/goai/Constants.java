@@ -35,12 +35,12 @@ public class Constants {
     /**
      * Port of the neural network server
      */
-    public static final int LOGGER_SERVER_PORT = 50052;
+    public static final int LOGGER_SERVER_PORT = 50050;
 
     /**
      * Time in seconds that MCTS has to find the best move
      */
-    public static final int COMPUTE_THRESHOLD = 5;
+    public static final int COMPUTE_THRESHOLD = 180;
 
     /**
      * Whether or not to verify the state of the game between moves

@@ -2,6 +2,8 @@ package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.framework.*;
 import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 class Node {
 
+    private static final Logger logger = LogManager.getFormatterLogger(Node.class);
     private static final Random random = new Random(System.currentTimeMillis());
 
     private final Node parent;
@@ -37,7 +40,7 @@ class Node {
         plays = new AtomicInteger(0);
         this.move = move;
         if (move != null) {
-            state.placeMove(new Move(move, color));
+            state.placeMove(new Move(move, Utils.getOppositeColor(color)));
         }
         this.possibleChildren = new HashSet<>(state.getAvailableSpaces());
         possibleChildren.removeIf(o -> !StateChecker.isLegalMove(new Move(o, color), state));
@@ -89,7 +92,7 @@ class Node {
             movesAsBoards = new HashSet<>();
             createMovesAsBoards(client);
         }
-        float highestValue = Float.MIN_VALUE;
+        float highestValue = Float.NEGATIVE_INFINITY;
         ValuedBoard highestValueChild = null;
         for (ValuedBoard b : movesAsBoards) {
             if (b.getValue() >= highestValue) {
@@ -98,7 +101,7 @@ class Node {
             }
         }
         assert highestValueChild != null;
-        Node newChild = addChild(highestValueChild.getMove(), highestValueChild.getBoard());
+        Node newChild = addChild(highestValueChild.getMove(), state.deepCopy());
         newChild.setValue(highestValueChild.getValue());
         movesAsBoards.remove(highestValueChild);
         return newChild;
@@ -106,12 +109,11 @@ class Node {
 
     private void createMovesAsBoards(NeuralNetworkClient client) {
         assert movesAsBoards.size() == 0;
-        for (Position p : getPossibleChildren()) {
-            Board copy = state.deepCopy();
-            copy.placeMove(new Move(p, color));
-            float value = client.getValue(color, copy);
-            ValuedBoard valuedBoard = new ValuedBoard(copy, value, p);
-            movesAsBoards.add(valuedBoard);
+        List<Position> positionList = new ArrayList<>(getPossibleChildren());
+        List<Float> boardValues = client.getValues(color, state, positionList);
+        assert boardValues.size() - 1 == positionList.size();
+        for (int i = 0; i < boardValues.size() - 1; i++) {
+            movesAsBoards.add(new ValuedBoard(boardValues.get(i), positionList.get(i)));
         }
         assert movesAsBoards.size() == getPossibleChildren().size();
     }
@@ -167,7 +169,6 @@ class Node {
      */
     private Node addChild(Position position) {
         Board childState = state.deepCopy();
-        childState.placeMove(new Move(position, color));
         return addChild(position, childState);
     }
 
@@ -210,18 +211,12 @@ class Node {
     }
 
     private class ValuedBoard {
-        private final Board board;
         private final float value;
         private final Position move;
 
-        ValuedBoard(Board board, float value, Position move) {
-            this.board = board;
+        ValuedBoard(float value, Position move) {
             this.value = value;
             this.move = move;
-        }
-
-        Board getBoard() {
-            return board;
         }
 
         float getValue() {

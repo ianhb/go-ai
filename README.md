@@ -57,6 +57,7 @@ $ gradle :clean :build :run
 * **UCT Bot:** Uses the Monte Carlo Tree Search algorithm with Upper Confidence Threshold expansion
 * **Neural Network Bot:** Uses a trained neural network to select move given the current board state
 * **Human Bot:** Takes console input to make a move
+* **Alpha Go Bot:** Uses a combination of neural networks and MCTS to select move
 
 ### Acknowledgements
 

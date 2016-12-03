@@ -26,10 +26,14 @@ public class AlphaGoBot extends MCTSBot {
 
     public static class SimBot extends AbstractBot {
 
-        private final NeuralNetworkClient client = NeuralNetworkClient.getInstance();
+        private NeuralNetworkClient client;
 
         SimBot(PositionState color) {
             super(color);
+        }
+
+        public void setClient(NeuralNetworkClient client) {
+            this.client = client;
         }
 
         @Override

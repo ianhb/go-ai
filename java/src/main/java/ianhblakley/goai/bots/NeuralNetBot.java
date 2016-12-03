@@ -17,7 +17,7 @@ class NeuralNetBot extends AbstractBot {
 
     NeuralNetBot(PositionState color) {
         super(color);
-        client = NeuralNetworkClient.getInstance();
+        client = NeuralNetworkClient.getInstance(1);
     }
 
     @Override

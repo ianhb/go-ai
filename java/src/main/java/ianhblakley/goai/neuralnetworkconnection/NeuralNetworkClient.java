@@ -10,6 +10,9 @@ import io.grpc.ManagedChannelBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,7 +26,12 @@ public class NeuralNetworkClient {
 
     private static final Logger logger = LogManager.getFormatterLogger(NeuralNetworkClient.class);
 
-    private static final NeuralNetworkClient ourInstance = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS, Constants.NEURAL_SERVER_PORT);
+    private static final NeuralNetworkClient instanceOne = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS,
+            Constants.NEURAL_SERVER_PORT);
+    private static final NeuralNetworkClient instanceTwo = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS,
+            Constants.NEURAL_SERVER_PORT + 1);
+    private static final NeuralNetworkClient instanceThree = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS,
+            Constants.NEURAL_SERVER_PORT + 2);
     private final NetServiceGrpc.NetServiceBlockingStub blockingStub;
     private final AtomicInteger idCount = new AtomicInteger(0);
 
@@ -36,8 +44,17 @@ public class NeuralNetworkClient {
         blockingStub = NetServiceGrpc.newBlockingStub(channel);
     }
 
-    public static NeuralNetworkClient getInstance() {
-        return ourInstance;
+    public static NeuralNetworkClient getInstance(int index) {
+        switch (index) {
+            case 1:
+                return instanceOne;
+            case 2:
+                return instanceTwo;
+            case 3:
+                return instanceThree;
+            default:
+                return instanceOne;
+        }
     }
 
     /**
@@ -92,12 +109,21 @@ public class NeuralNetworkClient {
      * @param board current board state
      * @return 0-1 value of current board state
      */
-    public float getValue(PositionState color, Board board) {
-        NeuralNet.Board board1 = buildBoard(color, board);
+    public List<Float> getValues(PositionState color, Board board, List<Position> potentialMoves) {
+        NeuralNet.MoveRequest requestBuilder = buildRequest(color, 0, board, potentialMoves);
         logger.trace("Sending value RPC request to server");
-        NeuralNet.BoardValue value = blockingStub.getValue(board1);
-        logger.trace("Received board value %s", value.getValue());
-        return value.getValue();
+        NeuralNet.BoardValues value = blockingStub.getValues(requestBuilder);
+        logger.trace("Received %s board values", value.getBoardValuesCount());
+        List<Float> values = new ArrayList<>(value.getBoardValuesList());
+        Float maxValue = Collections.max(values);
+        for (int i = 0; i < values.size(); i++) {
+            values.set(i, values.get(i) / maxValue);
+        }
+        return value.getBoardValuesList();
+    }
+
+    private NeuralNet.MoveRequest buildRequest(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
+        return buildRequest(color, turnCount, board, new ArrayList<>(possiblePositions));
     }
 
     /**
@@ -108,7 +134,7 @@ public class NeuralNetworkClient {
      * @param possiblePositions possible playable positions
      * @return request to send to server
      */
-    private NeuralNet.MoveRequest buildRequest(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
+    private NeuralNet.MoveRequest buildRequest(PositionState color, int turnCount, Board board, List<Position> possiblePositions) {
         NeuralNet.MoveRequest.Builder requestBuilder = NeuralNet.MoveRequest.newBuilder();
         requestBuilder.setId(idCount.getAndIncrement());
 
