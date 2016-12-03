@@ -19,6 +19,7 @@ public class BotFactory {
     private static final String NEURAL_NET_BOT = "NeuralNetBot";
     private static final String HUMAN_BOT = "HumanBot";
     private static final String ALPHA_GO_BOT = "AlphaGoBot";
+    private static final String PSEUDO_ALPHA_BOT = "PseudoAlphaBot";
 
     public static Bot getBot(PositionState color, String type) {
         switch (type) {
@@ -36,6 +37,8 @@ public class BotFactory {
                 return new AlphaGoBot(color);
             case NEURAL_SIM_BOT:
                 return new AlphaGoBot.SimBot(color);
+            case PSEUDO_ALPHA_BOT:
+                return new PsuedoAlphaBot(color);
             default:
                 return new RandomBot(color);
         }
@@ -43,6 +46,7 @@ public class BotFactory {
 
     public static List<String> botTypes() {
         List<String> botSet = new ArrayList<>();
+        botSet.add(PSEUDO_ALPHA_BOT);
         botSet.add(ALPHA_GO_BOT);
         botSet.add(UCT_BOT);
         botSet.add(NEURAL_NET_BOT);

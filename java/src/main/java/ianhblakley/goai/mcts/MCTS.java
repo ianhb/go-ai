@@ -61,6 +61,10 @@ public class MCTS {
         return new MCTS(new AlphaTreePolicy(), new AlphaDefaultPolicy.AlphaDefaultPolicyFactory(), color);
     }
 
+    public static MCTS psuedoMCTS(PositionState color) {
+        return new MCTS(new AlphaTreePolicy(), new RandomDefaultPolicy.RandomDefaultPolicyFactory(), color);
+    }
+
     /**
      * Finds the best move for the given board for the player color
      *
