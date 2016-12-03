@@ -81,6 +81,6 @@ run{
     standardInput = System.in
 }
 mainClassName = 'ianhblakley.goai.Main'
-applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml", "-ea", "-Xmx4G"
+applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml", "-ea", "-Xmx10G"
 //                             "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006"
 ]

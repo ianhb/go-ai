@@ -67,7 +67,7 @@ class GameLoggerServer(game_logger_pb2.GameLoggerServiceServicer):
 
 
 def serve():
-    if os.path.exists(os.path.dirname(constants.GENERATED_DATA_DIR)):
+    if not os.path.exists(os.path.dirname(constants.GENERATED_DATA_DIR)):
         os.mkdir(os.path.dirname(constants.GENERATED_DATA_DIR))
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     game_logger_pb2.add_GameLoggerServiceServicer_to_server(GameLoggerServer(), server)
