@@ -1,6 +1,6 @@
 package ianhblakley.goai.mcts;
 
-import ianhblakley.goai.bots.AlphaGoBot;
+import ianhblakley.goai.bots.Bot;
 import ianhblakley.goai.bots.BotFactory;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Game;
@@ -18,15 +18,15 @@ class AlphaDefaultPolicy extends AbstractDefaultPolicy {
     }
 
     /**
-     * Simulates a game with two {@link ianhblakley.goai.bots.AlphaGoBot.SimBot} instance and returns the winning color
+     * Simulates a game with two {@link ianhblakley.goai.bots.NeuralNetBot} instance and returns the winning color
      * Simulation is started at the board state of the node passed in the constructor
      *
      * @return winning color
      */
     @Override
     public PositionState simulate() {
-        AlphaGoBot.SimBot black = (AlphaGoBot.SimBot) BotFactory.getBot(PositionState.BLACK, BotFactory.NEURAL_SIM_BOT);
-        AlphaGoBot.SimBot white = (AlphaGoBot.SimBot) BotFactory.getBot(PositionState.WHITE, BotFactory.NEURAL_SIM_BOT);
+        Bot black = BotFactory.getBot(PositionState.BLACK, BotFactory.NEURAL_NET_BOT);
+        Bot white = BotFactory.getBot(PositionState.WHITE, BotFactory.NEURAL_NET_BOT);
         Board currentBoard = leafNode.getState().deepCopy();
         currentBoard.verifyIntegrity();
         Game simulation = new Game(currentBoard, black, white);

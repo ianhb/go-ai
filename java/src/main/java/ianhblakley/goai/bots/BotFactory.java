@@ -12,11 +12,10 @@ import java.util.List;
  */
 public class BotFactory {
 
-    public static final String NEURAL_SIM_BOT = "NeuralSimBot";
     public static final String RANDOM_BOT = "RandomBot";
+    public static final String NEURAL_NET_BOT = "NeuralNetBot";
     private static final String RANDOM_MCTS_BOT = "RandomMCTSBot";
     private static final String UCT_BOT = "UctBot";
-    private static final String NEURAL_NET_BOT = "NeuralNetBot";
     private static final String HUMAN_BOT = "HumanBot";
     private static final String ALPHA_GO_BOT = "AlphaGoBot";
     private static final String PSEUDO_ALPHA_BOT = "PseudoAlphaBot";
@@ -35,8 +34,6 @@ public class BotFactory {
                 return new HumanBot(color);
             case ALPHA_GO_BOT:
                 return new AlphaGoBot(color);
-            case NEURAL_SIM_BOT:
-                return new AlphaGoBot.SimBot(color);
             case PSEUDO_ALPHA_BOT:
                 return new PsuedoAlphaBot(color);
             default:
@@ -46,9 +43,9 @@ public class BotFactory {
 
     public static List<String> botTypes() {
         List<String> botSet = new ArrayList<>();
-        botSet.add(NEURAL_NET_BOT);
         botSet.add(PSEUDO_ALPHA_BOT);
         botSet.add(ALPHA_GO_BOT);
+        botSet.add(NEURAL_NET_BOT);
         botSet.add(UCT_BOT);
         botSet.add(RANDOM_MCTS_BOT);
         botSet.add(RANDOM_BOT);

@@ -44,7 +44,9 @@ class Node {
         }
         this.possibleChildren = new HashSet<>(state.getAvailableSpaces());
         possibleChildren.removeIf(o -> !StateChecker.isLegalMove(new Move(o, color), state));
-        possibleChildren.add(null);
+        if (possibleChildren.size() < 100) {
+            possibleChildren.add(null);
+        }
         //this.possibleChildren.add(null);
         // TODO: add pass as a possible child
         this.terminalState = possibleChildren.size() == 0;

@@ -1,12 +1,7 @@
 package ianhblakley.goai.bots;
 
-import ianhblakley.goai.framework.*;
+import ianhblakley.goai.framework.PositionState;
 import ianhblakley.goai.mcts.MCTS;
-import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Bot that uses the Google Alpha-Go strategy of combining neural networks and MCTS to select a move
@@ -23,36 +18,5 @@ public class AlphaGoBot extends MCTSBot {
     @Override
     public String toString() {
         return "Alpha Go Bot";
-    }
-
-    public static class SimBot extends AbstractBot {
-
-        private NeuralNetworkClient client = NeuralNetworkClient.getInstance();
-
-        SimBot(PositionState color) {
-            super(color);
-        }
-
-        @Override
-        public Move getPlay(Board board, int turnNumber) {
-            if (checkCannotPlay()) return new Move(color);
-            Set<Position> positionSet = board.getAvailableSpaces();
-            if (positionSet.size() == 0) return new Move(color);
-            List<Position> legalMoves = new ArrayList<>();
-            for (Position p : positionSet) {
-                Move m = new Move(p, color);
-                if (StateChecker.isLegalMove(m, board)) {
-                    legalMoves.add(p);
-                }
-            }
-            legalMoves.add(null);
-            Position bestMove = client.getBestPosition(color, board, legalMoves);
-            if (bestMove == null) {
-                return new Move(color);
-            }
-            playStone();
-            return new Move(bestMove, color);
-        }
-
     }
 }

@@ -34,7 +34,9 @@ class NeuralNetBot extends AbstractBot {
                 legalMoves.add(p);
             }
         }
-        legalMoves.add(null);
+        if (legalMoves.size() < 100) {
+            legalMoves.add(null);
+        }
         Position bestMove = client.getBestPosition(color, board, legalMoves);
         if (bestMove == null) {
             return new Move(color);
