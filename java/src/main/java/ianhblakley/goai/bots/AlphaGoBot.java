@@ -4,7 +4,8 @@ import ianhblakley.goai.framework.*;
 import ianhblakley.goai.mcts.MCTS;
 import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,14 +27,10 @@ public class AlphaGoBot extends MCTSBot {
 
     public static class SimBot extends AbstractBot {
 
-        private NeuralNetworkClient client;
+        private NeuralNetworkClient client = NeuralNetworkClient.getInstance();
 
         SimBot(PositionState color) {
             super(color);
-        }
-
-        public void setClient(NeuralNetworkClient client) {
-            this.client = client;
         }
 
         @Override
@@ -41,14 +38,15 @@ public class AlphaGoBot extends MCTSBot {
             if (checkCannotPlay()) return new Move(color);
             Set<Position> positionSet = board.getAvailableSpaces();
             if (positionSet.size() == 0) return new Move(color);
-            Set<Position> legalMoves = new HashSet<>();
+            List<Position> legalMoves = new ArrayList<>();
             for (Position p : positionSet) {
                 Move m = new Move(p, color);
                 if (StateChecker.isLegalMove(m, board)) {
                     legalMoves.add(p);
                 }
             }
-            Position bestMove = client.getSimulationPosition(color, turnNumber, board, legalMoves);
+            legalMoves.add(null);
+            Position bestMove = client.getBestPosition(color, board, legalMoves);
             if (bestMove == null) {
                 return new Move(color);
             }

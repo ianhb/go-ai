@@ -1,12 +1,10 @@
 package ianhblakley.goai.mcts;
 
-import ianhblakley.goai.Constants;
 import ianhblakley.goai.bots.AlphaGoBot;
 import ianhblakley.goai.bots.BotFactory;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Game;
 import ianhblakley.goai.framework.PositionState;
-import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
 
 /**
  * Default policy that simulates using a fast neural network
@@ -29,8 +27,6 @@ class AlphaDefaultPolicy extends AbstractDefaultPolicy {
     public PositionState simulate() {
         AlphaGoBot.SimBot black = (AlphaGoBot.SimBot) BotFactory.getBot(PositionState.BLACK, BotFactory.NEURAL_SIM_BOT);
         AlphaGoBot.SimBot white = (AlphaGoBot.SimBot) BotFactory.getBot(PositionState.WHITE, BotFactory.NEURAL_SIM_BOT);
-        black.setClient(NeuralNetworkClient.getInstance((int) Thread.currentThread().getId() % Constants.THREAD_COUNT));
-        white.setClient(NeuralNetworkClient.getInstance((int) Thread.currentThread().getId() % Constants.THREAD_COUNT));
         Board currentBoard = leafNode.getState().deepCopy();
         currentBoard.verifyIntegrity();
         Game simulation = new Game(currentBoard, black, white);

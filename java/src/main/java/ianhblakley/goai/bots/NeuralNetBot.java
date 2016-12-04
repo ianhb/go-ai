@@ -3,7 +3,8 @@ package ianhblakley.goai.bots;
 import ianhblakley.goai.framework.*;
 import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,22 +18,24 @@ class NeuralNetBot extends AbstractBot {
 
     NeuralNetBot(PositionState color) {
         super(color);
-        client = NeuralNetworkClient.getInstance(1);
+        client = NeuralNetworkClient.getInstance();
     }
 
     @Override
     public Move getPlay(Board board, int turnNumber) {
         if (checkCannotPlay()) return new Move(color);
         Set<Position> positionSet = board.getAvailableSpaces();
+
         if (positionSet.size() == 0) return new Move(color);
-        Set<Position> legalMoves = new HashSet<>();
+        List<Position> legalMoves = new ArrayList<>();
         for (Position p : positionSet) {
             Move m = new Move(p, color);
             if (StateChecker.isLegalMove(m, board)) {
                 legalMoves.add(p);
             }
         }
-        Position bestMove = client.getBestPosition(color, turnNumber, board, legalMoves);
+        legalMoves.add(null);
+        Position bestMove = client.getBestPosition(color, board, legalMoves);
         if (bestMove == null) {
             return new Move(color);
         }

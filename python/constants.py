@@ -12,6 +12,7 @@ FAST_MODEL_FILE = "models/fast/model.ckpt"
 VALUE_MODEL_FILE = "models/value_model.ckpt"
 TRAIN_FILE = 'fuseki-TRAIN.tfrecords'
 VALIDATION_FILE = 'fuseki-VALID.tfrecords'
+EXPORT_PATH = 'models/export/fast_model'
 
 LEARNING_RATE = 0.01
 FAST_HIDDEN1 = 128

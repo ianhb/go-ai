@@ -50,7 +50,9 @@ class Main {
         game.play();
         logger.info("Game Finished: %s vs %s", black, white);
         game.printStats();
-        client.logGame(game);
+        if (Constants.LOG_GAMES) {
+            client.logGame(game);
+        }
         return game.getWinner();
     }
 }

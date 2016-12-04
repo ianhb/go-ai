@@ -46,10 +46,10 @@ public class BotFactory {
 
     public static List<String> botTypes() {
         List<String> botSet = new ArrayList<>();
+        botSet.add(NEURAL_NET_BOT);
         botSet.add(PSEUDO_ALPHA_BOT);
         botSet.add(ALPHA_GO_BOT);
         botSet.add(UCT_BOT);
-        botSet.add(NEURAL_NET_BOT);
         botSet.add(RANDOM_MCTS_BOT);
         botSet.add(RANDOM_BOT);
         return botSet;

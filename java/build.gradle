@@ -16,6 +16,7 @@ dependencies {
     compile group: 'io.grpc', name: 'grpc-netty', version: '1.0.1'
     compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.0.1'
     compile group: 'io.grpc', name: 'grpc-stub', version: '1.0.1'
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.1.0'
     compile 'com.google.guava:guava:20.0'
 }
 
@@ -81,6 +82,6 @@ run{
     standardInput = System.in
 }
 mainClassName = 'ianhblakley.goai.Main'
-applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml", "-ea", "-Xmx10G"
+applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=src/log4j2.xml", "-ea", "-Xmx10G",
 //                             "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5006"
 ]

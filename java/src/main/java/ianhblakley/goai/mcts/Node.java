@@ -44,6 +44,7 @@ class Node {
         }
         this.possibleChildren = new HashSet<>(state.getAvailableSpaces());
         possibleChildren.removeIf(o -> !StateChecker.isLegalMove(new Move(o, color), state));
+        possibleChildren.add(null);
         //this.possibleChildren.add(null);
         // TODO: add pass as a possible child
         this.terminalState = possibleChildren.size() == 0;
@@ -111,8 +112,8 @@ class Node {
         assert movesAsBoards.size() == 0;
         List<Position> positionList = new ArrayList<>(getPossibleChildren());
         List<Float> boardValues = client.getValues(color, state, positionList);
-        assert boardValues.size() - 1 == positionList.size();
-        for (int i = 0; i < boardValues.size() - 1; i++) {
+        assert boardValues.size() == positionList.size();
+        for (int i = 0; i < boardValues.size(); i++) {
             movesAsBoards.add(new ValuedBoard(boardValues.get(i), positionList.get(i)));
         }
         assert movesAsBoards.size() == getPossibleChildren().size();

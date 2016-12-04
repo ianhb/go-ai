@@ -25,7 +25,7 @@ public class Constants {
     /**
      * Port of the neural network server
      */
-    public static final int NEURAL_SERVER_PORT = 50051;
+    public static final int NEURAL_SERVER_PORT = 9000;
 
     /**
      * Address of the neural network server
@@ -40,10 +40,12 @@ public class Constants {
     /**
      * Time in seconds that MCTS has to find the best move
      */
-    public static final int COMPUTE_THRESHOLD = 180;
+    public static final int COMPUTE_THRESHOLD = 60;
 
     /**
      * Whether or not to verify the state of the game between moves
      */
     public static final boolean VERIFY_STATES = true;
+
+    static final boolean LOG_GAMES = false;
 }

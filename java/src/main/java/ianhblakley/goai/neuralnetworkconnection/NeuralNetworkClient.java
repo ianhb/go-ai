@@ -9,12 +9,16 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.tensorflow.framework.DataType;
+import org.tensorflow.framework.TensorProto;
+import org.tensorflow.framework.TensorShapeProto;
+import tensorflow.serving.Model;
+import tensorflow.serving.Predict;
+import tensorflow.serving.PredictionServiceGrpc;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Client interface to connect to grpc server that evaluates board states and potential moves using
@@ -26,14 +30,9 @@ public class NeuralNetworkClient {
 
     private static final Logger logger = LogManager.getFormatterLogger(NeuralNetworkClient.class);
 
-    private static final NeuralNetworkClient instanceOne = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS,
+    private static final NeuralNetworkClient instance = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS,
             Constants.NEURAL_SERVER_PORT);
-    private static final NeuralNetworkClient instanceTwo = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS,
-            Constants.NEURAL_SERVER_PORT + 1);
-    private static final NeuralNetworkClient instanceThree = new NeuralNetworkClient(Constants.NEURAL_SERVER_ADDRESS,
-            Constants.NEURAL_SERVER_PORT + 2);
-    private final NetServiceGrpc.NetServiceBlockingStub blockingStub;
-    private final AtomicInteger idCount = new AtomicInteger(0);
+    private final PredictionServiceGrpc.PredictionServiceBlockingStub blockingStub;
 
     private NeuralNetworkClient(String host, int port) {
         this(ManagedChannelBuilder.forAddress(host, port).usePlaintext(true));
@@ -41,20 +40,53 @@ public class NeuralNetworkClient {
 
     private NeuralNetworkClient(ManagedChannelBuilder<?> channelBuilder) {
         ManagedChannel channel = channelBuilder.build();
-        blockingStub = NetServiceGrpc.newBlockingStub(channel);
+        blockingStub = PredictionServiceGrpc.newBlockingStub(channel);
     }
 
-    public static NeuralNetworkClient getInstance(int index) {
-        switch (index) {
-            case 1:
-                return instanceOne;
-            case 2:
-                return instanceTwo;
-            case 3:
-                return instanceThree;
-            default:
-                return instanceOne;
+    public static NeuralNetworkClient getInstance() {
+        return instance;
+    }
+
+    private static void addBoard(TensorProto.Builder builder, PositionState[][] board, PositionState color) {
+        for (int row = 0; row < Constants.BOARD_SIZE; row++) {
+            for (int column = 0; column < Constants.BOARD_SIZE; column++) {
+                PositionState indexState = board[row][column];
+                if (indexState == color) {
+                    builder.addIntVal(1);
+                } else if (indexState == Utils.getOppositeColor(color)) {
+                    builder.addIntVal(-1);
+                } else {
+                    builder.addIntVal(0);
+                }
+            }
         }
+    }
+
+    private static Predict.PredictRequest makeRequest(PositionState color, Board board, List<Position> moves) {
+        Predict.PredictRequest.Builder builder = Predict.PredictRequest.newBuilder();
+        builder.setModelSpec(Model.ModelSpec.newBuilder().setName("fast").build());
+        TensorProto.Builder tensorBuilder = TensorProto.newBuilder();
+        tensorBuilder.setDtype(DataType.DT_FLOAT);
+        TensorShapeProto.Builder shapeBuilder = TensorShapeProto.newBuilder();
+        shapeBuilder.addDim(0, TensorShapeProto.Dim.newBuilder().setSize(moves.size()));
+        shapeBuilder.addDim(1, TensorShapeProto.Dim.newBuilder().setSize(Constants.BOARD_SIZE * Constants.BOARD_SIZE));
+        tensorBuilder.setTensorShape(shapeBuilder.build());
+        for (Position position : moves) {
+            PositionState[][] copy = board.stateCopy();
+            if (position != null) {
+                copy[position.getRow()][position.getColumn()] = color;
+            }
+            addBoard(tensorBuilder, copy, color);
+        }
+        builder.putInputs("boards", tensorBuilder.build());
+        return builder.build();
+    }
+
+    public static void main(String[] args) {
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(Constants.NEURAL_SERVER_ADDRESS, 9000).usePlaintext(true).build();
+        PredictionServiceGrpc.PredictionServiceBlockingStub predictionServiceGrpc = PredictionServiceGrpc.newBlockingStub(channel);
+        Board board = new Board(false);
+        logger.debug(predictionServiceGrpc.predict(makeRequest(PositionState.BLACK, board, new ArrayList<>(board.getAvailableSpaces()))));
     }
 
     /**
@@ -62,44 +94,17 @@ public class NeuralNetworkClient {
      * Uses the bigger/slower policy neural net
      *
      * @param color             color of move to play
-     * @param turnCount         current turnCount
      * @param board             current baord state
      * @param possiblePositions possible positions to play
      * @return best move according to slow policy neural net
      */
-    public Position getBestPosition(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
-        NeuralNet.MoveRequest request = buildRequest(color, turnCount, board, possiblePositions);
-        logger.trace("Sending slow RPC request %s to server", request.getId());
-        NeuralNet.MoveResponse response = blockingStub.getMoveSlow(request);
+    public Position getBestPosition(PositionState color, Board board, List<Position> possiblePositions) {
+        Predict.PredictRequest request = makeRequest(color, board, possiblePositions);
+        logger.trace("Sending slow RPC request to server");
+        Predict.PredictResponse response = blockingStub.predict(request);
         logger.trace("Recieved response with %s", response);
-        assert request.getId() == response.getId();
-        if (response.hasBestMove()) {
-            return new Position(response.getBestMove().getRow(), response.getBestMove().getColumn());
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Gets the best position to play from a given game state for MCTS simulations
-     * Uses the smaller/faster policy neural net
-     * @param color color of move to play
-     * @param turnCount current turnCount
-     * @param board current baord state
-     * @param possiblePositions possible positions to play
-     * @return best move according to fast policy neural net
-     */
-    public Position getSimulationPosition(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
-        NeuralNet.MoveRequest request = buildRequest(color, turnCount, board, possiblePositions);
-        logger.trace("Sending fast RPC request %s to server", request.getId());
-        NeuralNet.MoveResponse response = blockingStub.getMoveFast(request);
-        logger.trace("Recieved response with %s", response);
-        assert request.getId() == response.getId();
-        if (response.hasBestMove()) {
-            return new Position(response.getBestMove().getRow(), response.getBestMove().getColumn());
-        } else {
-            return null;
-        }
+        int bestIndex = getBestIndex(response);
+        return possiblePositions.get(bestIndex);
     }
 
     /**
@@ -110,66 +115,38 @@ public class NeuralNetworkClient {
      * @return 0-1 value of current board state
      */
     public List<Float> getValues(PositionState color, Board board, List<Position> potentialMoves) {
-        NeuralNet.MoveRequest requestBuilder = buildRequest(color, 0, board, potentialMoves);
+        Predict.PredictRequest request = makeRequest(color, board, potentialMoves);
         logger.trace("Sending value RPC request to server");
-        NeuralNet.BoardValues value = blockingStub.getValues(requestBuilder);
-        logger.trace("Received %s board values", value.getBoardValuesCount());
-        List<Float> values = new ArrayList<>(value.getBoardValuesList());
+        Predict.PredictResponse response = blockingStub.predict(request);
+        logger.trace("Received %s board values", response.getOutputsCount());
+        List<Float> values = getValues(response);
         Float maxValue = Collections.max(values);
         for (int i = 0; i < values.size(); i++) {
             values.set(i, values.get(i) / maxValue);
         }
-        return value.getBoardValuesList();
+        return values;
     }
 
-    private NeuralNet.MoveRequest buildRequest(PositionState color, int turnCount, Board board, Set<Position> possiblePositions) {
-        return buildRequest(color, turnCount, board, new ArrayList<>(possiblePositions));
-    }
-
-    /**
-     * Builds a {@link ianhblakley.goai.neuralnetworkconnection.NeuralNet.MoveRequest} from provided parameters
-     * @param color color to play
-     * @param turnCount current # of turns
-     * @param board current board state
-     * @param possiblePositions possible playable positions
-     * @return request to send to server
-     */
-    private NeuralNet.MoveRequest buildRequest(PositionState color, int turnCount, Board board, List<Position> possiblePositions) {
-        NeuralNet.MoveRequest.Builder requestBuilder = NeuralNet.MoveRequest.newBuilder();
-        requestBuilder.setId(idCount.getAndIncrement());
-
-        NeuralNet.Board protoBoard = buildBoard(color, board);
-        requestBuilder.setBoard(protoBoard);
-        for (Position position : possiblePositions) {
-            requestBuilder.addPotentialMoves(NeuralNet.Move.newBuilder().setRow(position.getRow()).
-                    setColumn(position.getColumn()).build());
+    private List<Float> getValues(Predict.PredictResponse response) {
+        List<Float> values = new ArrayList<>();
+        TensorProto results = response.getOutputsOrThrow("labels");
+        for (int i = 0; i < results.getFloatValCount(); i += 2) {
+            values.add(results.getFloatVal(i));
         }
-        requestBuilder.setTurnCount(turnCount);
-        return requestBuilder.build();
+        return values;
     }
 
-    /**
-     * Builds a {@link ianhblakley.goai.neuralnetworkconnection.NeuralNet.Board} from a {@link Board} and
-     * {@link PositionState}. Pieces are translated into PLAYER and OPPONENT depending on color
-     * @param color color to build board for
-     * @param board current board state
-     * @return proto representation of board
-     */
-    private NeuralNet.Board buildBoard(PositionState color, Board board) {
-        NeuralNet.Board.Builder protoBoard = NeuralNet.Board.newBuilder();
-        for (int row = 0; row < Constants.BOARD_SIZE; row++) {
-            for (int column = 0; column < Constants.BOARD_SIZE; column++) {
-                PositionState indexState = board.getPositionState(row, column);
-                if (indexState == color) {
-                    protoBoard.addArray(NeuralNet.Board.PositionState.PLAYER);
-                } else if (indexState == Utils.getOppositeColor(color)) {
-                    protoBoard.addArray(NeuralNet.Board.PositionState.OPPONENT);
-                } else {
-                    protoBoard.addArray(NeuralNet.Board.PositionState.EMPTY);
-                }
+    private int getBestIndex(Predict.PredictResponse response) {
+        TensorProto results = response.getOutputsOrThrow("labels");
+        float bestValue = Float.NEGATIVE_INFINITY;
+        int bestIndex = -1;
+        for (int i = 0; i < results.getFloatValCount(); i += 2) {
+            if (results.getFloatVal(i) >= bestValue) {
+                bestValue = results.getFloatVal(i);
+                bestIndex = (i / 2);
             }
         }
-        return protoBoard.build();
+        return bestIndex;
     }
 
 }

@@ -2,6 +2,7 @@ import os
 import time
 
 import tensorflow as tf
+from tensorflow.contrib.session_bundle import exporter
 
 import constants
 from neural_nets import fast
@@ -21,6 +22,7 @@ flags.DEFINE_string('summary_dir', constants.SUMMARY_DIR, 'Directory with summar
 flags.DEFINE_string('model_type', 'fast', 'Model type to train: fast, slow, value')
 flags.DEFINE_integer('num_epochs', constants.NUM_EPOCHS, 'Number of times to run through training data')
 flags.DEFINE_bool('log_summaries', False, 'Save summary logs')
+flags.DEFINE_integer('export_version', 1, 'Model Version Number')
 
 
 def read_and_decode(filename_queue):
@@ -68,7 +70,7 @@ def build_fast_train_func():
     logits = go_neural_net.inference(t_boards)
     loss = tools.soft_max_loss(logits, t_labels)
     train_op = tools.training(loss, FLAGS.learning_rate)
-    return go_neural_net, train_op, loss
+    return t_boards, logits, go_neural_net, train_op, loss
 
 
 def build_slow_train_func():
@@ -161,7 +163,7 @@ def train_fast():
         os.mkdir(os.path.dirname(constants.FAST_MODEL_FILE))
     with tf.Graph().as_default():
         sess = tf.Session()
-        fast_nn, fast_train, fast_loss = build_fast_train_func()
+        boards, logits, fast_nn, fast_train, fast_loss = build_fast_train_func()
         if os.path.isfile(constants.FAST_MODEL_FILE):
             saver = tf.train.Saver()
             print "Loading Fast Neural Net Model"
@@ -170,7 +172,18 @@ def train_fast():
             print "Training Fast Neural Net"
             run_training(sess, fast_train, fast_loss, constants.FAST)
         print "Evaluating Fast Neural Net"
-        run_eval(sess, fast_nn)
+        #run_eval(sess, fast_nn)
+        print "Exporting Model with number {0}".format(FLAGS.export_version)
+        saver = tf.train.Saver(sharded=True)
+        model_exporter = exporter.Exporter(saver)
+        model_exporter.init(
+            sess.graph.as_graph_def(),
+            named_graph_signatures={
+                'inputs': exporter.generic_signature({'boards': boards}),
+                'outputs': exporter.generic_signature({'labels': logits})
+            }
+        )
+        model_exporter.export(constants.EXPORT_PATH, tf.constant(FLAGS.export_version), sess)
         sess.close()
 
 

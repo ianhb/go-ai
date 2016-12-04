@@ -193,6 +193,10 @@ public class Board implements Serializable {
         return cellManager.getCell(new Position(row, column));
     }
 
+    public PositionState[][] stateCopy() {
+        return Utils.deepCopyBoard(boardMap);
+    }
+
     /**
      * Places move {@link Move} on the board
      * @param move move to play

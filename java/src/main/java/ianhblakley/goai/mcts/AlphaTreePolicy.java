@@ -13,7 +13,7 @@ class AlphaTreePolicy implements TreePolicy {
 
     private static final Logger logger = LogManager.getFormatterLogger(AlphaTreePolicy.class);
 
-    private final NeuralNetworkClient client = NeuralNetworkClient.getInstance(1);
+    private final NeuralNetworkClient client = NeuralNetworkClient.getInstance();
 
     @Override
     public Node select(Node root) {
