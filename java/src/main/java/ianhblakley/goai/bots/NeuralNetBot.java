@@ -1,5 +1,6 @@
 package ianhblakley.goai.bots;
 
+import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.*;
 import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
 
@@ -34,7 +35,7 @@ class NeuralNetBot extends AbstractBot {
                 legalMoves.add(p);
             }
         }
-        if (legalMoves.size() < 100) {
+        if (legalMoves.size() < Constants.ALLOW_PASS_COUNT) {
             legalMoves.add(null);
         }
         Position bestMove = client.getBestPosition(color, board, legalMoves);

@@ -48,4 +48,6 @@ public class Constants {
     public static final boolean VERIFY_STATES = true;
 
     static final boolean LOG_GAMES = false;
+
+    public static final int ALLOW_PASS_COUNT = 200;
 }

@@ -79,12 +79,11 @@ $ python main.py
 To build and start the neural network server
 ```sh
 $ git clone --recurse-submodules https://github.com/tensorflow/serving
-$ cd serving
 $ cd serving/tensorflow
 $ ./configure
 $ cd ..
 $ bazel build tensorflow_serving/model_servers:tensorflow_model_server
-$ ./bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --model_name=fast --model_base_path=/tmp/models/export/fast_model
+$ ./bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --model_name=fast --model_base_path=/tmp/models/export/fast_model --port=9000
 ```
 
 Run all possible games:

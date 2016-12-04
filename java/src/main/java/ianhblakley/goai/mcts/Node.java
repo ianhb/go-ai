@@ -1,5 +1,6 @@
 package ianhblakley.goai.mcts;
 
+import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.*;
 import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +45,7 @@ class Node {
         }
         this.possibleChildren = new HashSet<>(state.getAvailableSpaces());
         possibleChildren.removeIf(o -> !StateChecker.isLegalMove(new Move(o, color), state));
-        if (possibleChildren.size() < 100) {
+        if (possibleChildren.size() < Constants.ALLOW_PASS_COUNT) {
             possibleChildren.add(null);
         }
         //this.possibleChildren.add(null);

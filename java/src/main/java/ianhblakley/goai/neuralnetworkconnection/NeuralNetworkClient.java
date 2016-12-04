@@ -82,13 +82,6 @@ public class NeuralNetworkClient {
         return builder.build();
     }
 
-    public static void main(String[] args) {
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(Constants.NEURAL_SERVER_ADDRESS, 9000).usePlaintext(true).build();
-        PredictionServiceGrpc.PredictionServiceBlockingStub predictionServiceGrpc = PredictionServiceGrpc.newBlockingStub(channel);
-        Board board = new Board(false);
-        logger.debug(predictionServiceGrpc.predict(makeRequest(PositionState.BLACK, board, new ArrayList<>(board.getAvailableSpaces()))));
-    }
-
     /**
      * Gets the best position to play from a given game state
      * Uses the bigger/slower policy neural net
