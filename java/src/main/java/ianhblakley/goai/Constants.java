@@ -15,7 +15,7 @@ public class Constants {
     /**
      * Total number of threads to run
      */
-    public static final int THREAD_COUNT = 3;
+    public static final int THREAD_COUNT = 7;
 
     /**
      * Address of the neural network server
