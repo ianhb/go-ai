@@ -23,9 +23,14 @@ public class Constants {
     public static final String NEURAL_SERVER_ADDRESS = "localhost";
 
     /**
-     * Port of the neural network server
+     * Port of the value neural network server
      */
-    public static final int NEURAL_SERVER_PORT = 9000;
+    public static final int VALUE_PORT = 9000;
+
+    /**
+     * Port of the move neural network server
+     */
+    public static final int MOVE_PORT = 9001;
 
     /**
      * Address of the neural network server

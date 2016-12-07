@@ -2,24 +2,25 @@ package ianhblakley.goai.bots;
 
 import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.*;
-import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
+import ianhblakley.goai.neuralnetworkconnection.NeuralMoveClient;
+import ianhblakley.goai.neuralnetworkconnection.ValueClient;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Bot that uses {@link NeuralNetworkClient} to find the best move given the current game state
+ * Bot that uses {@link ValueClient} to find the best move given the current game state
  *
  * Created by ian on 11/13/16.
  */
 class NeuralNetBot extends AbstractBot {
 
-    private final NeuralNetworkClient client;
+    private final NeuralMoveClient client;
 
     NeuralNetBot(PositionState color) {
         super(color);
-        client = NeuralNetworkClient.getInstance();
+        client = NeuralMoveClient.getInstance();
     }
 
     @Override

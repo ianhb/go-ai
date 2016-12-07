@@ -1,6 +1,6 @@
 package ianhblakley.goai.mcts;
 
-import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
+import ianhblakley.goai.neuralnetworkconnection.ValueClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,7 +13,7 @@ class AlphaTreePolicy implements TreePolicy {
 
     private static final Logger logger = LogManager.getFormatterLogger(AlphaTreePolicy.class);
 
-    private final NeuralNetworkClient client = NeuralNetworkClient.getInstance();
+    private final ValueClient client = ValueClient.getInstance();
 
     @Override
     public Node select(Node root) {

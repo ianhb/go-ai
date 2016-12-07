@@ -2,7 +2,7 @@ package ianhblakley.goai.mcts;
 
 import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.*;
-import ianhblakley.goai.neuralnetworkconnection.NeuralNetworkClient;
+import ianhblakley.goai.neuralnetworkconnection.ValueClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -89,7 +89,7 @@ class Node {
         return addChild(randomMove);
     }
 
-    Node selectHighestValueChild(NeuralNetworkClient client) {
+    Node selectHighestValueChild(ValueClient client) {
         if (movesAsBoards == null) {
             movesAsBoards = new HashSet<>();
             createMovesAsBoards(client);
@@ -109,7 +109,7 @@ class Node {
         return newChild;
     }
 
-    private void createMovesAsBoards(NeuralNetworkClient client) {
+    private void createMovesAsBoards(ValueClient client) {
         assert movesAsBoards.size() == 0;
         List<Position> positionList = new ArrayList<>(getPossibleChildren());
         List<Float> boardValues = client.getValues(color, state, positionList);
