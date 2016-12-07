@@ -47,5 +47,6 @@ public class Constants {
      */
     public static final boolean VERIFY_STATES = true;
     public static final int ALLOW_PASS_COUNT = 200;
+    public static final int RESIGN_THRESHOLD = 150;
     static final boolean LOG_GAMES = false;
 }

@@ -37,6 +37,9 @@ public class RandomBot extends AbstractBot {
         Collections.shuffle(randomPositions);
         Move m = new Move(randomPositions.get(0), color);
         assert (StateChecker.isLegalMove(m, board));
+        if (resign(board, m.getPosition(), turnNumber)) {
+            return new Move(color);
+        }
         playStone();
         logger.trace("Playing %s", m);
         return m;

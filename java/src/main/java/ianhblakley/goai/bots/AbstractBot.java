@@ -3,7 +3,9 @@ package ianhblakley.goai.bots;
 import ianhblakley.goai.Constants;
 import ianhblakley.goai.framework.Board;
 import ianhblakley.goai.framework.Move;
+import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
+import ianhblakley.goai.framework.scoring.Scorer;
 
 /**
  * Abstract Bot that handles ensuring that no bot has played more stones than supposed to
@@ -21,6 +23,24 @@ abstract class AbstractBot implements Bot {
         this.color = color;
         stones = (int) (Math.floor(Math.pow(Constants.BOARD_SIZE, 2)) / 2);
         if (color.equals(PositionState.BLACK)) stones++;
+    }
+
+    boolean resign(Board board, Position position, int turnNumber) {
+        if (turnNumber > Constants.RESIGN_THRESHOLD) {
+            Scorer currentScore = Scorer.getDefaultScorer();
+            Scorer playedScore = Scorer.getDefaultScorer();
+            Board playedBoard = board.deepCopy();
+            playedBoard.placeMove(new Move(position, color));
+            currentScore.winner(board, false);
+            playedScore.winner(playedBoard, false);
+            switch (color) {
+                case BLACK:
+                    return currentScore.getBlackScore() <= playedScore.getBlackScore();
+                case WHITE:
+                    return currentScore.getWhiteScore() <= playedScore.getWhiteScore();
+            }
+        }
+        return false;
     }
 
     /**

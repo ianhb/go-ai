@@ -31,6 +31,9 @@ abstract class MCTSBot extends AbstractBot {
         if (m == null) {
             return new Move(color);
         }
+        if (resign(board, m, turnNumber)) {
+            return new Move(color);
+        }
         playStone();
         return new Move(m, color);
     }

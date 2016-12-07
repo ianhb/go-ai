@@ -42,6 +42,9 @@ class NeuralNetBot extends AbstractBot {
         if (bestMove == null) {
             return new Move(color);
         }
+        if (resign(board, bestMove, turnNumber)) {
+            return new Move(color);
+        }
         playStone();
         return new Move(bestMove, color);
     }
