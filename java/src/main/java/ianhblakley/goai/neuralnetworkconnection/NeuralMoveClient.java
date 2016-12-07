@@ -6,7 +6,6 @@ import ianhblakley.goai.framework.Position;
 import ianhblakley.goai.framework.PositionState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,15 +57,11 @@ public class NeuralMoveClient {
         Predict.PredictRequest request = NeuralUtils.makeRequest(color, board, possiblePositions);
         logger.trace("Sending slow RPC request to server");
         try {
-            Predict.PredictResponse response = blockingStub.withDeadlineAfter(5, TimeUnit.SECONDS).predict(request);
+            Predict.PredictResponse response = blockingStub.withDeadlineAfter(5, TimeUnit.MILLISECONDS).predict(request);
             logger.trace("Recieved response with %s", response);
             int bestIndex = getBestIndex(response);
             return possiblePositions.get(bestIndex);
-        } catch (StatusRuntimeException e) {
-            if (e.getStatus() == Status.DEADLINE_EXCEEDED) {
-                logger.debug("Error Getting Position");
-                logger.debug(e);
-            }
+        } catch (StatusRuntimeException ignored) {
         }
         return possiblePositions.get(0);
     }
