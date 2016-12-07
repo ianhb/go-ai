@@ -10,13 +10,19 @@ Beta Go relies on several components to work correctly:
 * Python 2.7
 * Gradle 3.1
 * JavaFX 
-
+* GRPC
+* TensorFlow
+* TensorFlow Serving
+* VirtualEnv
+* Bazel
 
 ### Installation
 
-Make sure the tech requirements (Java 8, Python 2.7 and Gradle 3.1) are installed
+Make sure the core tech requirements (Java 8, Python 2.7, JavaFX8 and Gradle 3.1) are installed
 
 Clone the repository and download the game records from the lastest release to python/datagen/data
+
+Requirements can be installed manually using configure.sh or manually as shown below.
 
 Setting up the python environment:
 ```sh
@@ -70,20 +76,26 @@ $ cp -r models/export /tmp/models
 ```
 The whole process takes ~1 day to generate the data and train on it
 
-Start Game Logger Server:
-```sh
-$ cd goai/python
-$ python main.py
-```
-
-To build and start the neural network server
+Building the neural network server
 ```sh
 $ git clone --recurse-submodules https://github.com/tensorflow/serving
 $ cd serving/tensorflow
 $ ./configure
 $ cd ..
 $ bazel build tensorflow_serving/model_servers:tensorflow_model_server
-$ ./bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --model_name=fast --model_base_path=/tmp/models/export/fast_model --port=9000
+```
+
+### Running Game Simulations:
+
+Start Game Logger Server:
+```sh
+$ cd goai/python
+$ python main.py
+```
+
+Starting the Tensorflow Server: 
+```sh
+$ ./serving/bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --model_name=fast --model_base_path=/tmp/models/export/fast_model --port=9000
 ```
 
 Run all possible games:
@@ -91,6 +103,10 @@ Run all possible games:
 $ cd goai/java
 $ gradle :clean :build :run
 ```
+
+##GUI
+A GUI exists for the game. Start the tensorflow server as described above.
+Then use run ```gradle :jfxrun``` to start the GUI
 
 ### Current Bots
 
@@ -104,8 +120,10 @@ $ gradle :clean :build :run
 
 ### Acknowledgements
 
+* Core Go Game Data for training comes from [KGS Go Server](http://kgs.fuseki.info/)
 * [JavaFX-Gradle-Plugin](https://github.com/FibreFoX/javafx-gradle-plugin)
-
+* MCTS Implementation based off of [A Survey of Monte Carlo Tree Search Methods](http://www.cameronius.com/cv/mcts-survey-master.pdf)
+* Alpha-Go Scematics comes from [Mastering the game of Go with deep neural networks and tree search](http://www.nature.com/nature/journal/v529/n7587/full/nature16961.html)
 
 
 
