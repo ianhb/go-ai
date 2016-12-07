@@ -40,14 +40,12 @@ public class Constants {
     /**
      * Time in seconds that MCTS has to find the best move
      */
-    public static final int COMPUTE_THRESHOLD = 60;
+    public static final int COMPUTE_THRESHOLD = 15;
 
     /**
      * Whether or not to verify the state of the game between moves
      */
     public static final boolean VERIFY_STATES = true;
-
-    static final boolean LOG_GAMES = false;
-
     public static final int ALLOW_PASS_COUNT = 200;
+    static final boolean LOG_GAMES = false;
 }

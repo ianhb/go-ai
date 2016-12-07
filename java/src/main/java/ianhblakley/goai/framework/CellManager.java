@@ -47,6 +47,10 @@ class CellManager {
             }
         };
         Utils.applyToSide(board, move.getPosition(), checkCapture);
+        if (getCell(move.getPosition()).getLibertyCount(board) == 0) {
+            board.removeCellFromBoard(getCell(move.getPosition()));
+            delete(getCell(move.getPosition()));
+        }
     }
 
     /**

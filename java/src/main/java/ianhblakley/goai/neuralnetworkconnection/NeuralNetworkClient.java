@@ -7,6 +7,8 @@ import ianhblakley.goai.framework.PositionState;
 import ianhblakley.goai.framework.Utils;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.tensorflow.framework.DataType;
@@ -19,6 +21,7 @@ import tensorflow.serving.PredictionServiceGrpc;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Client interface to connect to grpc server that evaluates board states and potential moves using
@@ -94,10 +97,17 @@ public class NeuralNetworkClient {
     public Position getBestPosition(PositionState color, Board board, List<Position> possiblePositions) {
         Predict.PredictRequest request = makeRequest(color, board, possiblePositions);
         logger.trace("Sending slow RPC request to server");
-        Predict.PredictResponse response = blockingStub.predict(request);
-        logger.trace("Recieved response with %s", response);
-        int bestIndex = getBestIndex(response);
-        return possiblePositions.get(bestIndex);
+        try {
+            Predict.PredictResponse response = blockingStub.withDeadlineAfter(5, TimeUnit.SECONDS).predict(request);
+            logger.trace("Recieved response with %s", response);
+            int bestIndex = getBestIndex(response);
+            return possiblePositions.get(bestIndex);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus() == Status.DEADLINE_EXCEEDED) {
+                logger.debug(e);
+            }
+        }
+        return null;
     }
 
     /**
@@ -110,14 +120,26 @@ public class NeuralNetworkClient {
     public List<Float> getValues(PositionState color, Board board, List<Position> potentialMoves) {
         Predict.PredictRequest request = makeRequest(color, board, potentialMoves);
         logger.trace("Sending value RPC request to server");
-        Predict.PredictResponse response = blockingStub.predict(request);
-        logger.trace("Received %s board values", response.getOutputsCount());
-        List<Float> values = getValues(response);
-        Float maxValue = Collections.max(values);
-        for (int i = 0; i < values.size(); i++) {
-            values.set(i, values.get(i) / maxValue);
+
+        try {
+            Predict.PredictResponse response = blockingStub.withDeadlineAfter(1, TimeUnit.MINUTES).predict(request);
+            logger.trace("Received %s board values", response.getOutputsCount());
+            List<Float> values = getValues(response);
+            Float maxValue = Collections.max(values);
+            for (int i = 0; i < values.size(); i++) {
+                values.set(i, values.get(i) / maxValue);
+            }
+            return values;
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus() == Status.DEADLINE_EXCEEDED) {
+                logger.debug(e);
+            }
         }
-        return values;
+        List<Float> zeroValues = new ArrayList<>();
+        for (int i = 0; i < potentialMoves.size(); i++) {
+            zeroValues.add(0f);
+        }
+        return zeroValues;
     }
 
     private List<Float> getValues(Predict.PredictResponse response) {

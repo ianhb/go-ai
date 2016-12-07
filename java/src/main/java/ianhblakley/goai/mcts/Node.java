@@ -48,8 +48,6 @@ class Node {
         if (possibleChildren.size() < Constants.ALLOW_PASS_COUNT) {
             possibleChildren.add(null);
         }
-        //this.possibleChildren.add(null);
-        // TODO: add pass as a possible child
         this.terminalState = possibleChildren.size() == 0;
     }
 
