@@ -104,6 +104,7 @@ public class NeuralNetworkClient {
             return possiblePositions.get(bestIndex);
         } catch (StatusRuntimeException e) {
             if (e.getStatus() == Status.DEADLINE_EXCEEDED) {
+                logger.debug("Error Getting Position");
                 logger.debug(e);
             }
         }
@@ -122,7 +123,7 @@ public class NeuralNetworkClient {
         logger.trace("Sending value RPC request to server");
 
         try {
-            Predict.PredictResponse response = blockingStub.withDeadlineAfter(1, TimeUnit.MINUTES).predict(request);
+            Predict.PredictResponse response = blockingStub.withDeadlineAfter(5, TimeUnit.SECONDS).predict(request);
             logger.trace("Received %s board values", response.getOutputsCount());
             List<Float> values = getValues(response);
             Float maxValue = Collections.max(values);
@@ -132,6 +133,7 @@ public class NeuralNetworkClient {
             return values;
         } catch (StatusRuntimeException e) {
             if (e.getStatus() == Status.DEADLINE_EXCEEDED) {
+                logger.debug("Error getting values");
                 logger.debug(e);
             }
         }
