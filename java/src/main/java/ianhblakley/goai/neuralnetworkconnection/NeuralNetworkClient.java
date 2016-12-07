@@ -108,7 +108,7 @@ public class NeuralNetworkClient {
                 logger.debug(e);
             }
         }
-        return null;
+        return possiblePositions.get(0);
     }
 
     /**
