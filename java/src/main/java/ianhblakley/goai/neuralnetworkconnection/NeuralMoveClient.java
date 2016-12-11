@@ -32,7 +32,7 @@ public class NeuralMoveClient {
     private final PredictionServiceGrpc.PredictionServiceBlockingStub blockingStub;
 
     private NeuralMoveClient(String host, int port) {
-        this(ManagedChannelBuilder.forAddress(host, port));
+        this(ManagedChannelBuilder.forAddress(host, port).usePlaintext(true));
     }
 
     private NeuralMoveClient(ManagedChannelBuilder<?> channelBuilder) {
