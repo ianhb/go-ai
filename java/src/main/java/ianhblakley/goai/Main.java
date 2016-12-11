@@ -25,7 +25,7 @@ class Main {
 
     public static void main(String[] args) throws Exception {
         List<String> botSet = BotFactory.botTypes();
-        Map<Matchup, Integer> logs = new HashMap();
+        Map<Matchup, Integer> logs = new HashMap<>();
         for (int rounds = 0; rounds < 10; rounds++) {
             for (int i = 0; i < botSet.size(); i++) {
                 for (int j = i + 1; j < botSet.size(); j++) {
@@ -51,6 +51,7 @@ class Main {
     }
 
     private static void printGames(Map<Matchup, Integer> logs, int rounds) {
+        logger.info("Round %s", rounds);
         for (Map.Entry<Matchup, Integer> matchup : logs.entrySet()) {
             logger.info("Game between %s and %s", matchup.getKey().black.getCanonicalName(), matchup.getKey().white.getCanonicalName());
             logger.info("Score: %s : %s", matchup.getValue(), rounds - matchup.getValue());
