@@ -9,7 +9,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Main class that runs the program
@@ -22,26 +24,37 @@ class Main {
     private static GameLoggerClient client = GameLoggerClient.getInstance();
 
     public static void main(String[] args) throws Exception {
-        List<String> winnerStats = new ArrayList<>();
         List<String> botSet = BotFactory.botTypes();
-        for (int i = 0; i < botSet.size(); i++) {
-            for (int j = i + 1; j < botSet.size(); j++) {
-                int wins = 0;
-                for (int rounds = 0; rounds < 10; rounds++) {
+        Map<Matchup, Integer> logs = new HashMap();
+        for (int rounds = 0; rounds < 10; rounds++) {
+            for (int i = 0; i < botSet.size(); i++) {
+                for (int j = i + 1; j < botSet.size(); j++) {
                     Bot black = BotFactory.getBot(PositionState.BLACK, botSet.get(i));
                     Bot white = BotFactory.getBot(PositionState.WHITE, botSet.get(j));
                     PositionState winner = playGame(black, white);
-                    if (winner == PositionState.BLACK) {
-                        wins++;
+                    Matchup matchup = new Matchup(black.getClass(), white.getClass());
+                    if (logs.containsKey(matchup)) {
+                        if (winner == PositionState.BLACK) {
+                            logs.put(matchup, logs.get(matchup) + 1);
+                        }
+                    } else {
+                        if (winner == PositionState.BLACK) {
+                            logs.put(matchup, 1);
+                        } else {
+                            logs.put(matchup, 0);
+                        }
                     }
                 }
-                winnerStats.add("Game between " + botSet.get(i) + " and " + botSet.get(j) + " had black win " + wins +
-                        " times");
-
             }
+            printGames(logs, rounds);
         }
+    }
 
-        winnerStats.forEach(logger::info);
+    private static void printGames(Map<Matchup, Integer> logs, int rounds) {
+        for (Map.Entry<Matchup, Integer> matchup : logs.entrySet()) {
+            logger.info("Game between %s and %s", matchup.getKey().black.getCanonicalName(), matchup.getKey().white.getCanonicalName());
+            logger.info("Score: %s : %s", matchup.getValue(), rounds - matchup.getValue());
+        }
     }
 
     private static PositionState playGame(Bot black, Bot white) {
@@ -54,5 +67,33 @@ class Main {
             client.logGame(game);
         }
         return game.getWinner();
+    }
+
+    private static class Matchup {
+        Class black;
+        Class white;
+
+        Matchup(Class black, Class white) {
+            this.black = black;
+            this.white = white;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Matchup matchup = (Matchup) o;
+
+            if (black != null ? !black.equals(matchup.black) : matchup.black != null) return false;
+            return white != null ? white.equals(matchup.white) : matchup.white == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = black != null ? black.hashCode() : 0;
+            result = 31 * result + (white != null ? white.hashCode() : 0);
+            return result;
+        }
     }
 }
