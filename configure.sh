@@ -8,7 +8,7 @@ sudo apt-get update && sudo apt-get install -y \
         libcurl3-dev \
         git \
         libfreetype6-dev \
-        libpng12-0 \
+        libpng16-16 \
         libzmq3-dev \
         pkg-config \
         python-dev \
