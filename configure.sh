@@ -18,6 +18,7 @@ python -m grpc.tools.protoc -I../proto --python_out=generated --grpc_python_out=
 export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.11.0-cp27-none-linux_x86_64.whl
 pip install --upgrade $TF_BINARY_URL
 cd ..
+deactivate
 fi
 
 echo "Setting Up TensorFlow Server"
@@ -54,6 +55,7 @@ sudo apt-get update && sudo apt-get install -y \
 
 
 echo "Creating models"
+source venv/bin/activate
 cd python
 if [ ! -r datagen/data/fuseki-TRAIN.tfrecords ]; then
 	cd datagen

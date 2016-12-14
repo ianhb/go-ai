@@ -22,7 +22,7 @@ Make sure the core tech requirements (Java 8, Python 2.7, JavaFX8 and Gradle 3.1
 
 Clone the repository and download the game records from the lastest release to python/datagen/data
 
-Requirements can be installed manually using configure.sh or manually as shown below.
+Requirements can be installed automatically using configure.sh or manually as shown below. If using configure.sh, when prompted for input on configure, use the defaults (press enter) and enter password when prompted to install required packages
 
 Setting up the python environment:
 ```sh
@@ -76,7 +76,7 @@ $ cp -r models/export /tmp/models
 ```
 The whole process takes ~1 day to generate the data and train on it
 
-Building the neural network server
+Building the neural network server (when prompted for input use the defaults):
 ```sh
 $ git clone --recurse-submodules https://github.com/tensorflow/serving
 $ cd serving/tensorflow
