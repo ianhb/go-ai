@@ -1,10 +1,11 @@
 #/bin/bash
 
-command -v java >/dev/null 2>&1 || { echo >&2 "I require java 8 but it's not installed.  Aborting."; exit 1; }
-command -v gradle >/dev/null 2>&1 || { echo >&2 "I require virtualenv but it's not installed.  Aborting."; exit 1; }
-command -v virtualenv >/dev/null 2>&1 || { echo >&2 "I require virtualenv but it's not installed.  Aborting."; exit 1; }
-command -v pip >/dev/null 2>&1 || { echo >&2 "I require pip but it's not installed.  Aborting."; exit 1; }
-command -v git >/dev/null 2>&1 || { echo >&2 "I require git but it's not installed.  Aborting."; exit 1; }
+echo "Checking General Requirements"
+command -v java >/dev/null 2>&1 || { echo >&2 "Installing Java and JavaFX."; sudo apt install default-jdk openjfx;}
+command -v gradle >/dev/null 2>&1 || { echo >&2 "Installing Gradle 3.2.1."; curl -s https://get.sdkman.io | bash; sdk install gradle 3.2.1; }
+command -v virtualenv >/dev/null 2>&1 || { echo >&2 "Installing virualenv."; sudo apt install virtualenv; }
+command -v pip >/dev/null 2>&1 || { echo >&2 "Installing Pip."; sudo apt install python-pip; }
+command -v git >/dev/null 2>&1 || { echo >&2 "Installing git."; sudo apt install git; }
 
 echo "Setting Up Python Environment"
 
