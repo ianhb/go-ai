@@ -69,7 +69,7 @@ class UCTTreePolicy implements TreePolicy {
      * @return UCT confidence interval size
      */
     private double confidenceBound(double cP, double n, double nj) {
-        if (Math.round(0) == 0) {
+        if (Math.round(nj) == 0) {
             return 0;
         }
         double numerator = 2 * Math.log(n);
