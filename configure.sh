@@ -21,7 +21,7 @@ sudo apt-get update && sudo apt-get install -y \
         zlib1g-dev
 command -v java >/dev/null 2>&1 || { echo >&2 "Installing Java and JavaFX."; sudo apt install default-jdk openjfx;}
 command -v gradle >/dev/null 2>&1 || { echo >&2 "Installing Gradle 3.2.1."; sudo apt install zip; curl -s https://get.sdkman.io | bash; source "/home/$USER/.sdkman/bin/sdkman-init.sh";  sdk install gradle 3.2.1; }
-
+source "/home/$USER/.bashrc"
 echo "Setting Up Python Environment"
 
 if [ ! -r venv ]; then
